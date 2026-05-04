@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: avocado-orchard-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001
+    volumes:
+      - ./backend:/app
+      - ./ml:/app/ml
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - avocado-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: avocado-orchard-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    networks:
+      - avocado-network
+    depends_on:
+      - backend
+
+  # Optional: Redis for caching (future enhancement)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: avocado-orchard-redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - avocado-network
+  #   volumes:
+  #     - redis-data:/data
+
+  # Optional: PostgreSQL for persistent storage (future enhancement)
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: avocado-orchard-db
+  #   environment:
+  #     - POSTGRES_USER=avocado
+  #     - POSTGRES_PASSWORD=orchard123
+  #     - POSTGRES_DB=avocado_orchard
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - avocado-network
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+
+networks:
+  avocado-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  postgres-data:
+
+# Made with Bob
