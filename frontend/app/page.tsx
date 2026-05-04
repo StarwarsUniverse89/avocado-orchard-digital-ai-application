@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Header from "@/components/Header";
 import MetricCard from "@/components/MetricCard";
 import AIAdvisorPanel from "@/components/AIAdvisorPanel";
@@ -5,7 +6,7 @@ import OrchardMap from "@/components/OrchardMap";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
       <Header />
 
       {/* Hero Section */}
@@ -28,10 +29,12 @@ export default function Home() {
               infrastructure.
             </p>
             <div className="flex flex-wrap gap-4 animate-fade-in">
-              <button className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-gray-950 font-semibold hover:opacity-90 transition-opacity glow-primary">
-                Launch Simulation
-              </button>
-              <button className="px-6 py-3 rounded-lg glass text-gray-300 font-semibold hover:bg-gray-800 transition-colors">
+              <Link href="/command-center">
+                <button className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-gray-950 font-semibold hover:opacity-90 transition-opacity glow-primary">
+                  Launch Command Center
+                </button>
+              </Link>
+              <button className="px-6 py-3 rounded-lg glass text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 View Documentation
               </button>
             </div>
