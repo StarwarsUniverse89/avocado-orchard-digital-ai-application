@@ -44,7 +44,9 @@ It combines:
 
 Transform agricultural data into real-time, AI-driven decisions by combining simulation, intelligence, and high-performance compute.
 
+
 ## SYSTEM ARCHITECTURE
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    BACKEND (AMD MI300X GPU)                         │
 ├─────────────────────────────────────────────────────────────────────┤
@@ -110,8 +112,9 @@ Transform agricultural data into real-time, AI-driven decisions by combining sim
 │  └──────────────────────────────────────────────────────────┘ │
 │                                                                │
 └────────────────────────────────────────────────────────────────┘
-
+```
 ## REAL-TIME METRIC-DRIVEN RENDERING
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │ Step 1: AI Agent Makes Decision                            │
 │ ─────────────────────────────────────────────────────────── │
@@ -158,3 +161,4 @@ Transform agricultural data into real-time, AI-driven decisions by combining sim
 │ 5. Show notification: "Irrigation increased"              │
 │ 6. Update metrics display                                 │
 └─────────────────────────────────────────────────────────────┘
+```
