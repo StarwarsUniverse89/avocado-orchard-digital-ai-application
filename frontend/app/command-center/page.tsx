@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import SatelliteOrchardView from "@/components/SatelliteOrchardView";
-import OrchardTwin3D from "@/components/OrchardTwin3D";
+import OrchardScene3D from "@/components/OrchardScene3D";
 import AIAdvisorPanel from "@/components/AIAdvisorPanel";
 import SimulationControls from "@/components/SimulationControls";
 import AMDStatusPanel from "@/components/AMDStatusPanel";
@@ -18,6 +18,7 @@ import {
   TreeData,
   AIRecommendation,
 } from "@/lib/mockData";
+import gsap from "gsap";
 
 export default function CommandCenter() {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -25,6 +26,8 @@ export default function CommandCenter() {
   const [trees, setTrees] = useState<TreeData[]>(generateTreeGrid(10, 15));
   const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [viewMode, setViewMode] = useState<'satellite' | '3d'>('satellite');
+  const viewContainerRef = useRef<HTMLDivElement>(null);
 
   // Simulate live data updates
   useEffect(() => {
@@ -44,6 +47,30 @@ export default function CommandCenter() {
     setSelectedSection(sectionId);
     // Regenerate trees for the selected section
     setTrees(generateTreeGrid(10, 15));
+    // Auto-switch to 3D view when section is selected
+    handleViewToggle('3d');
+  };
+
+  const handleViewToggle = (mode: 'satellite' | '3d') => {
+    if (mode === viewMode) return;
+    
+    // GSAP animation for view transition
+    if (viewContainerRef.current) {
+      gsap.fromTo(
+        viewContainerRef.current,
+        { opacity: 0, scale: 0.95, y: 20 },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.5,
+          ease: 'power2.out',
+          onStart: () => setViewMode(mode)
+        }
+      );
+    } else {
+      setViewMode(mode);
+    }
   };
 
   const handleSimulate = (scenario: {
@@ -147,9 +174,47 @@ export default function CommandCenter() {
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Left Column - Satellite View */}
-          <div className="lg:col-span-2">
-            <SatelliteOrchardView onSectionSelect={handleSectionSelect} />
+          {/* Left Column - View Toggle and Visualization */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* View Toggle */}
+            <div className="glass-elevated rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                  Visualization Mode
+                </h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleViewToggle('satellite')}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                      viewMode === 'satellite'
+                        ? 'bg-primary text-gray-950 shadow-lg'
+                        : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                    }`}
+                  >
+                    🛰️ Satellite View
+                  </button>
+                  <button
+                    onClick={() => handleViewToggle('3d')}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                      viewMode === '3d'
+                        ? 'bg-primary text-gray-950 shadow-lg'
+                        : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                    }`}
+                  >
+                    🎮 3D Twin
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* View Container with Animation */}
+            <div ref={viewContainerRef}>
+              {viewMode === 'satellite' ? (
+                <SatelliteOrchardView onSectionSelect={handleSectionSelect} />
+              ) : (
+                <OrchardScene3D trees={trees} />
+              )}
+            </div>
           </div>
 
           {/* Right Column - AMD Status */}
@@ -158,22 +223,14 @@ export default function CommandCenter() {
           </div>
         </div>
 
-        {/* 3D Twin and Controls */}
+        {/* Simulation Controls */}
         {selectedSection && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 animate-fade-in">
-            {/* 3D Digital Twin */}
-            <div className="lg:col-span-2">
-              <OrchardTwin3D trees={trees} />
-            </div>
-
-            {/* Simulation Controls */}
-            <div className="lg:col-span-1">
-              <SimulationControls
-                onSimulate={handleSimulate}
-                onReset={handleReset}
-                onApplyRecommendation={handleApplyRecommendation}
-              />
-            </div>
+          <div className="mb-8 animate-fade-in">
+            <SimulationControls
+              onSimulate={handleSimulate}
+              onReset={handleReset}
+              onApplyRecommendation={handleApplyRecommendation}
+            />
           </div>
         )}
 

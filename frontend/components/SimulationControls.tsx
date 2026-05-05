@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import gsap from "gsap";
 
 interface SimulationControlsProps {
   onSimulate: (scenario: {
@@ -20,13 +21,39 @@ export default function SimulationControls({
   const [heatChange, setHeatChange] = useState(0);
   const [moistureChange, setMoistureChange] = useState(0);
   const [pestChange, setPestChange] = useState(0);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSimulate = () => {
-    onSimulate({
-      heat_change: heatChange,
-      moisture_change: moistureChange,
-      pest_change: pestChange,
-    });
+    setIsSimulating(true);
+    
+    // Animate the simulation
+    if (containerRef.current) {
+      gsap.fromTo(
+        containerRef.current,
+        { scale: 0.98 },
+        {
+          scale: 1,
+          duration: 0.3,
+          ease: 'back.out(1.7)',
+          onComplete: () => {
+            onSimulate({
+              heat_change: heatChange,
+              moisture_change: moistureChange,
+              pest_change: pestChange,
+            });
+            setTimeout(() => setIsSimulating(false), 500);
+          }
+        }
+      );
+    } else {
+      onSimulate({
+        heat_change: heatChange,
+        moisture_change: moistureChange,
+        pest_change: pestChange,
+      });
+      setTimeout(() => setIsSimulating(false), 500);
+    }
   };
 
   const handleReset = () => {
@@ -36,22 +63,96 @@ export default function SimulationControls({
     onReset();
   };
 
+  const handleQuickScenario = (scenario: string) => {
+    let heat = 0, moisture = 0, pest = 0;
+    
+    switch (scenario) {
+      case 'heat_stress':
+        heat = 8;
+        moisture = -20;
+        break;
+      case 'water_stress':
+        moisture = -25;
+        pest = 5;
+        break;
+      case 'pest_risk':
+        pest = 15;
+        break;
+      case 'optimal':
+        heat = -3;
+        moisture = 15;
+        pest = -5;
+        break;
+    }
+    
+    setHeatChange(heat);
+    setMoistureChange(moisture);
+    setPestChange(pest);
+    
+    // Auto-run simulation
+    setTimeout(() => {
+      onSimulate({ heat_change: heat, moisture_change: moisture, pest_change: pest });
+    }, 300);
+  };
+
   return (
-    <div className="glass-elevated rounded-xl p-6">
+    <div className="glass-elevated rounded-xl p-6" ref={containerRef}>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-1">
             Simulation Controls
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Adjust conditions and see AI recommendations
+            Test scenarios and apply AI recommendations
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {isSimulating && (
+            <span className="text-xs text-primary font-medium animate-pulse">
+              Simulating...
+            </span>
+          )}
           <span className="text-xs text-gray-500 dark:text-gray-400">
             GPU Accelerated
           </span>
           <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+        </div>
+      </div>
+
+      {/* Quick Scenario Buttons */}
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+          Quick Scenarios
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => handleQuickScenario('heat_stress')}
+            disabled={isSimulating}
+            className="px-4 py-3 rounded-lg bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/50 hover:border-orange-500 text-orange-300 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            🌡️ Heat Stress
+          </button>
+          <button
+            onClick={() => handleQuickScenario('water_stress')}
+            disabled={isSimulating}
+            className="px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/50 hover:border-blue-500 text-blue-300 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            💧 Water Stress
+          </button>
+          <button
+            onClick={() => handleQuickScenario('pest_risk')}
+            disabled={isSimulating}
+            className="px-4 py-3 rounded-lg bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/50 hover:border-red-500 text-red-300 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            🐛 Pest Risk
+          </button>
+          <button
+            onClick={() => handleQuickScenario('optimal')}
+            disabled={isSimulating}
+            className="px-4 py-3 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/50 hover:border-green-500 text-green-300 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ✨ Optimal
+          </button>
         </div>
       </div>
 
@@ -140,71 +241,25 @@ export default function SimulationControls({
       <div className="grid grid-cols-3 gap-3">
         <button
           onClick={handleSimulate}
-          className="px-4 py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-gray-950 font-semibold hover:opacity-90 transition-opacity glow-primary"
+          disabled={isSimulating}
+          className="px-4 py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-gray-950 font-semibold hover:opacity-90 transition-opacity glow-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Run Simulation
+          {isSimulating ? 'Simulating...' : 'Run Custom'}
         </button>
         <button
           onClick={onApplyRecommendation}
-          className="px-4 py-3 rounded-lg bg-success/20 border border-success/50 text-success font-semibold hover:bg-success/30 transition-colors"
+          disabled={isSimulating}
+          className="px-4 py-3 rounded-lg bg-success/20 border border-success/50 text-success font-semibold hover:bg-success/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Apply AI Fix
         </button>
         <button
           onClick={handleReset}
-          className="px-4 py-3 rounded-lg bg-gray-800 dark:bg-gray-800 hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-300 dark:text-gray-300 font-semibold transition-colors"
+          disabled={isSimulating}
+          className="px-4 py-3 rounded-lg bg-gray-800 dark:bg-gray-800 hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-300 dark:text-gray-300 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Reset
         </button>
-      </div>
-
-      {/* Quick Scenarios */}
-      <div className="mt-6 pt-6 border-t border-gray-700 dark:border-gray-800">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          Quick Scenarios
-        </h3>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => {
-              setHeatChange(8);
-              setMoistureChange(-20);
-              setPestChange(0);
-            }}
-            className="px-3 py-2 rounded-lg bg-gray-800/50 dark:bg-gray-800/50 hover:bg-gray-700/50 dark:hover:bg-gray-700/50 text-gray-300 dark:text-gray-300 text-sm transition-colors"
-          >
-            🌡️ Heat Wave
-          </button>
-          <button
-            onClick={() => {
-              setHeatChange(0);
-              setMoistureChange(-25);
-              setPestChange(5);
-            }}
-            className="px-3 py-2 rounded-lg bg-gray-800/50 dark:bg-gray-800/50 hover:bg-gray-700/50 dark:hover:bg-gray-700/50 text-gray-300 dark:text-gray-300 text-sm transition-colors"
-          >
-            💧 Drought
-          </button>
-          <button
-            onClick={() => {
-              setHeatChange(0);
-              setMoistureChange(0);
-              setPestChange(15);
-            }}
-            className="px-3 py-2 rounded-lg bg-gray-800/50 dark:bg-gray-800/50 hover:bg-gray-700/50 dark:hover:bg-gray-700/50 text-gray-300 dark:text-gray-300 text-sm transition-colors"
-          >
-            🐛 Pest Outbreak
-          </button>
-          <button
-            onClick={() => {
-              setHeatChange(-3);
-              setMoistureChange(15);
-              setPestChange(-5);
-            }}
-            className="px-3 py-2 rounded-lg bg-gray-800/50 dark:bg-gray-800/50 hover:bg-gray-700/50 dark:hover:bg-gray-700/50 text-gray-300 dark:text-gray-300 text-sm transition-colors"
-          >
-            ✨ Optimal
-          </button>
-        </div>
       </div>
     </div>
   );

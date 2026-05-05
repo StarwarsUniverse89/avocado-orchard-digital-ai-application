@@ -9,6 +9,11 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from services.orchard_service import get_orchard_by_id, load_orchards
+from services.financial_service import (
+    get_financial_prediction,
+    get_orchard_financial_summary,
+    get_roi_analysis,
+)
 
 router = APIRouter()
 
@@ -211,5 +216,164 @@ async def get_system_status():
             "active_connections": 0,
         },
     }
+
+
+# Financial endpoints
+@router.get("/financial/{orchard_id}", tags=["Financial"])
+async def get_financial_summary(orchard_id: str):
+    """Get current financial summary for an orchard"""
+    try:
+        summary = get_orchard_financial_summary(orchard_id)
+        return {
+            "success": True,
+            "data": summary,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/financial/predict", tags=["Financial"])
+async def predict_financial_impact(request: Dict[str, Any]):
+    """
+    Predict financial impact of a scenario
+    
+    Request body:
+    {
+        "orchard_id": "orchard_A",
+        "scenario": {
+            "temperature": 36,
+            "soil_moisture": 32,
+            "pest_pressure": 7,
+            "ndvi": 0.52
+        }
+    }
+    """
+    try:
+        orchard_id = request.get("orchard_id")
+        scenario = request.get("scenario", {})
+        
+        if not orchard_id:
+            raise HTTPException(status_code=400, detail="orchard_id is required")
+        
+        prediction = get_financial_prediction(orchard_id, scenario)
+        return {
+            "success": True,
+            "data": prediction,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/financial/{orchard_id}/roi-analysis", tags=["Financial"])
+async def get_roi_scenarios(orchard_id: str):
+    """Get ROI analysis for multiple scenarios"""
+    try:
+        analysis = get_roi_analysis(orchard_id)
+        return {
+            "success": True,
+            "data": analysis,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Satellite endpoints
+@router.get("/satellite/{orchard_id}", tags=["Satellite"])
+async def get_satellite(orchard_id: str):
+    """Get satellite/NDVI data for an orchard"""
+    try:
+        from services.satellite_service import get_satellite_data
+        data = get_satellite_data(orchard_id)
+        return {
+            "success": True,
+            "data": data,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Vision endpoints
+@router.get("/vision/{orchard_id}", tags=["Vision"])
+async def get_vision_analysis(orchard_id: str):
+    """Get computer vision analysis for an orchard"""
+    try:
+        from services.vision_service import analyze_orchard_vision
+        data = analyze_orchard_vision(orchard_id)
+        return {
+            "success": True,
+            "data": data,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Yield endpoints
+@router.get("/yield/{orchard_id}", tags=["Yield"])
+async def get_yield_prediction(orchard_id: str):
+    """Get yield prediction for an orchard"""
+    try:
+        from services.yield_service import predict_yield
+        data = predict_yield(orchard_id)
+        return {
+            "success": True,
+            "data": data,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Agent endpoints
+@router.post("/agent", tags=["AI"])
+async def get_agent_recommendation(request: Dict[str, Any]):
+    """
+    Get AI agent recommendation
+    
+    Request body:
+    {
+        "orchard_id": "orchard_A"
+    }
+    """
+    try:
+        from agents.knowledge_agent import generate_recommendation
+        orchard_id = request.get("orchard_id")
+        
+        if not orchard_id:
+            raise HTTPException(status_code=400, detail="orchard_id is required")
+        
+        recommendation = generate_recommendation(orchard_id)
+        return {
+            "success": True,
+            "data": recommendation,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# AMD Status endpoint
+@router.get("/amd/status", tags=["System"])
+async def get_amd_status():
+    """Get AMD GPU and compute status"""
+    return {
+        "success": True,
+        "data": {
+            "gpu_available": True,
+            "gpu_model": "AMD MI300X (Simulated)",
+            "rocm_version": "5.7+",
+            "compute_status": "ready",
+            "vllm_status": "ready",
+            "models_loaded": ["qwen-2.5-stub", "llama-3-stub"],
+            "memory_used_gb": 24.5,
+            "memory_total_gb": 192,
+            "utilization_percent": 12.8,
+        },
+    }
+
 
 # Made with Bob
