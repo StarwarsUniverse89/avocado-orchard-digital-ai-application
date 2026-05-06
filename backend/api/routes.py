@@ -359,27 +359,103 @@ async def get_yield_prediction(orchard_id: str):
 @router.post("/agent", tags=["AI"])
 async def get_agent_recommendation(request: Dict[str, Any]):
     """
-    Get AI agent recommendation
+    Get AI agent recommendation using Mexico avocado network
     
     Request body:
     {
-        "orchard_id": "orchard_A"
+        "orchard_id": "orchard_A",  # Optional - can be municipality ID or synthetic orchard ID
+        "municipality_name": "Tancítaro"  # Optional - municipality name
     }
+    
+    If no orchard/municipality specified, defaults to highest-risk municipality
     """
     try:
-        from agents.knowledge_agent import generate_recommendation
+        from services.mexico_orchard_network_service import get_orchard_context_for_agent
+        from core.config import config
+        
         orchard_id = request.get("orchard_id")
+        municipality_name = request.get("municipality_name")
         
-        if not orchard_id:
-            raise HTTPException(status_code=400, detail="orchard_id is required")
+        # Get orchard context from Mexico network
+        context = get_orchard_context_for_agent(orchard_id, municipality_name)
         
-        recommendation = generate_recommendation(orchard_id)
+        if context.get("type") == "error":
+            raise HTTPException(status_code=404, detail=context.get("error", "Orchard not found"))
+        
+        orchard_data = context.get("data", {})
+        
+        # Try AMD/vLLM inference if configured
+        if config.is_amd_cloud_configured() and config.AMD_MODEL_ENDPOINT:
+            try:
+                import sys
+                import os
+                sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'ml', 'inference'))
+                from amd_model_client import amd_client
+                
+                # Prepare prompt for AMD model
+                prompt = f"""You are an expert avocado orchard advisor. Analyze this orchard data and provide actionable recommendations.
+
+Orchard: {orchard_data.get('name', orchard_data.get('id', 'Unknown'))}
+Location: {orchard_data.get('state', 'Michoacán')}, Mexico
+NDVI: {orchard_data.get('ndvi_average', orchard_data.get('ndvi', 0.7))}
+Stress Level: {orchard_data.get('stress_level', 'medium')}
+Estimated Hectares: {orchard_data.get('estimated_hectares', 'N/A')}
+Soil Moisture: {orchard_data.get('soil_moisture', 'N/A')}%
+Temperature: {orchard_data.get('temperature', 'N/A')}°C
+Projected Profit: ${orchard_data.get('projected_profit_usd', 'N/A'):,}
+
+Provide a concise recommendation focusing on:
+1. Most critical action needed
+2. Expected impact on yield/profit
+3. Scientific reasoning
+
+Keep response under 150 words."""
+
+                # Call AMD model
+                amd_response = amd_client.generate_text(prompt, max_tokens=200)
+                
+                if amd_response and amd_response.get("success"):
+                    return {
+                        "success": True,
+                        "data": {
+                            "orchard_id": orchard_id or orchard_data.get("id"),
+                            "orchard_name": orchard_data.get("name"),
+                            "recommendation": amd_response.get("text", ""),
+                            "model": "AMD MI300X vLLM",
+                            "model_name": config.MODEL_NAME,
+                            "context": context,
+                            "mode": "live",
+                        }
+                    }
+            except Exception as e:
+                print(f"AMD inference failed, falling back to deterministic: {e}")
+        
+        # Fallback to deterministic logic
+        ndvi = orchard_data.get('ndvi_average', orchard_data.get('ndvi', 0.7))
+        stress_level = orchard_data.get('stress_level', 'medium')
+        soil_moisture = orchard_data.get('soil_moisture', 60)
+        
+        # Generate deterministic recommendation
+        if stress_level == "high" or ndvi < 0.65:
+            recommendation = f"URGENT: {orchard_data.get('name', 'This orchard')} shows high stress (NDVI: {ndvi}). Immediate irrigation and soil analysis recommended. Expected yield impact: 15-25% loss if not addressed. Projected profit at risk: ${orchard_data.get('projected_profit_usd', 0):,}."
+        elif stress_level == "medium" or ndvi < 0.75:
+            recommendation = f"MODERATE: {orchard_data.get('name', 'This orchard')} shows moderate stress (NDVI: {ndvi}). Increase monitoring frequency and consider supplemental irrigation. Expected yield impact: 5-10% potential loss. Maintain current management with adjustments."
+        else:
+            recommendation = f"OPTIMAL: {orchard_data.get('name', 'This orchard')} is in good condition (NDVI: {ndvi}). Continue current management practices. Expected yield: stable. Projected profit: ${orchard_data.get('projected_profit_usd', 0):,}."
+        
         return {
             "success": True,
-            "data": recommendation,
+            "data": {
+                "orchard_id": orchard_id or orchard_data.get("id"),
+                "orchard_name": orchard_data.get("name"),
+                "recommendation": recommendation,
+                "model": "deterministic",
+                "context": context,
+                "mode": "stub",
+            }
         }
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -499,7 +575,7 @@ async def get_mexico_analytics():
 @router.post("/agent/command", tags=["AI"])
 async def process_agent_command(request: Dict[str, Any]):
     """
-    Process natural language command through AI agent
+    Process natural language command through AI agent using Mexico network
     
     Request body:
     {
@@ -508,16 +584,19 @@ async def process_agent_command(request: Dict[str, Any]):
     }
     """
     try:
+        from services.mexico_orchard_network_service import (
+            get_mexico_analytics,
+            get_highest_risk_orchard,
+            get_top_production_municipality,
+            compare_municipalities,
+        )
+        
         command = request.get("command", "").strip()
         context = request.get("context", {})
         
         if not command:
             raise HTTPException(status_code=400, detail="command is required")
         
-        # Import agent
-        from agents.knowledge_agent import generate_recommendation
-        
-        # Process command (simplified - in production would use LLM)
         command_lower = command.lower()
         
         response = {
@@ -526,30 +605,48 @@ async def process_agent_command(request: Dict[str, Any]):
             "understood": True,
             "action": None,
             "message": "",
+            "data": None,
         }
         
-        # Parse common commands
+        # Parse common commands with Mexico network data
         if "avocado belt" in command_lower:
             response["action"] = "show_avocado_belt"
             response["message"] = "Displaying Michoacán avocado belt boundary and municipalities."
+            analytics = get_mexico_analytics()
+            response["data"] = {
+                "belt_bounds": analytics.get("belt_bounds"),
+                "total_municipalities": analytics.get("total_municipalities"),
+            }
         elif "production cluster" in command_lower:
             response["action"] = "show_production_clusters"
             response["message"] = "Showing production clusters across the avocado belt."
+            analytics = get_mexico_analytics()
+            response["data"] = {
+                "total_clusters": analytics.get("total_clusters"),
+            }
         elif "orchard network" in command_lower and "michoacán" in command_lower:
             response["action"] = "create_orchard_network"
             response["message"] = "Generating synthetic orchard network in Michoacán."
         elif "highest production" in command_lower:
             response["action"] = "show_top_municipality"
-            response["message"] = "Flying to Tancítaro, the highest production municipality."
+            top_muni = get_top_production_municipality()
+            response["message"] = f"Flying to {top_muni.get('name')}, the highest production municipality."
+            response["data"] = top_muni
         elif "highest stress" in command_lower or "highest risk" in command_lower:
             response["action"] = "find_highest_stress_orchard"
-            response["message"] = "Locating the highest stress orchard in the avocado belt."
+            highest_risk = get_highest_risk_orchard()
+            response["message"] = f"Locating {highest_risk.get('name')}, the highest stress municipality in the avocado belt."
+            response["data"] = highest_risk
         elif "compare" in command_lower and ("tancítaro" in command_lower or "uruapan" in command_lower):
             response["action"] = "compare_municipalities"
+            comparison = compare_municipalities("Tancítaro", "Uruapan")
             response["message"] = "Comparing Tancítaro and Uruapan production metrics."
+            response["data"] = comparison
         elif "3d twin" in command_lower and "highest risk" in command_lower:
             response["action"] = "enter_3d_twin_highest_risk"
-            response["message"] = "Opening 3D digital twin for the highest risk orchard."
+            highest_risk = get_highest_risk_orchard()
+            response["message"] = f"Opening 3D digital twin for {highest_risk.get('name')}, the highest risk orchard."
+            response["data"] = highest_risk
         else:
             response["understood"] = False
             response["message"] = f"Command not recognized: {command}"

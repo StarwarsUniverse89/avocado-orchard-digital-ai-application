@@ -11,11 +11,13 @@ echo "AMD MI300X Live Inference Test"
 echo "=========================================="
 echo ""
 
-# Configuration
-BACKEND_URL="${BACKEND_URL:-http://localhost:8000}"
+# Configuration - Backend runs on port 8001, vLLM on port 8000
+API_BASE_URL="${API_BASE_URL:-http://localhost:8001}"
+BACKEND_URL="${BACKEND_URL:-$API_BASE_URL}"
 API_BASE="${BACKEND_URL}/api/v1"
 
 echo "Backend URL: $BACKEND_URL"
+echo "API Base: $API_BASE"
 echo ""
 
 # Colors for output
@@ -69,7 +71,10 @@ COMMAND_RESPONSE=$(curl -s -X POST "${API_BASE}/agent/command" \
 echo "$COMMAND_RESPONSE" | python3 -m json.tool
 echo ""
 
-if echo "$COMMAND_RESPONSE" | grep -q '"success": true'; then
+# Check for success field in JSON response
+COMMAND_SUCCESS=$(echo "$COMMAND_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('success', False))" 2>/dev/null || echo "false")
+
+if [ "$COMMAND_SUCCESS" = "True" ] || echo "$COMMAND_RESPONSE" | grep -q '"success": true'; then
     echo -e "${GREEN}✅ Agent command processed successfully${NC}"
 else
     echo -e "${RED}❌ Agent command failed${NC}"
@@ -86,27 +91,34 @@ echo ""
 RECOMMENDATION_RESPONSE=$(curl -s -X POST "${API_BASE}/agent" \
   -H "Content-Type: application/json" \
   -d '{
-    "orchard_id": "orchard_A"
+    "municipality_name": "Tancítaro"
   }')
 
 echo "$RECOMMENDATION_RESPONSE" | python3 -m json.tool
 echo ""
 
-# Check if response contains model info
-if echo "$RECOMMENDATION_RESPONSE" | grep -q "vLLM on AMD MI300X"; then
-    echo -e "${GREEN}✅ Live vLLM inference detected!${NC}"
-    echo "   Recommendation generated using AMD MI300X GPU"
-elif echo "$RECOMMENDATION_RESPONSE" | grep -q "stub"; then
-    echo -e "${YELLOW}⚠️  Stub mode detected${NC}"
-    echo "   Recommendation generated using deterministic logic"
+# Check for success field
+REC_SUCCESS=$(echo "$RECOMMENDATION_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('success', False))" 2>/dev/null || echo "false")
+
+if [ "$REC_SUCCESS" = "True" ] || echo "$RECOMMENDATION_RESPONSE" | grep -q '"success": true'; then
+    echo -e "${GREEN}✅ Agent recommendation generated successfully${NC}"
+    
+    # Check if response contains model info
+    if echo "$RECOMMENDATION_RESPONSE" | grep -q "AMD MI300X vLLM"; then
+        echo -e "${GREEN}   Live vLLM inference detected!${NC}"
+        echo "   Recommendation generated using AMD MI300X GPU"
+    elif echo "$RECOMMENDATION_RESPONSE" | grep -q "deterministic"; then
+        echo -e "${YELLOW}   Deterministic mode detected${NC}"
+        echo "   Recommendation generated using fallback logic"
+    fi
 else
-    echo -e "${YELLOW}⚠️  Could not determine inference mode${NC}"
+    echo -e "${RED}❌ Agent recommendation failed${NC}"
 fi
 echo ""
 
 # Test 4: Test Mexico Orchard Network
 echo "=========================================="
-echo "Test 4: Mexico Orchard Network"
+echo "Test 4: Mexico Orchard Network Analytics"
 echo "=========================================="
 echo "GET ${API_BASE}/orchard-network/mexico/analytics"
 echo ""
@@ -115,8 +127,15 @@ MEXICO_RESPONSE=$(curl -s "${API_BASE}/orchard-network/mexico/analytics")
 echo "$MEXICO_RESPONSE" | python3 -m json.tool
 echo ""
 
-if echo "$MEXICO_RESPONSE" | grep -q '"success": true'; then
-    echo -e "${GREEN}✅ Mexico network data loaded${NC}"
+# Check for success field
+MEXICO_SUCCESS=$(echo "$MEXICO_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('success', False))" 2>/dev/null || echo "false")
+
+if [ "$MEXICO_SUCCESS" = "True" ] || echo "$MEXICO_RESPONSE" | grep -q '"success": true'; then
+    echo -e "${GREEN}✅ Mexico network data loaded successfully${NC}"
+    
+    # Extract some analytics
+    TOTAL_MUNIS=$(echo "$MEXICO_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('data', {}).get('total_municipalities', 0))" 2>/dev/null || echo "0")
+    echo "   Total municipalities: $TOTAL_MUNIS"
 else
     echo -e "${RED}❌ Mexico network data failed${NC}"
 fi
@@ -142,20 +161,25 @@ elif [ "$MODE" = "configured_stub" ]; then
     echo -e "${YELLOW}⚠️  AMD Configured but in Stub Mode${NC}"
     echo ""
     echo "To enable live vLLM inference:"
-    echo "  1. Start vLLM server on AMD MI300X instance"
+    echo "  1. Start vLLM server on port 8000"
     echo "  2. Set AMD_MODEL_ENDPOINT in backend/.env"
-    echo "     Example: AMD_MODEL_ENDPOINT=http://your-mi300x-ip:8000"
-    echo "  3. Restart backend server"
-    echo "  4. Run this test again"
+    echo "     Example: AMD_MODEL_ENDPOINT=http://localhost:8000/v1/chat/completions"
+    echo "  3. Restart backend server on port 8001"
+    echo "  4. Run this test again with: API_BASE_URL=http://localhost:8001 bash TEST_LIVE_AMD_INFERENCE.sh"
 else
     echo -e "${YELLOW}⚠️  AMD Not Configured - Stub Mode${NC}"
     echo ""
     echo "To enable AMD MI300X inference:"
     echo "  1. Copy backend/.env.example to backend/.env"
     echo "  2. Set AMD_API_KEY and AMD_MODEL_ENDPOINT"
-    echo "  3. Restart backend server"
-    echo "  4. Run this test again"
+    echo "  3. Start backend on port 8001: uvicorn main:app --host 0.0.0.0 --port 8001"
+    echo "  4. Run this test again with: API_BASE_URL=http://localhost:8001 bash TEST_LIVE_AMD_INFERENCE.sh"
 fi
+echo ""
+echo "Port Configuration:"
+echo "  - vLLM Server: Port 8000"
+echo "  - FastAPI Backend: Port 8001"
+echo "  - Test Script: Using $BACKEND_URL"
 echo ""
 
 # Exit with appropriate code

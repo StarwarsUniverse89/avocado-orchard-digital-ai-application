@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from api.routes import router as api_router
 from realtime.stream import ConnectionManager
+from core.config import config
 
 # Lifespan context manager for startup/shutdown events
 @asynccontextmanager
@@ -34,9 +35,10 @@ app = FastAPI(
 )
 
 # CORS middleware configuration
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],  # Frontend URLs
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -158,10 +160,18 @@ async def send_orchard_update(websocket: WebSocket, client_id: str):
 
 # Run the application
 if __name__ == "__main__":
+    # Read host and port from environment variables
+    host = config.API_HOST if hasattr(config, 'API_HOST') else os.getenv("API_HOST", "0.0.0.0")
+    port = config.API_PORT if hasattr(config, 'API_PORT') else int(os.getenv("API_PORT", "8001"))
+    
+    print(f"🚀 Starting backend server on {host}:{port}")
+    print(f"📍 API endpoints: http://{host}:{port}/api/v1")
+    print(f"📚 API docs: http://{host}:{port}/docs")
+    
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
-        port=8000,
+        host=host,
+        port=port,
         reload=True,
         log_level="info",
     )
