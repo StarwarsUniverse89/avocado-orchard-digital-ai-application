@@ -1,3 +1,19 @@
+/* Cesium CSS */
+@import "cesium/Build/Cesium/Widgets/widgets.css";
+
+/* Cesium Container Sizing - Permanent Fix */
+.cesium-viewer,
+.cesium-viewer-cesiumWidgetContainer,
+.cesium-widget,
+.cesium-widget canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.cesium-viewer {
+  position: relative !important;
+}
+
 @import "tailwindcss";
 
 :root {

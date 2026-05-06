@@ -1,13 +1,21 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import Header from "@/components/Header";
-import SatelliteOrchardView from "@/components/SatelliteOrchardView";
+
+// Dynamically import GlobeCommandView to avoid SSR issues with Cesium
+const GlobeCommandView = dynamic(
+  () => import("@/components/GlobeCommandView").then((mod) => ({ default: mod.GlobeCommandView })),
+  { ssr: false }
+);
 import OrchardScene3D from "@/components/OrchardScene3D";
 import AIAdvisorPanel from "@/components/AIAdvisorPanel";
 import SimulationControls from "@/components/SimulationControls";
 import AMDStatusPanel from "@/components/AMDStatusPanel";
 import MetricCard from "@/components/MetricCard";
+import AnalyticsSummaryPanel from "@/components/AnalyticsSummaryPanel";
+import FinancialPredictionPanel from "@/components/FinancialPredictionPanel";
 import {
   mockOrchards,
   generateTreeGrid,
@@ -18,16 +26,22 @@ import {
   TreeData,
   AIRecommendation,
 } from "@/lib/mockData";
+import { orchardNetwork } from "@/lib/orchardNetwork";
+import { UICommand, UICommandHandler } from "@/types/uiCommands";
 import gsap from "gsap";
 
 export default function CommandCenter() {
+  const [selectedOrchardId, setSelectedOrchardId] = useState<string | null>(null);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [orchardData, setOrchardData] = useState<OrchardData>(mockOrchards[0]);
   const [trees, setTrees] = useState<TreeData[]>(generateTreeGrid(10, 15));
   const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
-  const [viewMode, setViewMode] = useState<'satellite' | '3d'>('satellite');
+  const [viewMode, setViewMode] = useState<'globe' | '3d'>('globe');
+  const [showAnalyticsSummary, setShowAnalyticsSummary] = useState(false);
+  const [showFinancialPanel, setShowFinancialPanel] = useState(false);
   const viewContainerRef = useRef<HTMLDivElement>(null);
+  const globeCommandRef = useRef<any>(null);
 
   // Simulate live data updates
   useEffect(() => {
@@ -43,7 +57,12 @@ export default function CommandCenter() {
     setRecommendations(generateRecommendations(orchardData));
   }, [orchardData]);
 
-  const handleSectionSelect = (sectionId: string) => {
+  const handleOrchardSelect = (orchardId: string) => {
+    setSelectedOrchardId(orchardId);
+  };
+
+  const handleSectionSelect = (orchardId: string, sectionId: string) => {
+    setSelectedOrchardId(orchardId);
     setSelectedSection(sectionId);
     // Regenerate trees for the selected section
     setTrees(generateTreeGrid(10, 15));
@@ -51,7 +70,15 @@ export default function CommandCenter() {
     handleViewToggle('3d');
   };
 
-  const handleViewToggle = (mode: 'satellite' | '3d') => {
+  const handleEnter3DTwin = (orchardId: string, sectionId?: string) => {
+    setSelectedOrchardId(orchardId);
+    if (sectionId) {
+      setSelectedSection(sectionId);
+    }
+    handleViewToggle('3d');
+  };
+
+  const handleViewToggle = (mode: 'globe' | '3d') => {
     if (mode === viewMode) return;
     
     // GSAP animation for view transition
@@ -70,6 +97,97 @@ export default function CommandCenter() {
       );
     } else {
       setViewMode(mode);
+    }
+  };
+
+  // UI Command handler for AI advisor
+  const handleUICommand: UICommandHandler = (command: UICommand) => {
+    console.log('Executing command:', command);
+    
+    switch (command.type) {
+      case 'navigate_to_orchard':
+        // Switch to globe view if not already
+        if (viewMode !== 'globe') {
+          setViewMode('globe');
+        }
+        // Let GlobeCommandView handle the navigation
+        setSelectedOrchardId(command.orchardId);
+        break;
+        
+      case 'show_network':
+        // Switch to globe view and reset selection
+        setViewMode('globe');
+        setSelectedOrchardId(null);
+        setSelectedSection(null);
+        break;
+        
+      case 'show_stress_zones':
+        // Switch to globe view
+        if (viewMode !== 'globe') {
+          setViewMode('globe');
+        }
+        if (command.orchardId) {
+          setSelectedOrchardId(command.orchardId);
+        }
+        break;
+        
+      case 'select_section':
+        setSelectedOrchardId(command.orchardId);
+        setSelectedSection(command.sectionId);
+        if (viewMode !== 'globe') {
+          setViewMode('globe');
+        }
+        break;
+        
+      case 'enter_3d_twin':
+        handleEnter3DTwin(command.orchardId, command.sectionId);
+        break;
+        
+      case 'run_simulation':
+        // Map scenario type to simulation parameters
+        const scenarioMap: Record<string, any> = {
+          irrigation: { moisture_change: 20 },
+          fertilization: { moisture_change: 10 },
+          pest_control: { pest_change: -15 },
+          harvest: {},
+        };
+        const params = scenarioMap[command.scenarioType] || { moisture_change: 10 };
+        handleSimulate(params);
+        break;
+        
+      case 'apply_recommendation':
+        handleApplyRecommendation();
+        break;
+        
+      case 'show_financial_impact':
+        setShowFinancialPanel(true);
+        // Scroll to financial panel
+        setTimeout(() => {
+          document.getElementById('financial-panel')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }, 100);
+        break;
+        
+      case 'create_analytics_summary':
+        setShowAnalyticsSummary(true);
+        // Scroll to analytics panel
+        setTimeout(() => {
+          document.getElementById('analytics-panel')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }, 100);
+        break;
+        
+      case 'reset_view':
+        setViewMode('globe');
+        setSelectedOrchardId(null);
+        setSelectedSection(null);
+        setShowAnalyticsSummary(false);
+        setShowFinancialPanel(false);
+        break;
     }
   };
 
@@ -173,9 +291,9 @@ export default function CommandCenter() {
         </section>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           {/* Left Column - View Toggle and Visualization */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {/* View Toggle */}
             <div className="glass-elevated rounded-xl p-4">
               <div className="flex items-center justify-between">
@@ -184,14 +302,14 @@ export default function CommandCenter() {
                 </h3>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleViewToggle('satellite')}
+                    onClick={() => handleViewToggle('globe')}
                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                      viewMode === 'satellite'
+                      viewMode === 'globe'
                         ? 'bg-primary text-gray-950 shadow-lg'
                         : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
                     }`}
                   >
-                    🛰️ Satellite View
+                    🌍 Globe View
                   </button>
                   <button
                     onClick={() => handleViewToggle('3d')}
@@ -209,17 +327,80 @@ export default function CommandCenter() {
 
             {/* View Container with Animation */}
             <div ref={viewContainerRef}>
-              {viewMode === 'satellite' ? (
-                <SatelliteOrchardView onSectionSelect={handleSectionSelect} />
+              {viewMode === 'globe' ? (
+                <GlobeCommandView
+                  onOrchardSelect={handleOrchardSelect}
+                  onSectionSelect={handleSectionSelect}
+                  onEnter3DTwin={handleEnter3DTwin}
+                  selectedOrchardId={selectedOrchardId || undefined}
+                  selectedSectionId={selectedSection || undefined}
+                  commandHandler={handleUICommand}
+                />
               ) : (
                 <OrchardScene3D trees={trees} />
               )}
             </div>
           </div>
 
-          {/* Right Column - AMD Status */}
-          <div className="lg:col-span-1">
+          {/* Right Column - AMD Status and Selected Orchard Details */}
+          <div className="lg:col-span-1 space-y-6">
             <AMDStatusPanel />
+            
+            {/* Selected Orchard Info */}
+            {selectedOrchardId && (
+              <div className="glass-elevated rounded-xl p-4 animate-fade-in">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50 mb-3">
+                  Selected Orchard
+                </h3>
+                {(() => {
+                  const orchard = orchardNetwork.find(o => o.id === selectedOrchardId);
+                  if (!orchard) return null;
+                  return (
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Name:</span>
+                        <span className="text-gray-900 dark:text-gray-50 font-medium">{orchard.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Trees:</span>
+                        <span className="text-gray-900 dark:text-gray-50 font-medium">{orchard.treeCount.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Health:</span>
+                        <span className="text-gray-900 dark:text-gray-50 font-medium">{orchard.healthScore}%</span>
+                      </div>
+                      {selectedSection && (
+                        <div className="pt-2 border-t border-gray-700 mt-2">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">Section:</span>
+                            <span className="text-gray-900 dark:text-gray-50 font-medium">{selectedSection}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+            
+            {/* Financial Prediction - Compact */}
+            {showFinancialPanel && (
+              <div className="glass-elevated rounded-xl p-4 animate-fade-in">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50 mb-3">
+                  Financial Impact
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Revenue:</span>
+                    <span className="text-success font-medium">${orchardData.revenue.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Forecast:</span>
+                    <span className="text-primary font-medium">+12%</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -234,10 +415,27 @@ export default function CommandCenter() {
           </div>
         )}
 
-        {/* AI Advisor */}
+        {/* AI Advisor - Compact */}
         <section className="mb-8">
-          <AIAdvisorPanel />
+          <AIAdvisorPanel onCommand={handleUICommand} />
         </section>
+
+        {/* Analytics Summary Panel (conditionally shown) */}
+        {showAnalyticsSummary && (
+          <section id="analytics-panel" className="mb-8">
+            <AnalyticsSummaryPanel
+              visible={showAnalyticsSummary}
+              onClose={() => setShowAnalyticsSummary(false)}
+            />
+          </section>
+        )}
+
+        {/* Financial Prediction Panel (conditionally shown) */}
+        {showFinancialPanel && (
+          <section id="financial-panel" className="mb-8">
+            <FinancialPredictionPanel />
+          </section>
+        )}
 
         {/* Predictive Insights */}
         <section className="mb-8">
