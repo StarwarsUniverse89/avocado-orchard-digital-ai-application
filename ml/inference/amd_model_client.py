@@ -1,12 +1,13 @@
 """
 AMD Cloud Model Client
-Connects to AMD Cloud API for LLM inference
-Returns stub responses if API keys are not configured
+Connects to AMD Cloud API for LLM inference via vLLM
+Supports OpenAI-compatible /v1/chat/completions format
+Returns stub responses if endpoint is not configured or unreachable
 """
 
 import os
 import sys
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import json
 
 # Add backend to path for config import
@@ -19,9 +20,17 @@ except ImportError:
     CONFIG_AVAILABLE = False
     print("⚠️  Config not available, using environment variables directly")
 
+# Try to import requests for HTTP calls
+try:
+    import requests
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
+    print("⚠️  requests library not available, using stub mode only")
+
 
 class AMDModelClient:
-    """Client for AMD Cloud LLM inference"""
+    """Client for AMD Cloud LLM inference via vLLM"""
     
     def __init__(self):
         """Initialize AMD Cloud client"""
@@ -30,21 +39,29 @@ class AMDModelClient:
             self.api_url = config.AMD_API_URL
             self.model_endpoint = config.AMD_MODEL_ENDPOINT
             self.model_name = config.MODEL_NAME
+            self.gpu_target = getattr(config, 'AMD_GPU_TARGET', 'AMD MI300X')
         else:
             self.api_key = os.getenv("AMD_API_KEY")
             self.api_url = os.getenv("AMD_API_URL", "https://api.amd.cloud/v1")
             self.model_endpoint = os.getenv("AMD_MODEL_ENDPOINT")
-            self.model_name = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-7B-Instruct")
+            self.model_name = os.getenv("AMD_MODEL_NAME", os.getenv("MODEL_NAME", "Qwen/Qwen2.5-7B-Instruct"))
+            self.gpu_target = os.getenv("AMD_GPU_TARGET", "AMD MI300X")
         
-        self.is_configured = bool(self.api_key and self.api_url)
+        self.is_configured = bool(self.api_key and self.model_endpoint)
+        self.mode = "live" if self.is_configured and REQUESTS_AVAILABLE else "stub"
         
         if not self.is_configured:
-            print("⚠️  AMD Cloud API not configured")
-            print("   To use AMD Cloud:")
+            print("⚠️  AMD Cloud vLLM endpoint not configured")
+            print("   To use AMD MI300X live inference:")
             print("   1. Copy backend/.env.example to backend/.env")
-            print("   2. Add your AMD_API_KEY to backend/.env")
-            print("   3. Never commit backend/.env to git")
-            print("   Using stub responses for now...")
+            print("   2. Set AMD_API_KEY (for authentication)")
+            print("   3. Set AMD_MODEL_ENDPOINT (vLLM server URL)")
+            print("   4. Set AMD_MODEL_NAME (default: Qwen/Qwen2.5-7B-Instruct)")
+            print("   5. Never commit backend/.env to git")
+            print("   Using deterministic stub responses for now...")
+        elif not REQUESTS_AVAILABLE:
+            print("⚠️  requests library not installed, using stub mode")
+            print("   Install with: pip install requests")
     
     def get_masked_key(self) -> str:
         """Return masked API key for safe logging"""
@@ -54,8 +71,66 @@ class AMDModelClient:
             return "***"
         return f"{self.api_key[:4]}...{self.api_key[-4:]}"
     
+    def _call_vllm_chat_completion(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float = 0.7,
+        max_tokens: int = 500
+    ) -> Optional[str]:
+        """
+        Call vLLM server using OpenAI-compatible /v1/chat/completions format
+        
+        Args:
+            messages: List of chat messages [{"role": "system/user/assistant", "content": "..."}]
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens to generate
+        
+        Returns:
+            Generated text or None if call fails
+        """
+        if not self.is_configured or not REQUESTS_AVAILABLE:
+            return None
+        
+        try:
+            # Construct OpenAI-compatible request
+            url = f"{self.model_endpoint}/v1/chat/completions"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}"
+            }
+            payload = {
+                "model": self.model_name,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "stream": False
+            }
+            
+            print(f"🚀 Calling vLLM endpoint: {url}")
+            print(f"   Model: {self.model_name}")
+            print(f"   GPU: {self.gpu_target}")
+            
+            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            response.raise_for_status()
+            
+            result = response.json()
+            content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+            
+            print(f"✅ vLLM inference successful")
+            return content
+            
+        except requests.exceptions.Timeout:
+            print(f"⏱️  vLLM request timeout after 30s")
+            return None
+        except requests.exceptions.ConnectionError:
+            print(f"🔌 Cannot connect to vLLM endpoint: {self.model_endpoint}")
+            return None
+        except Exception as e:
+            print(f"❌ vLLM call failed: {e}")
+            return None
+    
     def generate_recommendation(
-        self, 
+        self,
         orchard_state: Dict[str, Any],
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
@@ -69,22 +144,90 @@ class AMDModelClient:
         Returns:
             AI recommendation with reasoning and impact prediction
         """
-        if not self.is_configured:
-            return self._generate_stub_recommendation(orchard_state, context)
+        # Try live vLLM inference first if configured
+        if self.is_configured and REQUESTS_AVAILABLE:
+            try:
+                # Prepare prompt for LLM
+                system_prompt = """You are an expert agricultural AI advisor specializing in avocado orchard management.
+Analyze the provided orchard data and provide a specific, actionable recommendation with reasoning and projected impact.
+Format your response as JSON with these fields:
+- recommendation: Brief action to take
+- reason: Detailed explanation
+- yield_impact: Projected yield change (e.g., "+12%")
+- profit_impact: Projected profit change (e.g., "+$4,500")
+- action_type: One of [moisture_recovery, heat_mitigation, pest_treatment, monitoring]"""
+                
+                user_prompt = f"""Orchard State:
+- Temperature: {orchard_state.get('temperature', 25)}°C
+- Soil Moisture: {orchard_state.get('soil_moisture', 60)}%
+- NDVI: {orchard_state.get('ndvi', 0.75)}
+- Health Status: {orchard_state.get('health_status', 'healthy')}
+- Leaf Damage: {orchard_state.get('leaf_damage', 5)}%
+
+Provide recommendation as JSON."""
+                
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ]
+                
+                response_text = self._call_vllm_chat_completion(messages)
+                
+                if response_text:
+                    # Try to parse JSON response
+                    try:
+                        # Extract JSON from response (handle markdown code blocks)
+                        json_start = response_text.find('{')
+                        json_end = response_text.rfind('}') + 1
+                        if json_start >= 0 and json_end > json_start:
+                            json_str = response_text[json_start:json_end]
+                            llm_result = json.loads(json_str)
+                            
+                            return {
+                                "recommendation": llm_result.get("recommendation", "Continue monitoring"),
+                                "reason": llm_result.get("reason", "Analysis complete"),
+                                "confidence": 0.90,
+                                "impact": {
+                                    "yield_change": llm_result.get("yield_impact", "0%"),
+                                    "profit_change": llm_result.get("profit_impact", "$0")
+                                },
+                                "visual_action": {
+                                    "type": llm_result.get("action_type", "monitoring"),
+                                    "duration": 3000,
+                                    "target_section": orchard_state.get("section", "all")
+                                },
+                                "model": f"{self.model_name} (vLLM on {self.gpu_target})",
+                                "amd_cloud_ready": True,
+                                "mode": "live",
+                                "note": f"Live inference from {self.gpu_target}"
+                            }
+                    except json.JSONDecodeError:
+                        print("⚠️  Could not parse LLM JSON response, using text")
+                        return {
+                            "recommendation": "AI Analysis Complete",
+                            "reason": response_text[:200],
+                            "confidence": 0.85,
+                            "impact": {
+                                "yield_change": "Analysis provided",
+                                "profit_change": "See details"
+                            },
+                            "visual_action": {
+                                "type": "monitoring",
+                                "duration": 3000,
+                                "target_section": orchard_state.get("section", "all")
+                            },
+                            "model": f"{self.model_name} (vLLM on {self.gpu_target})",
+                            "amd_cloud_ready": True,
+                            "mode": "live",
+                            "note": f"Live inference from {self.gpu_target}"
+                        }
+            
+            except Exception as e:
+                print(f"❌ Error in live vLLM inference: {e}")
+                print("   Falling back to deterministic stub")
         
-        try:
-            # TODO: Implement actual AMD Cloud API call
-            # For now, return stub even if configured (until we test on AMD Cloud)
-            print(f"🔧 AMD Cloud API configured (Key: {self.get_masked_key()})")
-            print(f"   Model: {self.model_name}")
-            print(f"   Endpoint: {self.api_url}")
-            print("   Real API call not yet implemented - using stub")
-            return self._generate_stub_recommendation(orchard_state, context)
-        
-        except Exception as e:
-            print(f"❌ Error calling AMD Cloud API: {e}")
-            print("   Falling back to stub response")
-            return self._generate_stub_recommendation(orchard_state, context)
+        # Fall back to deterministic stub
+        return self._generate_stub_recommendation(orchard_state, context)
     
     def _generate_stub_recommendation(
         self,

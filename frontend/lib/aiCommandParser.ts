@@ -2,6 +2,12 @@
 // Works without a live LLM by using pattern matching
 
 import { orchardNetwork } from './orchardNetwork';
+import {
+  mexicoAvocadoMunicipalities,
+  michoacanAvocadoBelt,
+  getHighestStressOrchard,
+  getTopProductionMunicipality,
+} from './mexicoAvocadoNetwork';
 
 export interface ParsedCommand {
   message: string;
@@ -51,6 +57,328 @@ function findSectionByName(orchardId: string, sectionName: string): string | nul
 
 // Command patterns with handlers
 const commandPatterns: CommandPattern[] = [
+  // Show avocado belt
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?avocado\s+belt/i,
+      /display\s+(?:the\s+)?avocado\s+belt/i,
+      /show\s+(?:the\s+)?Michoacán\s+belt/i,
+    ],
+    command: 'show_avocado_belt',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying Michoacán avocado belt boundary and production municipalities.',
+        command: 'show_avocado_belt',
+        args: {
+          belt: michoacanAvocadoBelt,
+          municipalities: mexicoAvocadoMunicipalities,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Show production clusters
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?production\s+clusters?/i,
+      /display\s+(?:the\s+)?clusters?/i,
+      /show\s+(?:the\s+)?avocado\s+clusters?/i,
+    ],
+    command: 'show_production_clusters',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying production clusters across the Michoacán avocado belt.',
+        command: 'show_production_clusters',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Create avocado orchard network in Michoacán
+  {
+    patterns: [
+      /create\s+(?:an?\s+)?(?:avocado\s+)?orchard\s+network\s+(?:in\s+)?Michoacán/i,
+      /generate\s+(?:the\s+)?Michoacán\s+(?:orchard\s+)?network/i,
+      /show\s+(?:the\s+)?synthetic\s+orchards?/i,
+    ],
+    command: 'create_orchard_network',
+    handler: (match, input) => {
+      return {
+        message: 'Generating synthetic orchard network across Michoacán production clusters.',
+        command: 'create_orchard_network',
+        args: {
+          region: 'michoacan',
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Navigate to specific municipalities
+  {
+    patterns: [
+      /navigate\s+to\s+Tancítaro/i,
+      /go\s+to\s+Tancítaro/i,
+      /show\s+(?:me\s+)?Tancítaro/i,
+    ],
+    command: 'navigate_to_municipality',
+    handler: (match, input) => {
+      const municipality = mexicoAvocadoMunicipalities.find(m => m.id === 'tancitaro');
+      return {
+        message: 'Flying to Tancítaro, the major avocado growing area near Pico de Tancítaro.',
+        command: 'navigate_to_municipality',
+        args: {
+          municipality_id: 'tancitaro',
+          lat: municipality?.lat,
+          lng: municipality?.lng,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /navigate\s+to\s+Uruapan/i,
+      /go\s+to\s+Uruapan/i,
+      /show\s+(?:me\s+)?Uruapan/i,
+    ],
+    command: 'navigate_to_municipality',
+    handler: (match, input) => {
+      const municipality = mexicoAvocadoMunicipalities.find(m => m.id === 'uruapan');
+      return {
+        message: 'Flying to Uruapan, known as the Avocado Capital of the World.',
+        command: 'navigate_to_municipality',
+        args: {
+          municipality_id: 'uruapan',
+          lat: municipality?.lat,
+          lng: municipality?.lng,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /navigate\s+to\s+Peribán/i,
+      /go\s+to\s+Peribán/i,
+      /show\s+(?:me\s+)?Peribán/i,
+    ],
+    command: 'navigate_to_municipality',
+    handler: (match, input) => {
+      const municipality = mexicoAvocadoMunicipalities.find(m => m.id === 'periban');
+      return {
+        message: 'Flying to Peribán, one of the major avocado-producing municipalities.',
+        command: 'navigate_to_municipality',
+        args: {
+          municipality_id: 'periban',
+          lat: municipality?.lat,
+          lng: municipality?.lng,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /navigate\s+to\s+Tacámbaro/i,
+      /go\s+to\s+Tacámbaro/i,
+      /show\s+(?:me\s+)?Tacámbaro/i,
+    ],
+    command: 'navigate_to_municipality',
+    handler: (match, input) => {
+      const municipality = mexicoAvocadoMunicipalities.find(m => m.id === 'tacambaro');
+      return {
+        message: 'Flying to Tacámbaro, significant high-altitude orchard density area.',
+        command: 'navigate_to_municipality',
+        args: {
+          municipality_id: 'tacambaro',
+          lat: municipality?.lat,
+          lng: municipality?.lng,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /navigate\s+to\s+Ziracuaretiro/i,
+      /go\s+to\s+Ziracuaretiro/i,
+      /show\s+(?:me\s+)?Ziracuaretiro/i,
+    ],
+    command: 'navigate_to_municipality',
+    handler: (match, input) => {
+      const municipality = mexicoAvocadoMunicipalities.find(m => m.id === 'ziracuaretiro');
+      return {
+        message: 'Flying to Ziracuaretiro, high demand for irrigation and satellite monitoring.',
+        command: 'navigate_to_municipality',
+        args: {
+          municipality_id: 'ziracuaretiro',
+          lat: municipality?.lat,
+          lng: municipality?.lng,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /navigate\s+to\s+Salvador\s+Escalante/i,
+      /go\s+to\s+Salvador\s+Escalante/i,
+      /show\s+(?:me\s+)?Salvador\s+Escalante/i,
+    ],
+    command: 'navigate_to_municipality',
+    handler: (match, input) => {
+      const municipality = mexicoAvocadoMunicipalities.find(m => m.id === 'salvador_escalante');
+      return {
+        message: 'Flying to Salvador Escalante, high-density avocado production area.',
+        command: 'navigate_to_municipality',
+        args: {
+          municipality_id: 'salvador_escalante',
+          lat: municipality?.lat,
+          lng: municipality?.lng,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /navigate\s+to\s+Ario\s+de\s+Rosales/i,
+      /go\s+to\s+Ario\s+de\s+Rosales/i,
+      /show\s+(?:me\s+)?Ario\s+de\s+Rosales/i,
+    ],
+    command: 'navigate_to_municipality',
+    handler: (match, input) => {
+      const municipality = mexicoAvocadoMunicipalities.find(m => m.id === 'ario_de_rosales');
+      return {
+        message: 'Flying to Ario de Rosales, significant avocado-producing municipality.',
+        command: 'navigate_to_municipality',
+        args: {
+          municipality_id: 'ario_de_rosales',
+          lat: municipality?.lat,
+          lng: municipality?.lng,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /navigate\s+to\s+Zitácuaro/i,
+      /go\s+to\s+Zitácuaro/i,
+      /show\s+(?:me\s+)?Zitácuaro/i,
+    ],
+    command: 'navigate_to_municipality',
+    handler: (match, input) => {
+      const municipality = mexicoAvocadoMunicipalities.find(m => m.id === 'zitacuaro');
+      return {
+        message: 'Flying to Zitácuaro, eastern avocado production cluster.',
+        command: 'navigate_to_municipality',
+        args: {
+          municipality_id: 'zitacuaro',
+          lat: municipality?.lat,
+          lng: municipality?.lng,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Show highest production municipality
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?highest\s+production\s+municipality/i,
+      /(?:which|what)\s+(?:is\s+)?(?:the\s+)?top\s+(?:production\s+)?municipality/i,
+      /show\s+(?:the\s+)?top\s+producer/i,
+    ],
+    command: 'show_top_municipality',
+    handler: (match, input) => {
+      const topMunicipality = getTopProductionMunicipality();
+      return {
+        message: `Flying to ${topMunicipality.name}, the highest production municipality with ${topMunicipality.estimated_hectares.toLocaleString()} hectares.`,
+        command: 'navigate_to_municipality',
+        args: {
+          municipality_id: topMunicipality.id,
+          lat: topMunicipality.lat,
+          lng: topMunicipality.lng,
+          highlight: true,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Find highest stress orchard in avocado belt
+  {
+    patterns: [
+      /find\s+(?:the\s+)?highest\s+stress\s+orchard\s+(?:in\s+)?(?:the\s+)?(?:avocado\s+)?belt/i,
+      /show\s+(?:me\s+)?(?:the\s+)?highest\s+risk\s+orchard/i,
+      /(?:which|what)\s+(?:is\s+)?(?:the\s+)?most\s+stressed\s+orchard/i,
+    ],
+    command: 'find_highest_stress_orchard',
+    handler: (match, input) => {
+      const highestStressOrchard = getHighestStressOrchard();
+      return {
+        message: `Found highest stress orchard: ${highestStressOrchard.name} with ${highestStressOrchard.stress_level} stress level and NDVI of ${highestStressOrchard.ndvi_average}.`,
+        command: 'select_orchard',
+        args: {
+          orchard_id: highestStressOrchard.orchard_id,
+          lat: highestStressOrchard.lat,
+          lng: highestStressOrchard.lng,
+          highlight: true,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Compare municipalities
+  {
+    patterns: [
+      /compare\s+Tancítaro\s+and\s+Uruapan/i,
+      /compare\s+Uruapan\s+and\s+Tancítaro/i,
+      /show\s+(?:me\s+)?(?:a\s+)?comparison\s+(?:of\s+)?Tancítaro\s+(?:and|vs)\s+Uruapan/i,
+    ],
+    command: 'compare_municipalities',
+    handler: (match, input) => {
+      const tancitaro = mexicoAvocadoMunicipalities.find(m => m.id === 'tancitaro');
+      const uruapan = mexicoAvocadoMunicipalities.find(m => m.id === 'uruapan');
+      return {
+        message: 'Comparing Tancítaro and Uruapan production metrics and stress levels.',
+        command: 'compare_municipalities',
+        args: {
+          municipality_ids: ['tancitaro', 'uruapan'],
+          municipalities: [tancitaro, uruapan],
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Enter 3D twin for highest risk orchard
+  {
+    patterns: [
+      /enter\s+3d\s+twin\s+(?:for\s+)?(?:the\s+)?highest\s+risk\s+orchard/i,
+      /open\s+(?:the\s+)?3d\s+(?:twin\s+)?(?:for\s+)?(?:the\s+)?highest\s+risk/i,
+      /show\s+(?:me\s+)?(?:the\s+)?3d\s+(?:view\s+)?(?:of\s+)?(?:the\s+)?highest\s+risk/i,
+    ],
+    command: 'enter_3d_twin_highest_risk',
+    handler: (match, input) => {
+      const highestStressOrchard = getHighestStressOrchard();
+      return {
+        message: `Opening 3D digital twin for ${highestStressOrchard.name}, the highest risk orchard.`,
+        command: 'enter_3d_twin',
+        args: {
+          orchard_id: highestStressOrchard.orchard_id,
+          orchard_name: highestStressOrchard.name,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
   // Navigate to orchard with highest/lowest stress
   {
     patterns: [
@@ -64,7 +392,7 @@ const commandPatterns: CommandPattern[] = [
       const orchardId = findOrchardByStress(level);
       
       return {
-        message: orchardId 
+        message: orchardId
           ? `Navigating to the ${level} stress orchard and showing stress zones.`
           : `Could not find orchard with ${level} stress.`,
         command: 'navigate_to_orchard',
@@ -287,14 +615,25 @@ export function parseAICommand(input: string): ParsedCommand {
   // No match found - return a helpful message
   return {
     message: `I'm not sure how to handle that command. Try commands like:
+    
+    Mexico Avocado Network:
+    • "Show avocado belt"
+    • "Show production clusters"
+    • "Create avocado orchard network in Michoacán"
+    • "Navigate to Tancítaro"
+    • "Navigate to Uruapan"
+    • "Show highest production municipality"
+    • "Find highest stress orchard in the avocado belt"
+    • "Compare Tancítaro and Uruapan"
+    • "Enter 3D twin for the highest risk orchard"
+    
+    General Commands:
     • "Show me the highest stress orchard"
-    • "Navigate to Orchard West"
     • "Show stress zones"
     • "Enter 3D twin"
     • "Run water stress simulation"
     • "Apply the best recommendation"
-    • "Show financial impact"
-    • "Create an analytics summary"`,
+    • "Show financial impact"`,
     command: 'unknown',
     args: {},
     confidence: 0.0,

@@ -24,6 +24,15 @@ import {
   OrchardLocation,
   OrchardSection,
 } from '@/lib/orchardNetwork';
+import {
+  michoacanAvocadoBelt,
+  mexicoAvocadoMunicipalities,
+  michoacanAvocadoClusters,
+  michoacanSyntheticOrchards,
+  AvocadoMunicipality,
+  AvocadoCluster,
+  SyntheticOrchardCandidate,
+} from '@/lib/mexicoAvocadoNetwork';
 import { UICommand, UICommandHandler } from '@/types/uiCommands';
 import SatelliteOrchardView from './SatelliteOrchardView';
 
@@ -48,6 +57,11 @@ export function GlobeCommandView({
   const [cesiumReady, setCesiumReady] = useState<boolean>(false);
   const [cesiumError, setCesiumError] = useState<boolean>(false);
   const [showStressZones, setShowStressZones] = useState(true);
+  const [showAvocadoBelt, setShowAvocadoBelt] = useState(false);
+  const [showProductionClusters, setShowProductionClusters] = useState(false);
+  const [showMexicoOrchards, setShowMexicoOrchards] = useState(false);
+  const [selectedMunicipalityId, setSelectedMunicipalityId] = useState<string | null>(null);
+  const [selectedOrchardMexico, setSelectedOrchardMexico] = useState<string | null>(null);
   const [cameraTarget, setCameraTarget] = useState<{
     destination: Cartesian3;
     duration: number;
@@ -93,6 +107,64 @@ export function GlobeCommandView({
   const handleCommand = useCallback(
     (command: UICommand) => {
       switch (command.type) {
+        case 'show_avocado_belt':
+          setShowAvocadoBelt(true);
+          setShowProductionClusters(false);
+          setShowMexicoOrchards(false);
+          // Fly to belt center
+          if (viewerRef.current) {
+            const centerLat = (michoacanAvocadoBelt.lat_min + michoacanAvocadoBelt.lat_max) / 2;
+            const centerLng = (michoacanAvocadoBelt.lng_min + michoacanAvocadoBelt.lng_max) / 2;
+            const destination = Cartesian3.fromDegrees(centerLng, centerLat, 150000);
+            setCameraTarget({ destination, duration: 2 });
+          }
+          break;
+        case 'show_production_clusters':
+          setShowProductionClusters(true);
+          setShowAvocadoBelt(true);
+          break;
+        case 'create_orchard_network':
+          setShowMexicoOrchards(true);
+          setShowProductionClusters(true);
+          setShowAvocadoBelt(true);
+          break;
+        case 'navigate_to_municipality': {
+          const municipality = mexicoAvocadoMunicipalities.find(
+            (m) => m.id === command.args?.municipality_id
+          );
+          if (municipality) {
+            const destination = Cartesian3.fromDegrees(
+              municipality.lng,
+              municipality.lat,
+              15000
+            );
+            setCameraTarget({ destination, duration: 2 });
+            setSelectedMunicipalityId(municipality.id);
+            setShowAvocadoBelt(true);
+          }
+          break;
+        }
+        case 'select_orchard': {
+          const orchard = michoacanSyntheticOrchards.find(
+            (o) => o.orchard_id === command.args?.orchard_id
+          );
+          if (orchard) {
+            const destination = Cartesian3.fromDegrees(
+              orchard.lng,
+              orchard.lat,
+              5000
+            );
+            setCameraTarget({ destination, duration: 2 });
+            setSelectedOrchardMexico(orchard.orchard_id);
+            setShowMexicoOrchards(true);
+          }
+          break;
+        }
+        case 'compare_municipalities':
+          // Show both municipalities
+          setShowAvocadoBelt(true);
+          setSelectedMunicipalityId(null);
+          break;
         case 'navigate_to_orchard': {
           const orchard = orchardNetwork.find(
             (o) => o.id === command.orchardId
@@ -141,6 +213,9 @@ export function GlobeCommandView({
             viewerRef.current.camera.flyHome(2);
           }
           setShowStressZones(true);
+          setShowAvocadoBelt(false);
+          setShowProductionClusters(false);
+          setShowMexicoOrchards(false);
           break;
       }
     },
@@ -314,6 +389,164 @@ export function GlobeCommandView({
             onComplete={() => setCameraTarget(null)}
           />
         )}
+
+        {/* Render Mexico Avocado Belt boundary */}
+        {showAvocadoBelt && (
+          <Entity
+            name={michoacanAvocadoBelt.name}
+            description={`
+              <div style="font-family: sans-serif;">
+                <h3>${michoacanAvocadoBelt.name}</h3>
+                <p>${michoacanAvocadoBelt.description}</p>
+                <p><strong>State:</strong> ${michoacanAvocadoBelt.state}</p>
+                <p><strong>Country:</strong> ${michoacanAvocadoBelt.country}</p>
+              </div>
+            `}
+          >
+            <PolygonGraphics
+              hierarchy={Cartesian3.fromDegreesArray([
+                michoacanAvocadoBelt.lng_min, michoacanAvocadoBelt.lat_min,
+                michoacanAvocadoBelt.lng_max, michoacanAvocadoBelt.lat_min,
+                michoacanAvocadoBelt.lng_max, michoacanAvocadoBelt.lat_max,
+                michoacanAvocadoBelt.lng_min, michoacanAvocadoBelt.lat_max,
+              ])}
+              material={Color.CYAN.withAlpha(0.1)}
+              outline={true}
+              outlineColor={Color.CYAN}
+              outlineWidth={3}
+              heightReference={HeightReference.CLAMP_TO_GROUND}
+            />
+          </Entity>
+        )}
+
+        {/* Render Mexico municipalities */}
+        {showAvocadoBelt && mexicoAvocadoMunicipalities.map((municipality) => {
+          const isSelected = selectedMunicipalityId === municipality.id;
+          const stressColor = municipality.stress_level === 'high' ? Color.RED :
+                             municipality.stress_level === 'medium' ? Color.YELLOW :
+                             Color.GREEN;
+          
+          return (
+            <Entity
+              key={municipality.id}
+              name={municipality.name}
+              description={`
+                <div style="font-family: sans-serif;">
+                  <h3>${municipality.name}</h3>
+                  <p><strong>State:</strong> ${municipality.state}</p>
+                  <p><strong>Estimated Hectares:</strong> ${municipality.estimated_hectares.toLocaleString()}</p>
+                  <p><strong>Production Rank:</strong> ${municipality.production_rank || 'N/A'}</p>
+                  <p><strong>Stress Level:</strong> ${municipality.stress_level}</p>
+                  <p><strong>NDVI Average:</strong> ${municipality.ndvi_average.toFixed(2)}</p>
+                  <p><strong>Projected Profit:</strong> $${municipality.projected_profit_usd.toLocaleString()}</p>
+                  <p>${municipality.note}</p>
+                </div>
+              `}
+              position={Cartesian3.fromDegrees(municipality.lng, municipality.lat)}
+            >
+              <PointGraphics
+                pixelSize={isSelected ? 20 : 12}
+                color={isSelected ? Color.CYAN : stressColor.withAlpha(0.8)}
+                outlineColor={Color.WHITE}
+                outlineWidth={2}
+                heightReference={HeightReference.CLAMP_TO_GROUND}
+              />
+              <LabelGraphics
+                text={municipality.name}
+                font="12px sans-serif"
+                fillColor={Color.WHITE}
+                outlineColor={Color.BLACK}
+                outlineWidth={2}
+                style={0}
+                verticalOrigin={VerticalOrigin.BOTTOM}
+                horizontalOrigin={HorizontalOrigin.CENTER}
+                pixelOffset={new Cartesian3(0, -15, 0)}
+                heightReference={HeightReference.CLAMP_TO_GROUND}
+              />
+            </Entity>
+          );
+        })}
+
+        {/* Render production clusters */}
+        {showProductionClusters && michoacanAvocadoClusters.map((cluster) => (
+          <Entity
+            key={cluster.id}
+            name={cluster.name}
+            description={`
+              <div style="font-family: sans-serif;">
+                <h3>${cluster.name}</h3>
+                <p><strong>Priority:</strong> ${cluster.priority}</p>
+                <p><strong>Estimated Hectares:</strong> ${cluster.estimated_hectares.toLocaleString()}</p>
+                <p><strong>NDVI Average:</strong> ${cluster.ndvi_average.toFixed(2)}</p>
+                <p><strong>Stress Level:</strong> ${cluster.stress_level}</p>
+                <p><strong>Profit at Risk:</strong> $${cluster.projected_profit_risk_usd.toLocaleString()}</p>
+              </div>
+            `}
+          >
+            <PolygonGraphics
+              hierarchy={Cartesian3.fromDegreesArray(
+                Array.from({ length: 32 }, (_, i) => {
+                  const angle = (i / 32) * 2 * Math.PI;
+                  const radiusInDegrees = cluster.radius_km / 111; // Approximate km to degrees
+                  return [
+                    cluster.center_lng + radiusInDegrees * Math.cos(angle),
+                    cluster.center_lat + radiusInDegrees * Math.sin(angle),
+                  ];
+                }).flat()
+              )}
+              material={
+                cluster.priority === 'high'
+                  ? Color.ORANGE.withAlpha(0.2)
+                  : Color.YELLOW.withAlpha(0.15)
+              }
+              outline={true}
+              outlineColor={cluster.priority === 'high' ? Color.ORANGE : Color.YELLOW}
+              outlineWidth={2}
+              heightReference={HeightReference.CLAMP_TO_GROUND}
+            />
+          </Entity>
+        ))}
+
+        {/* Render synthetic orchards */}
+        {showMexicoOrchards && michoacanSyntheticOrchards.map((orchard) => {
+          const isSelected = selectedOrchardMexico === orchard.orchard_id;
+          const stressColor = orchard.stress_level === 'high' ? Color.RED :
+                             orchard.stress_level === 'medium' ? Color.YELLOW :
+                             Color.GREEN;
+          
+          return (
+            <Entity
+              key={orchard.orchard_id}
+              name={orchard.name}
+              description={`
+                <div style="font-family: sans-serif;">
+                  <h3>${orchard.name}</h3>
+                  <p><strong>Cluster:</strong> ${orchard.cluster_id}</p>
+                  <p><strong>Acres:</strong> ${orchard.estimated_acres}</p>
+                  <p><strong>Trees:</strong> ${orchard.estimated_trees.toLocaleString()}</p>
+                  <p><strong>NDVI:</strong> ${orchard.ndvi_average.toFixed(2)}</p>
+                  <p><strong>Stress Level:</strong> ${orchard.stress_level}</p>
+                  <p><strong>Soil Moisture:</strong> ${orchard.soil_moisture}%</p>
+                  <p><strong>Projected Yield:</strong> ${orchard.projected_yield_kg.toLocaleString()} kg</p>
+                  <p><strong>Projected Revenue:</strong> $${orchard.projected_revenue_usd.toLocaleString()}</p>
+                  <p><strong>Projected Profit:</strong> $${orchard.projected_profit_usd.toLocaleString()}</p>
+                </div>
+              `}
+              position={Cartesian3.fromDegrees(orchard.lng, orchard.lat)}
+              onClick={() => {
+                setSelectedOrchardMexico(orchard.orchard_id);
+              }}
+            >
+              <PointGraphics
+                pixelSize={isSelected ? 12 : 8}
+                color={isSelected ? Color.CYAN : stressColor.withAlpha(0.7)}
+                outlineColor={Color.WHITE}
+                outlineWidth={1}
+                heightReference={HeightReference.CLAMP_TO_GROUND}
+              />
+            </Entity>
+          );
+        })}
 
         {/* Render orchards */}
         {orchardNetwork.map((orchard) => (

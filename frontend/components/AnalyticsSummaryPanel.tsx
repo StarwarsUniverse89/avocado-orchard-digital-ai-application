@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { orchardNetwork } from "@/lib/orchardNetwork";
+import { getMexicoAvocadoAnalytics } from "@/lib/mexicoAvocadoNetwork";
 
 interface AnalyticsSummaryPanelProps {
   visible?: boolean;
@@ -27,19 +28,19 @@ export default function AnalyticsSummaryPanel({
 
   useEffect(() => {
     setLastUpdated(new Date().toLocaleTimeString());
+    
+    // Get Mexico avocado analytics
+    const mexicoAnalytics = getMexicoAvocadoAnalytics();
+    
     // Calculate analytics from orchard network
-    const totalOrchards = orchardNetwork.length;
-    const totalTrees = orchardNetwork.reduce((sum, o) => sum + o.treeCount, 0);
+    const totalOrchards = orchardNetwork.length + mexicoAnalytics.total_synthetic_orchards;
+    const totalTrees = orchardNetwork.reduce((sum, o) => sum + o.treeCount, 0) +
+                      mexicoAnalytics.total_estimated_trees;
     const avgHealthScore =
-      orchardNetwork.reduce((sum, o) => sum + o.healthScore, 0) / totalOrchards;
+      orchardNetwork.reduce((sum, o) => sum + o.healthScore, 0) / orchardNetwork.length;
 
-    // Find highest stress orchard
-    const stressMap = { low: 1, medium: 2, high: 3 };
-    const highestStress = [...orchardNetwork].sort((a, b) => {
-      const aStress = stressMap[a.stressLevel as keyof typeof stressMap] || 0;
-      const bStress = stressMap[b.stressLevel as keyof typeof stressMap] || 0;
-      return bStress - aStress;
-    })[0];
+    // Find highest stress orchard (prioritize Mexico data)
+    const highestStressOrchard = mexicoAnalytics.highest_risk_orchard;
 
     // Find lowest NDVI section across all orchards
     let lowestNDVISection = { name: "", ndvi: 1, orchardName: "" };
@@ -54,6 +55,15 @@ export default function AnalyticsSummaryPanel({
         }
       });
     });
+    
+    // Check Mexico orchards for lower NDVI
+    if (highestStressOrchard.ndvi_average < lowestNDVISection.ndvi) {
+      lowestNDVISection = {
+        name: highestStressOrchard.name,
+        ndvi: highestStressOrchard.ndvi_average,
+        orchardName: "Michoacán",
+      };
+    }
 
     // Count critical sections (high stress)
     const criticalSections = orchardNetwork.reduce((count, orchard) => {
@@ -63,28 +73,27 @@ export default function AnalyticsSummaryPanel({
     }, 0);
 
     // Calculate projected risk based on stress levels
+    const stressMap = { low: 1, medium: 2, high: 3 };
     const highStressCount = orchardNetwork.filter(
       (o) => o.stressLevel === "high"
     ).length;
-    const projectedYieldRisk = (highStressCount / totalOrchards) * 100;
+    const projectedYieldRisk = (highStressCount / orchardNetwork.length) * 100;
 
-    // Estimate profit impact (simplified calculation)
-    const avgTreeValue = 280; // $280 per tree per year
-    const riskFactor = projectedYieldRisk / 100;
-    const projectedProfitImpact = Math.round(
-      totalTrees * avgTreeValue * riskFactor * 0.15
-    );
+    // Use Mexico profit at risk data
+    const projectedProfitImpact = mexicoAnalytics.projected_profit_at_risk_usd;
 
     // Determine recommended action
     let recommendedAction = "Continue monitoring";
-    if (criticalSections > 0) {
+    if (highestStressOrchard.stress_level === "high") {
+      recommendedAction = `Priority: Address ${highestStressOrchard.name} in Michoacán (high stress, NDVI ${highestStressOrchard.ndvi_average})`;
+    } else if (criticalSections > 0) {
       recommendedAction = `Immediate irrigation needed in ${criticalSections} section${criticalSections > 1 ? "s" : ""}`;
     } else if (highStressCount > 0) {
       recommendedAction = "Increase irrigation frequency";
     }
 
     setSummary({
-      highestStressOrchard: highestStress.name,
+      highestStressOrchard: highestStressOrchard.name,
       lowestNDVISection: `${lowestNDVISection.orchardName} - ${lowestNDVISection.name}`,
       projectedYieldRisk: Math.round(projectedYieldRisk),
       projectedProfitImpact,

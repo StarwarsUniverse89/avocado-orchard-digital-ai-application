@@ -10,7 +10,13 @@ export type UICommand =
   | ApplyRecommendationCommand
   | ShowFinancialImpactCommand
   | CreateAnalyticsSummaryCommand
-  | ResetViewCommand;
+  | ResetViewCommand
+  | ShowAvocadoBeltCommand
+  | ShowProductionClustersCommand
+  | CreateOrchardNetworkCommand
+  | NavigateToMunicipalityCommand
+  | SelectOrchardCommand
+  | CompareMunicipalitiesCommand;
 
 export interface NavigateToOrchardCommand {
   type: 'navigate_to_orchard';
@@ -68,6 +74,50 @@ export interface CreateAnalyticsSummaryCommand {
 export interface ResetViewCommand {
   type: 'reset_view';
   zoomLevel?: 'global' | 'regional' | 'orchard';
+}
+
+// Mexico Avocado Network Commands
+export interface ShowAvocadoBeltCommand {
+  type: 'show_avocado_belt';
+  belt?: any;
+  municipalities?: any[];
+}
+
+export interface ShowProductionClustersCommand {
+  type: 'show_production_clusters';
+}
+
+export interface CreateOrchardNetworkCommand {
+  type: 'create_orchard_network';
+  region?: string;
+}
+
+export interface NavigateToMunicipalityCommand {
+  type: 'navigate_to_municipality';
+  args?: {
+    municipality_id: string;
+    lat?: number;
+    lng?: number;
+    highlight?: boolean;
+  };
+}
+
+export interface SelectOrchardCommand {
+  type: 'select_orchard';
+  args?: {
+    orchard_id: string;
+    lat?: number;
+    lng?: number;
+    highlight?: boolean;
+  };
+}
+
+export interface CompareMunicipalitiesCommand {
+  type: 'compare_municipalities';
+  args?: {
+    municipality_ids: string[];
+    municipalities?: any[];
+  };
 }
 
 // Command handler type

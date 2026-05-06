@@ -37,6 +37,8 @@ class Config:
     AMD_API_KEY: Optional[str] = os.getenv("AMD_API_KEY")
     AMD_API_URL: str = os.getenv("AMD_API_URL", "https://api.amd.cloud/v1")
     AMD_MODEL_ENDPOINT: Optional[str] = os.getenv("AMD_MODEL_ENDPOINT")
+    AMD_MODEL_NAME: str = os.getenv("AMD_MODEL_NAME", "Qwen/Qwen2.5-7B-Instruct")
+    AMD_GPU_TARGET: str = os.getenv("AMD_GPU_TARGET", "AMD MI300X")
     
     # vLLM Configuration
     VLLM_API_KEY: Optional[str] = os.getenv("VLLM_API_KEY")
