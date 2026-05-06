@@ -12,8 +12,7 @@ echo "=========================================="
 echo ""
 
 # Configuration - Backend runs on port 8001, vLLM on port 8000
-API_BASE_URL="${API_BASE_URL:-http://localhost:8001}"
-BACKEND_URL="${BACKEND_URL:-$API_BASE_URL}"
+BACKEND_URL="${BACKEND_URL:-${API_BASE_URL:-http://localhost:8001}}"
 API_BASE="${BACKEND_URL}/api/v1"
 
 echo "Backend URL: $BACKEND_URL"
@@ -72,9 +71,7 @@ echo "$COMMAND_RESPONSE" | python3 -m json.tool
 echo ""
 
 # Check for success field in JSON response
-COMMAND_SUCCESS=$(echo "$COMMAND_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('success', False))" 2>/dev/null || echo "false")
-
-if [ "$COMMAND_SUCCESS" = "True" ] || echo "$COMMAND_RESPONSE" | grep -q '"success": true'; then
+if echo "$COMMAND_RESPONSE" | grep -q '"success": true'; then
     echo -e "${GREEN}✅ Agent command processed successfully${NC}"
 else
     echo -e "${RED}❌ Agent command failed${NC}"
@@ -91,16 +88,15 @@ echo ""
 RECOMMENDATION_RESPONSE=$(curl -s -X POST "${API_BASE}/agent" \
   -H "Content-Type: application/json" \
   -d '{
-    "municipality_name": "Tancítaro"
+    "municipality_name": "Tancítaro",
+    "command": "Give an avocado orchard recommendation using AMD MI300X inference."
   }')
 
 echo "$RECOMMENDATION_RESPONSE" | python3 -m json.tool
 echo ""
 
 # Check for success field
-REC_SUCCESS=$(echo "$RECOMMENDATION_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('success', False))" 2>/dev/null || echo "false")
-
-if [ "$REC_SUCCESS" = "True" ] || echo "$RECOMMENDATION_RESPONSE" | grep -q '"success": true'; then
+if echo "$RECOMMENDATION_RESPONSE" | grep -q '"success": true'; then
     echo -e "${GREEN}✅ Agent recommendation generated successfully${NC}"
     
     # Check if response contains model info
@@ -128,9 +124,7 @@ echo "$MEXICO_RESPONSE" | python3 -m json.tool
 echo ""
 
 # Check for success field
-MEXICO_SUCCESS=$(echo "$MEXICO_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('success', False))" 2>/dev/null || echo "false")
-
-if [ "$MEXICO_SUCCESS" = "True" ] || echo "$MEXICO_RESPONSE" | grep -q '"success": true'; then
+if echo "$MEXICO_RESPONSE" | grep -q '"success": true'; then
     echo -e "${GREEN}✅ Mexico network data loaded successfully${NC}"
     
     # Extract some analytics

@@ -364,7 +364,8 @@ async def get_agent_recommendation(request: Dict[str, Any]):
     Request body:
     {
         "orchard_id": "orchard_A",  # Optional - can be municipality ID or synthetic orchard ID
-        "municipality_name": "Tancítaro"  # Optional - municipality name
+        "municipality_name": "Tancítaro",  # Optional - municipality name
+        "command": "Give recommendation"  # Optional - natural language command
     }
     
     If no orchard/municipality specified, defaults to highest-risk municipality
@@ -375,12 +376,19 @@ async def get_agent_recommendation(request: Dict[str, Any]):
         
         orchard_id = request.get("orchard_id")
         municipality_name = request.get("municipality_name")
+        command = request.get("command", "")
         
-        # Get orchard context from Mexico network
+        # Get orchard context from Mexico network (never uses orchards.json)
         context = get_orchard_context_for_agent(orchard_id, municipality_name)
         
         if context.get("type") == "error":
-            raise HTTPException(status_code=404, detail=context.get("error", "Orchard not found"))
+            # Return error response instead of raising exception
+            return {
+                "success": False,
+                "error": context.get("error", "Orchard not found"),
+                "message": "Could not find orchard data. Using Mexico avocado network as source of truth.",
+                "mode": "error"
+            }
         
         orchard_data = context.get("data", {})
         
@@ -488,6 +496,14 @@ async def get_amd_status():
         elif config.is_amd_cloud_configured():
             mode = "configured_stub"
         
+        # Set note based on mode
+        if mode == "live":
+            note = "Live AMD MI300X vLLM endpoint configured and reachable; fallback enabled if endpoint fails."
+        elif mode == "configured_stub":
+            note = "AMD Cloud configured; inference running in safe stub mode until AMD_MODEL_ENDPOINT is set."
+        else:
+            note = "Using deterministic stub responses"
+        
         return {
             "success": True,
             "data": {
@@ -503,7 +519,7 @@ async def get_amd_status():
                 "ready_for_testing": connection_status.get("ready_for_testing", False),
                 "vllm_configured": config.is_vllm_configured(),
                 "gpu_enabled": config.AMD_GPU_ENABLED,
-                "note": "AMD Cloud configured; inference running in safe stub mode until AMD_MODEL_ENDPOINT is set." if mode == "configured_stub" else "Using deterministic stub responses"
+                "note": note
             },
         }
     except Exception as e:
