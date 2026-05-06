@@ -93,7 +93,11 @@ class AMDModelClient:
         
         try:
             # Construct OpenAI-compatible request
-            url = f"{self.model_endpoint}/v1/chat/completions"
+            # AMD_MODEL_ENDPOINT should be full URL like http://localhost:8000/v1/chat/completions
+            url = self.model_endpoint
+            if not url.endswith('/v1/chat/completions'):
+                url = f"{url}/v1/chat/completions" if not url.endswith('/') else f"{url}v1/chat/completions"
+            
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.api_key}"
@@ -128,6 +132,63 @@ class AMDModelClient:
         except Exception as e:
             print(f"❌ vLLM call failed: {e}")
             return None
+    
+    def generate_text(
+        self,
+        prompt: str,
+        temperature: float = 0.2,
+        max_tokens: int = 500
+    ) -> Dict[str, Any]:
+        """
+        Generate text from a prompt using vLLM
+        
+        Args:
+            prompt: Text prompt
+            temperature: Sampling temperature (default 0.2 for more deterministic)
+            max_tokens: Maximum tokens to generate
+        
+        Returns:
+            Dict with success, text, model info, or error
+        """
+        if not self.is_configured or not REQUESTS_AVAILABLE:
+            return {
+                "success": False,
+                "error": "AMD vLLM endpoint not configured",
+                "mode": "stub"
+            }
+        
+        try:
+            messages = [
+                {"role": "system", "content": "You are an expert avocado orchard advisor. Provide concise, actionable recommendations."},
+                {"role": "user", "content": prompt}
+            ]
+            
+            response_text = self._call_vllm_chat_completion(messages, temperature, max_tokens)
+            
+            if response_text:
+                return {
+                    "success": True,
+                    "text": response_text,
+                    "model": self.model_name,
+                    "provider": f"{self.gpu_target} vLLM",
+                    "mode": "live",
+                    "fallback_used": False
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": "vLLM call returned no content",
+                    "mode": "stub",
+                    "fallback_used": True
+                }
+        
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "mode": "stub",
+                "fallback_used": True
+            }
     
     def generate_recommendation(
         self,

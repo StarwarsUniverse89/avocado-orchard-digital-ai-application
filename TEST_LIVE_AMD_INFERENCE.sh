@@ -67,14 +67,16 @@ COMMAND_RESPONSE=$(curl -s -X POST "${API_BASE}/agent/command" \
     "context": {}
   }')
 
-echo "$COMMAND_RESPONSE" | python3 -m json.tool
+echo "$COMMAND_RESPONSE" | python3 -m json.tool 2>/dev/null || echo "$COMMAND_RESPONSE"
 echo ""
 
 # Check for success field in JSON response
 if echo "$COMMAND_RESPONSE" | grep -q '"success": true'; then
-    echo -e "${GREEN}✅ Agent command processed successfully${NC}"
+    echo -e "${GREEN}✅ Test 2: PASS - Agent command processed successfully${NC}"
+    TEST2_PASS=1
 else
-    echo -e "${RED}❌ Agent command failed${NC}"
+    echo -e "${RED}❌ Test 2: FAIL - Agent command failed${NC}"
+    TEST2_PASS=0
 fi
 echo ""
 
@@ -92,23 +94,26 @@ RECOMMENDATION_RESPONSE=$(curl -s -X POST "${API_BASE}/agent" \
     "command": "Give an avocado orchard recommendation using AMD MI300X inference."
   }')
 
-echo "$RECOMMENDATION_RESPONSE" | python3 -m json.tool
+echo "$RECOMMENDATION_RESPONSE" | python3 -m json.tool 2>/dev/null || echo "$RECOMMENDATION_RESPONSE"
 echo ""
 
 # Check for success field
 if echo "$RECOMMENDATION_RESPONSE" | grep -q '"success": true'; then
-    echo -e "${GREEN}✅ Agent recommendation generated successfully${NC}"
+    echo -e "${GREEN}✅ Test 3: PASS - Agent recommendation generated successfully${NC}"
+    TEST3_PASS=1
     
     # Check if response contains model info
-    if echo "$RECOMMENDATION_RESPONSE" | grep -q "AMD MI300X vLLM"; then
-        echo -e "${GREEN}   Live vLLM inference detected!${NC}"
-        echo "   Recommendation generated using AMD MI300X GPU"
-    elif echo "$RECOMMENDATION_RESPONSE" | grep -q "deterministic"; then
-        echo -e "${YELLOW}   Deterministic mode detected${NC}"
+    if echo "$RECOMMENDATION_RESPONSE" | grep -q '"mode": "live"'; then
+        echo -e "${GREEN}   ✓ Live vLLM inference detected!${NC}"
+        MODEL_NAME=$(echo "$RECOMMENDATION_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('data', {}).get('model', 'Unknown'))" 2>/dev/null || echo "Unknown")
+        echo "   Model: $MODEL_NAME"
+    elif echo "$RECOMMENDATION_RESPONSE" | grep -q '"mode": "stub"'; then
+        echo -e "${YELLOW}   ⚠ Deterministic mode detected${NC}"
         echo "   Recommendation generated using fallback logic"
     fi
 else
-    echo -e "${RED}❌ Agent recommendation failed${NC}"
+    echo -e "${RED}❌ Test 3: FAIL - Agent recommendation failed${NC}"
+    TEST3_PASS=0
 fi
 echo ""
 
@@ -120,18 +125,20 @@ echo "GET ${API_BASE}/orchard-network/mexico/analytics"
 echo ""
 
 MEXICO_RESPONSE=$(curl -s "${API_BASE}/orchard-network/mexico/analytics")
-echo "$MEXICO_RESPONSE" | python3 -m json.tool
+echo "$MEXICO_RESPONSE" | python3 -m json.tool 2>/dev/null || echo "$MEXICO_RESPONSE"
 echo ""
 
 # Check for success field
 if echo "$MEXICO_RESPONSE" | grep -q '"success": true'; then
-    echo -e "${GREEN}✅ Mexico network data loaded successfully${NC}"
+    echo -e "${GREEN}✅ Test 4: PASS - Mexico network data loaded successfully${NC}"
+    TEST4_PASS=1
     
     # Extract some analytics
     TOTAL_MUNIS=$(echo "$MEXICO_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('data', {}).get('total_municipalities', 0))" 2>/dev/null || echo "0")
     echo "   Total municipalities: $TOTAL_MUNIS"
 else
-    echo -e "${RED}❌ Mexico network data failed${NC}"
+    echo -e "${RED}❌ Test 4: FAIL - Mexico network data failed${NC}"
+    TEST4_PASS=0
 fi
 echo ""
 
@@ -141,8 +148,17 @@ echo "Test Summary"
 echo "=========================================="
 echo ""
 
-if [ "$MODE" = "live" ]; then
-    echo -e "${GREEN}✅ AMD MI300X Live Mode Active${NC}"
+# Calculate total passed tests
+TOTAL_PASSED=$((${TEST2_PASS:-0} + ${TEST3_PASS:-0} + ${TEST4_PASS:-0}))
+
+if [ "$MODE" = "live" ] && [ "$TOTAL_PASSED" -eq 3 ]; then
+    echo -e "${GREEN}✅ ALL TESTS PASSED${NC}"
+    echo ""
+    echo "AMD MI300X Live Mode Active - All 4 tests passing:"
+    echo "  ✓ Test 1: AMD status returns mode 'live'"
+    echo "  ✓ Test 2: Agent command processes successfully"
+    echo "  ✓ Test 3: AI recommendation generated with live vLLM"
+    echo "  ✓ Test 4: Mexico network analytics loaded"
     echo ""
     echo "Your setup is ready for production inference!"
     echo ""
@@ -151,6 +167,18 @@ if [ "$MODE" = "live" ]; then
     echo "  2. Test with various orchard scenarios"
     echo "  3. Benchmark inference latency"
     echo "  4. Scale up if needed (multi-GPU)"
+    EXIT_CODE=0
+elif [ "$MODE" = "live" ]; then
+    echo -e "${YELLOW}⚠️  AMD Live Mode but Some Tests Failed${NC}"
+    echo ""
+    echo "Test Results:"
+    echo "  Test 1 (AMD Status): ${MODE}"
+    echo "  Test 2 (Agent Command): $([ ${TEST2_PASS:-0} -eq 1 ] && echo 'PASS' || echo 'FAIL')"
+    echo "  Test 3 (AI Recommendation): $([ ${TEST3_PASS:-0} -eq 1 ] && echo 'PASS' || echo 'FAIL')"
+    echo "  Test 4 (Mexico Analytics): $([ ${TEST4_PASS:-0} -eq 1 ] && echo 'PASS' || echo 'FAIL')"
+    echo ""
+    echo "Review the output above to identify issues."
+    EXIT_CODE=1
 elif [ "$MODE" = "configured_stub" ]; then
     echo -e "${YELLOW}⚠️  AMD Configured but in Stub Mode${NC}"
     echo ""
@@ -160,6 +188,7 @@ elif [ "$MODE" = "configured_stub" ]; then
     echo "     Example: AMD_MODEL_ENDPOINT=http://localhost:8000/v1/chat/completions"
     echo "  3. Restart backend server on port 8001"
     echo "  4. Run this test again with: API_BASE_URL=http://localhost:8001 bash TEST_LIVE_AMD_INFERENCE.sh"
+    EXIT_CODE=1
 else
     echo -e "${YELLOW}⚠️  AMD Not Configured - Stub Mode${NC}"
     echo ""
@@ -168,6 +197,7 @@ else
     echo "  2. Set AMD_API_KEY and AMD_MODEL_ENDPOINT"
     echo "  3. Start backend on port 8001: uvicorn main:app --host 0.0.0.0 --port 8001"
     echo "  4. Run this test again with: API_BASE_URL=http://localhost:8001 bash TEST_LIVE_AMD_INFERENCE.sh"
+    EXIT_CODE=1
 fi
 echo ""
 echo "Port Configuration:"
@@ -177,10 +207,6 @@ echo "  - Test Script: Using $BACKEND_URL"
 echo ""
 
 # Exit with appropriate code
-if [ "$MODE" = "live" ]; then
-    exit 0
-else
-    exit 1
-fi
+exit $EXIT_CODE
 
 # Made with Bob

@@ -400,7 +400,7 @@ async def get_agent_recommendation(request: Dict[str, Any]):
                 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'ml', 'inference'))
                 from amd_model_client import amd_client
                 
-                # Prepare prompt for AMD model
+                # Prepare prompt for AMD model with Mexico context
                 prompt = f"""You are an expert avocado orchard advisor. Analyze this orchard data and provide actionable recommendations.
 
 Orchard: {orchard_data.get('name', orchard_data.get('id', 'Unknown'))}
@@ -408,9 +408,9 @@ Location: {orchard_data.get('state', 'Michoacán')}, Mexico
 NDVI: {orchard_data.get('ndvi_average', orchard_data.get('ndvi', 0.7))}
 Stress Level: {orchard_data.get('stress_level', 'medium')}
 Estimated Hectares: {orchard_data.get('estimated_hectares', 'N/A')}
-Soil Moisture: {orchard_data.get('soil_moisture', 'N/A')}%
-Temperature: {orchard_data.get('temperature', 'N/A')}°C
-Projected Profit: ${orchard_data.get('projected_profit_usd', 'N/A'):,}
+Soil Moisture: {orchard_data.get('soil_moisture', 60)}%
+Temperature: {orchard_data.get('temperature', 25)}°C
+Projected Profit: ${orchard_data.get('projected_profit_usd', 0):,}
 
 Provide a concise recommendation focusing on:
 1. Most critical action needed
@@ -419,8 +419,8 @@ Provide a concise recommendation focusing on:
 
 Keep response under 150 words."""
 
-                # Call AMD model
-                amd_response = amd_client.generate_text(prompt, max_tokens=200)
+                # Call AMD model with temperature 0.2 for more deterministic output
+                amd_response = amd_client.generate_text(prompt, temperature=0.2, max_tokens=500)
                 
                 if amd_response and amd_response.get("success"):
                     return {
@@ -429,10 +429,11 @@ Keep response under 150 words."""
                             "orchard_id": orchard_id or orchard_data.get("id"),
                             "orchard_name": orchard_data.get("name"),
                             "recommendation": amd_response.get("text", ""),
-                            "model": "AMD MI300X vLLM",
-                            "model_name": config.MODEL_NAME,
+                            "model": amd_response.get("model", config.MODEL_NAME),
+                            "provider": amd_response.get("provider", "AMD MI300X vLLM"),
                             "context": context,
                             "mode": "live",
+                            "fallback_used": False,
                         }
                     }
             except Exception as e:
