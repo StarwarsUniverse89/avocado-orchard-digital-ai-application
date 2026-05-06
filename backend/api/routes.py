@@ -297,6 +297,34 @@ async def get_satellite(orchard_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/satellite/{orchard_id}/ndvi", tags=["Satellite"])
+async def get_ndvi_timeseries(orchard_id: str, days: int = 30):
+    """Get NDVI time series data for an orchard"""
+    try:
+        from services.satellite_service import get_ndvi_timeseries
+        data = get_ndvi_timeseries(orchard_id, days)
+        return {
+            "success": True,
+            "data": data,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/satellite/{orchard_id}/heatmap", tags=["Satellite"])
+async def get_stress_heatmap_data(orchard_id: str):
+    """Get stress heatmap data for an orchard"""
+    try:
+        from services.satellite_service import get_stress_heatmap
+        data = get_stress_heatmap(orchard_id)
+        return {
+            "success": True,
+            "data": data,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Vision endpoints
 @router.get("/vision/{orchard_id}", tags=["Vision"])
 async def get_vision_analysis(orchard_id: str):
@@ -356,24 +384,35 @@ async def get_agent_recommendation(request: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# AMD Status endpoint
+# AMD Cloud API Status endpoint
 @router.get("/amd/status", tags=["System"])
 async def get_amd_status():
-    """Get AMD GPU and compute status"""
-    return {
-        "success": True,
-        "data": {
-            "gpu_available": True,
-            "gpu_model": "AMD MI300X (Simulated)",
-            "rocm_version": "5.7+",
-            "compute_status": "ready",
-            "vllm_status": "ready",
-            "models_loaded": ["qwen-2.5-stub", "llama-3-stub"],
-            "memory_used_gb": 24.5,
-            "memory_total_gb": 192,
-            "utilization_percent": 12.8,
-        },
-    }
+    """Get AMD Cloud API configuration and status"""
+    try:
+        from core.config import config
+        from ml.inference.amd_model_client import amd_client
+        
+        # Get connection status
+        connection_status = amd_client.test_connection()
+        
+        return {
+            "success": True,
+            "data": {
+                "configured": config.is_amd_cloud_configured(),
+                "api_key_masked": config.get_masked_api_key(config.AMD_API_KEY),
+                "api_url": config.AMD_API_URL,
+                "model_name": config.MODEL_NAME,
+                "endpoint_configured": bool(config.AMD_MODEL_ENDPOINT),
+                "mode": "live" if config.is_amd_cloud_configured() else "stub",
+                "connection_status": connection_status.get("status"),
+                "ready_for_testing": connection_status.get("ready_for_testing", False),
+                "vllm_configured": config.is_vllm_configured(),
+                "gpu_enabled": config.AMD_GPU_ENABLED,
+                "note": "Using stub responses until real AMD Cloud endpoint is tested"
+            },
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error checking AMD status: {str(e)}")
 
 
 # Made with Bob

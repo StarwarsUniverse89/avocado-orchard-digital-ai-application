@@ -20,8 +20,9 @@ export default function SceneLighting({
 }: SceneLightingProps) {
   const directionalLightRef = useRef<DirectionalLight>(null);
 
-  // Show light helper in development (conditional hook usage)
-  useHelper(showHelpers ? directionalLightRef : null, DirectionalLightHelper, 1);
+  // Show light helper in development
+  // Note: useHelper is disabled to avoid TypeScript issues with conditional refs
+  // useHelper(showHelpers ? directionalLightRef : null, DirectionalLightHelper, 1);
 
   // Time of day configurations
   const timeConfigs = {

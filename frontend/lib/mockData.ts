@@ -256,6 +256,10 @@ export interface OrchardSection {
   bounds: { x: number; y: number; width: number; height: number };
   health_status: "healthy" | "warning" | "risk";
   tree_count: number;
+  ndvi: number;
+  stress_level: number; // 0-100, higher is more stress
+  soil_moisture: number;
+  temperature: number;
 }
 
 export const orchardSections: OrchardSection[] = [
@@ -265,6 +269,10 @@ export const orchardSections: OrchardSection[] = [
     bounds: { x: 0, y: 0, width: 50, height: 30 },
     health_status: "healthy",
     tree_count: 45,
+    ndvi: 0.82,
+    stress_level: 15,
+    soil_moisture: 68,
+    temperature: 24.2,
   },
   {
     id: "section-central",
@@ -272,6 +280,10 @@ export const orchardSections: OrchardSection[] = [
     bounds: { x: 0, y: 30, width: 50, height: 30 },
     health_status: "warning",
     tree_count: 52,
+    ndvi: 0.64,
+    stress_level: 42,
+    soil_moisture: 45,
+    temperature: 27.8,
   },
   {
     id: "section-south",
@@ -279,7 +291,79 @@ export const orchardSections: OrchardSection[] = [
     bounds: { x: 0, y: 60, width: 50, height: 30 },
     health_status: "healthy",
     tree_count: 48,
+    ndvi: 0.78,
+    stress_level: 22,
+    soil_moisture: 62,
+    temperature: 25.1,
+  },
+  {
+    id: "section-east",
+    name: "East Section",
+    bounds: { x: 50, y: 0, width: 50, height: 50 },
+    health_status: "healthy",
+    tree_count: 55,
+    ndvi: 0.85,
+    stress_level: 12,
+    soil_moisture: 72,
+    temperature: 23.5,
+  },
+  {
+    id: "section-west",
+    name: "West Section",
+    bounds: { x: 50, y: 50, width: 50, height: 50 },
+    health_status: "risk",
+    tree_count: 38,
+    ndvi: 0.58,
+    stress_level: 65,
+    soil_moisture: 38,
+    temperature: 29.2,
   },
 ];
+
+// Satellite data interface
+export interface SatelliteData {
+  orchard_id: string;
+  timestamp: string;
+  ndvi_average: number;
+  stress_zones: StressZone[];
+  satellite_layer: {
+    type: string;
+    asset: string;
+  };
+}
+
+export interface StressZone {
+  section_id: string;
+  severity: "low" | "medium" | "high";
+  ndvi: number;
+  recommendation: string;
+}
+
+// Generate synthetic satellite data
+export function getSatelliteData(orchardId: string): SatelliteData {
+  const stressZones: StressZone[] = orchardSections
+    .filter(section => section.stress_level > 30)
+    .map(section => ({
+      section_id: section.id,
+      severity: section.stress_level > 60 ? "high" : section.stress_level > 40 ? "medium" : "low",
+      ndvi: section.ndvi,
+      recommendation: section.stress_level > 60
+        ? "Immediate irrigation and inspection required"
+        : "Monitor closely and adjust irrigation schedule",
+    }));
+
+  const avgNdvi = orchardSections.reduce((sum, s) => sum + s.ndvi, 0) / orchardSections.length;
+
+  return {
+    orchard_id: orchardId,
+    timestamp: new Date().toISOString(),
+    ndvi_average: Math.round(avgNdvi * 100) / 100,
+    stress_zones: stressZones,
+    satellite_layer: {
+      type: "aerial",
+      asset: "/assets/ui/avocado_orchard_aerialview.webp",
+    },
+  };
+}
 
 // Made with Bob

@@ -2,9 +2,71 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 backend/venv/
 venv/
+env/
+.Python
+
+# Environment files - NEVER COMMIT THESE
 .env
+backend/.env
+frontend/.env.local
+frontend/.env.production.local
+frontend/.env.development.local
+.env.local
+.env.*.local
 
 # Next.js
 frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.cache/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Model weights (large files)
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+models/
+checkpoints/
+
+# Datasets (large files)
+*.zip
+*.tar.gz
+*.csv
+*.xlsx
+ml/datasets/*.zip
+ml/datasets/*.tar.gz
+
+# Temporary files
+tmp/
+temp/
+*.tmp

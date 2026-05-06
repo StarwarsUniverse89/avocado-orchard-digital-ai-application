@@ -1,7 +1,8 @@
 """
 Knowledge Agent
 AI agent that provides recommendations based on orchard data and research knowledge
-Uses LangGraph for workflow orchestration (future integration)
+Uses AMD Cloud API for LLM-powered recommendations when configured
+Falls back to deterministic logic when AMD Cloud is not available
 """
 
 from typing import Dict, Any, List
@@ -16,6 +17,15 @@ from services.satellite_service import get_satellite_data
 from services.vision_service import analyze_orchard_vision
 from services.yield_service import predict_yield
 from services.financial_service import get_financial_prediction
+
+# Import AMD model client
+try:
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'ml', 'inference'))
+    from amd_model_client import amd_client
+    AMD_CLIENT_AVAILABLE = True
+except ImportError:
+    AMD_CLIENT_AVAILABLE = False
+    print("⚠️  AMD model client not available, using deterministic recommendations")
 
 
 def load_knowledge_base() -> Dict[str, Any]:
@@ -32,7 +42,7 @@ def load_knowledge_base() -> Dict[str, Any]:
         return {}
 
 
-def generate_recommendation(orchard_id: str) -> Dict[str, Any]:
+def generate_recommendation(orchard_id: str, use_amd_client: bool = True) -> Dict[str, Any]:
     """
     Generate AI recommendation for an orchard
     
@@ -43,9 +53,11 @@ def generate_recommendation(orchard_id: str) -> Dict[str, Any]:
     - Yield prediction
     - Financial impact
     - Research knowledge
+    - AMD Cloud LLM (when configured)
     
     Args:
         orchard_id: Orchard identifier
+        use_amd_client: Whether to use AMD model client (default: True)
     
     Returns:
         Structured recommendation with reasoning
@@ -58,6 +70,59 @@ def generate_recommendation(orchard_id: str) -> Dict[str, Any]:
     satellite_data = get_satellite_data(orchard_id)
     vision_data = analyze_orchard_vision(orchard_id)
     yield_data = predict_yield(orchard_id)
+    
+    # Try AMD Cloud client first if available and requested
+    if use_amd_client and AMD_CLIENT_AVAILABLE:
+        try:
+            # Prepare orchard state for AMD client
+            orchard_state = {
+                "orchard_id": orchard_id,
+                "temperature": orchard.get("temperature", 25),
+                "soil_moisture": orchard.get("soil_moisture", 70),
+                "health_status": orchard.get("health_status", "healthy"),
+                "ndvi": satellite_data.get("ndvi_average", 0.75),
+                "leaf_damage": orchard.get("leaf_damage", 5),
+            }
+            
+            context = {
+                "satellite": satellite_data,
+                "vision": vision_data,
+                "yield": yield_data,
+            }
+            
+            # Get AMD recommendation
+            amd_recommendation = amd_client.generate_recommendation(orchard_state, context)
+            
+            # If AMD client returns a recommendation, wrap it in our format
+            if amd_recommendation:
+                return {
+                    "orchard_id": orchard_id,
+                    "recommendations": [{
+                        "id": f"rec_{orchard_id}_amd",
+                        "recommendation": amd_recommendation.get("recommendation"),
+                        "reason": amd_recommendation.get("reason"),
+                        "impact": amd_recommendation.get("impact"),
+                        "confidence": amd_recommendation.get("confidence", 0.85),
+                        "priority": "high" if "increase" in amd_recommendation.get("recommendation", "").lower() else "medium",
+                        "visual_action": amd_recommendation.get("visual_action"),
+                        "research_basis": "AMD Cloud LLM analysis with research knowledge base",
+                        "model": amd_recommendation.get("model", "amd_cloud"),
+                        "amd_cloud_ready": amd_recommendation.get("amd_cloud_ready", False),
+                    }],
+                    "data_sources": {
+                        "orchard_metrics": True,
+                        "satellite_ndvi": True,
+                        "vision_analysis": True,
+                        "yield_prediction": True,
+                        "financial_model": True,
+                        "research_kb": True,
+                        "amd_cloud_llm": amd_recommendation.get("amd_cloud_ready", False),
+                    },
+                    "agent_version": "knowledge_agent_v1.1_amd",
+                    "timestamp": "2026-05-05T00:00:00Z",
+                }
+        except Exception as e:
+            print(f"⚠️  AMD client error: {e}, falling back to deterministic logic")
     
     # Analyze conditions
     temperature = orchard.get("temperature", 25)

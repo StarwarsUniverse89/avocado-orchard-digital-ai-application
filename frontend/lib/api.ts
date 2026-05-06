@@ -114,4 +114,37 @@ export async function getSystemStatus(): Promise<ApiResponse<any>> {
   }
 }
 
+// Get satellite data for an orchard
+export async function getSatelliteData(orchardId: string): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/satellite/${orchardId}`);
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Get NDVI time series
+export async function getNDVITimeseries(orchardId: string, days: number = 30): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/satellite/${orchardId}/ndvi?days=${days}`);
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Get stress heatmap
+export async function getStressHeatmap(orchardId: string): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/satellite/${orchardId}/heatmap`);
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
 // Made with Bob
