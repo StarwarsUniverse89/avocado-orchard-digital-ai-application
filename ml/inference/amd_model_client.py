@@ -3,12 +3,16 @@ AMD Cloud Model Client
 Connects to AMD Cloud API for LLM inference via vLLM
 Supports OpenAI-compatible /v1/chat/completions format
 Returns stub responses if endpoint is not configured or unreachable
+Uses Python standard library urllib (no external dependencies)
 """
 
 import os
 import sys
 from typing import Dict, Any, Optional, List
 import json
+import urllib.request
+import urllib.error
+import urllib.parse
 
 # Add backend to path for config import
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'backend'))
@@ -19,14 +23,6 @@ try:
 except ImportError:
     CONFIG_AVAILABLE = False
     print("⚠️  Config not available, using environment variables directly")
-
-# Try to import requests for HTTP calls
-try:
-    import requests
-    REQUESTS_AVAILABLE = True
-except ImportError:
-    REQUESTS_AVAILABLE = False
-    print("⚠️  requests library not available, using stub mode only")
 
 
 class AMDModelClient:
@@ -48,7 +44,7 @@ class AMDModelClient:
             self.gpu_target = os.getenv("AMD_GPU_TARGET", "AMD MI300X")
         
         self.is_configured = bool(self.api_key and self.model_endpoint)
-        self.mode = "live" if self.is_configured and REQUESTS_AVAILABLE else "stub"
+        self.mode = "live" if self.is_configured else "stub"
         
         if not self.is_configured:
             print("⚠️  AMD Cloud vLLM endpoint not configured")
@@ -59,12 +55,9 @@ class AMDModelClient:
             print("   4. Set AMD_MODEL_NAME (default: Qwen/Qwen2.5-7B-Instruct)")
             print("   5. Never commit backend/.env to git")
             print("   Using deterministic stub responses for now...")
-        elif not REQUESTS_AVAILABLE:
-            print("⚠️  requests library not installed, using stub mode")
-            print("   Install with: pip install requests")
     
     def get_masked_key(self) -> str:
-        """Return masked API key for safe logging"""
+        """Return masked API key for safe logging (never expose full key)"""
         if not self.api_key:
             return "NOT_SET"
         if len(self.api_key) < 8:
@@ -79,6 +72,7 @@ class AMDModelClient:
     ) -> Optional[str]:
         """
         Call vLLM server using OpenAI-compatible /v1/chat/completions format
+        Uses Python standard library urllib (no external dependencies)
         
         Args:
             messages: List of chat messages [{"role": "system/user/assistant", "content": "..."}]
@@ -88,7 +82,7 @@ class AMDModelClient:
         Returns:
             Generated text or None if call fails
         """
-        if not self.is_configured or not REQUESTS_AVAILABLE:
+        if not self.is_configured:
             return None
         
         try:
@@ -98,10 +92,7 @@ class AMDModelClient:
             if not url.endswith('/v1/chat/completions'):
                 url = f"{url}/v1/chat/completions" if not url.endswith('/') else f"{url}v1/chat/completions"
             
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}"
-            }
+            # Prepare payload
             payload = {
                 "model": self.model_name,
                 "messages": messages,
@@ -110,24 +101,41 @@ class AMDModelClient:
                 "stream": False
             }
             
+            # Convert payload to JSON bytes
+            data = json.dumps(payload).encode('utf-8')
+            
+            # Create request with headers (do not log API key)
+            req = urllib.request.Request(
+                url,
+                data=data,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.api_key}"
+                },
+                method='POST'
+            )
+            
             print(f"🚀 Calling vLLM endpoint: {url}")
             print(f"   Model: {self.model_name}")
             print(f"   GPU: {self.gpu_target}")
             
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
-            response.raise_for_status()
+            # Make request with 30 second timeout
+            with urllib.request.urlopen(req, timeout=30) as response:
+                response_data = response.read().decode('utf-8')
+                result = json.loads(response_data)
+                content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+                
+                print(f"✅ vLLM inference successful")
+                return content
             
-            result = response.json()
-            content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-            
-            print(f"✅ vLLM inference successful")
-            return content
-            
-        except requests.exceptions.Timeout:
-            print(f"⏱️  vLLM request timeout after 30s")
+        except urllib.error.HTTPError as e:
+            print(f"❌ vLLM HTTP error {e.code}: {e.reason}")
             return None
-        except requests.exceptions.ConnectionError:
-            print(f"🔌 Cannot connect to vLLM endpoint: {self.model_endpoint}")
+        except urllib.error.URLError as e:
+            print(f"🔌 Cannot connect to vLLM endpoint: {e.reason}")
+            return None
+        except TimeoutError:
+            print(f"⏱️  vLLM request timeout after 30s")
             return None
         except Exception as e:
             print(f"❌ vLLM call failed: {e}")
@@ -150,7 +158,7 @@ class AMDModelClient:
         Returns:
             Dict with success, text, model info, or error
         """
-        if not self.is_configured or not REQUESTS_AVAILABLE:
+        if not self.is_configured:
             return {
                 "success": False,
                 "error": "AMD vLLM endpoint not configured",
@@ -206,7 +214,7 @@ class AMDModelClient:
             AI recommendation with reasoning and impact prediction
         """
         # Try live vLLM inference first if configured
-        if self.is_configured and REQUESTS_AVAILABLE:
+        if self.is_configured:
             try:
                 # Prepare prompt for LLM
                 system_prompt = """You are an expert agricultural AI advisor specializing in avocado orchard management.
