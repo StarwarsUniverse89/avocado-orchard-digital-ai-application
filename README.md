@@ -2,127 +2,243 @@
 
 ## Overview
 
-This project is a high-performance AI agent system that models avocado orchards as a digital twin, enabling real-time analysis, simulation, and decision-making with satellite-based orchard detection capabilities.
+**Avocado Orchard Digital AI** is an AI-powered digital twin command center for avocado orchards. The application helps growers, operators, and agricultural teams scan avocado-producing regions, detect orchard parcel candidates, archive orchard records, analyze production and risk, and generate 3D digital twin views for decision support.
 
-It combines:
+This project was built as a solo submission for the **AMD AI Developer Challenge**. It demonstrates how AMD GPU infrastructure can support live AI inference, geospatial intelligence, orchard risk analysis, and a vision-to-3D simulation workflow.
 
-- **Interactive digital twin visualization** with Cesium globe integration
-- **AI-driven decision support** with natural language commands
-- **Satellite-based orchard detection** using NDVI and ML analysis
-- **Research-based simulation models** for yield prediction
-- **GPU-accelerated computation** on AMD MI300X infrastructure
-- **Vision/3D analysis pipeline** for tree-level insights
+The current implementation focuses on the Michoacán avocado belt in Mexico and combines:
+
+- Cesium-based geospatial visualization
+- FastAPI backend services
+- AMD MI300X vLLM inference
+- Qwen3-32B AI advisor support
+- Orchard detection and archive workflows
+- PostgreSQL-ready orchard persistence
+- Financial and analytics summaries
+- Vision/3D analysis and digital twin generation
 
 ---
 
 ## Key Features
 
-### 🌍 Globe View & Orchard Network
-- Interactive Cesium globe showing Mexico's Michoacán avocado belt
-- Real-time municipality and orchard visualization
-- Stress level indicators and production metrics
-- Synthetic orchard network generation
+### 🌍 Cesium Geospatial Command Center
+
+- Interactive Cesium globe focused on the Michoacán avocado belt
+- Municipality navigation for avocado-producing regions
+- Production cluster visualization
+- Orchard parcel polygon rendering
+- Stress-level color coding
+- GPS boundary and area display
 
 ### 🛰️ Orchard Detection Pipeline
-- **Satellite imagery analysis** for orchard parcel detection
-- **NDVI-based vegetation analysis** with stress level classification
-- **Boundary detection** with GPS coordinate mapping
-- **Tree count estimation** using crown density analysis
-- **Orchard archive system** for saving detected parcels
-- **Vision/3D analysis** for detailed tree-level metrics
 
-### 🤖 AI Command Center
-- Natural language command interface
-- Commands for navigation, scanning, and analysis
-- Automated orchard detection workflows
-- Real-time recommendations and insights
+The orchard detection workflow allows users to select a municipality or region and scan for orchard parcel candidates.
 
-### 🎮 3D Digital Twin
-- Tree-level visualization with health indicators
-- Scenario simulation (weather, soil moisture, pest impact)
-- Before/after comparison views
-- GPU-accelerated rendering
+Detected parcels include:
 
-### 📊 Analytics & Predictions
-- Financial impact analysis
-- Yield forecasting
-- Risk assessment
-- Network-wide analytics summaries
+- Archive ID
+- Orchard ID
+- Municipality ID
+- GPS center coordinates
+- Boundary coordinates
+- Estimated hectares and acres
+- Estimated tree count
+- NDVI average
+- Stress level
+- Confidence score
+- Detection method
+- Imagery source
+
+The detection pipeline is model-ready and supports fallback detection if satellite imagery, SAMGeo, OpenCV, or custom model dependencies are unavailable.
+
+### 🗄️ Orchard Archive and Network System
+
+Detected orchard parcels can be saved to an archive for future use. The archive is designed to support PostgreSQL persistence when `DATABASE_URL` is configured, with JSON fallback for local/demo use.
+
+The archive system enables:
+
+- Saving detected orchards
+- Loading previously scanned orchards
+- Selecting archived parcels
+- Creating company/grower orchard networks
+- Running analytics on a single orchard, municipality, or network
+
+### 🤖 AI Advisor
+
+The AI Advisor converts natural language into application workflows and UI actions.
+
+Example commands:
+
+```text
+show highest production municipality
+scan Tancítaro for orchards
+select largest orchard candidate
+show financial impact
+create analytics summary
+compare Tancítaro and Uruapan
+run vision pipeline
+generate 3D twin from selected orchard
+```
+
+The AI Advisor is powered by a live AMD MI300X vLLM endpoint running **Qwen3-32B** for reasoning, command interpretation, and grower recommendations.
+
+### 🎮 3D Digital Twin Workflow
+
+Selected orchard parcels can be passed into the Vision/3D pipeline to generate digital twin parameters such as:
+
+- Canopy volume
+- Estimated fruit count
+- Average fruit size
+- Tree height
+- Trunk diameter
+- Branch density
+- Health status
+- Stress color
+- Visual 3D parameters
+
+The 3D twin workflow supports interactive orchard visualization and scenario-based decision support.
+
+### 📊 Financial and Analytics Intelligence
+
+The application supports context-aware analytics for:
+
+- Selected orchard parcels
+- Archived orchards
+- Municipalities
+- Full Mexico avocado network
+- Company orchard networks
+
+Analytics include:
+
+- Total hectares
+- Estimated tree count
+- NDVI
+- Stress level
+- Production rank
+- Projected profit at risk
+- Financial impact
+- Recommended next actions
 
 ---
 
 ## Architecture
 
-### Frontend Stack
-- **Next.js 14** - React framework with App Router
-- **Cesium** - 3D globe and geospatial visualization
-- **Three.js** - 3D orchard scene rendering
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first styling
+```text
+Frontend: Next.js + Cesium + React/Three.js
+        |
+        | HTTP API
+        v
+Backend: FastAPI on port 8001
+        |
+        | OpenAI-compatible API
+        v
+vLLM: Qwen3-32B on AMD MI300X, port 8000
+        |
+        v
+AI Advisor + Orchard Reasoning
 
-### Backend Stack
-- **FastAPI** - High-performance Python API (Port 8001)
-- **vLLM** - LLM inference server (Port 8000)
-- **AMD MI300X GPU** - Hardware acceleration
-- **ROCm** - AMD GPU compute platform
+Backend Services:
+- Mexico avocado network service
+- Orchard detection service
+- Satellite imagery service
+- Orchard archive service
+- Company orchard network service
+- Vision/3D analysis service
+- Financial and yield services
 
-### ML/AI Layer
-- **Orchard Detection** - NDVI analysis + ML classification
-- **Vision/3D Analysis** - Tree detection and health assessment
-- **Knowledge Agent** - Research-grounded recommendations
-- **LLM Integration** - Qwen3-32B (primary) / Qwen2.5-32B-Instruct (fallback) on AMD MI300X
+Persistence:
+- PostgreSQL when DATABASE_URL is configured
+- JSON fallback for local/demo mode
+```
 
 ---
 
-## Quick Start
+## Technology Stack
 
-### Prerequisites
-- Node.js 18+
-- Python 3.10+
-- AMD GPU with ROCm (optional, falls back to CPU)
+### Frontend
 
-### Frontend Setup
-```bash
-cd frontend
-npm install
-cp .env.example .env.local
-# Add your Cesium Ion token to .env.local
-npm run dev
-```
+- **Next.js** - React application framework
+- **TypeScript** - Type-safe frontend development
+- **Cesium** - 3D globe and geospatial visualization
+- **Three.js / React Three Fiber** - 3D orchard digital twin rendering
+- **Tailwind CSS** - UI styling
+- **AI Advisor UI** - Natural language workflow controller
 
-Frontend runs on: http://localhost:3000
+### Backend
 
-### Backend Setup
-```bash
-cd backend
-pip install -r requirements.txt
-cp .env.example .env
-# Configure AMD API key if using AMD Cloud
-uvicorn main:app --reload --port 8001
-```
+- **FastAPI** - Python API server
+- **SQLAlchemy** - PostgreSQL ORM layer
+- **PostgreSQL** - Orchard archive and network persistence
+- **vLLM** - OpenAI-compatible LLM serving
+- **AMD MI300X** - GPU inference infrastructure
+- **ROCm** - AMD GPU compute platform
 
-Backend API runs on: http://localhost:8001
+### AI / ML
 
-### Environment Variables
+- **Qwen/Qwen3-32B** - Primary AI Advisor model
+- **Qwen/Qwen2.5-32B-Instruct** - Fallback model
+- **Orchard detection service** - Parcel detection and fallback logic
+- **Vision/3D analysis service** - Tree-level simulation and digital twin parameters
+- **NDVI/stress estimation** - Crop health and risk indicators
 
-**Frontend (.env.local):**
-```
-NEXT_PUBLIC_CESIUM_ION_TOKEN=your_cesium_token
+---
+
+## Ports
+
+| Service | Port |
+|---|---:|
+| Frontend | 3000 |
+| vLLM model server | 8000 |
+| FastAPI backend | 8001 |
+| PostgreSQL | 5432 |
+
+---
+
+## Environment Variables
+
+### Frontend: `frontend/.env.local`
+
+```env
 NEXT_PUBLIC_API_URL=http://localhost:8001
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8001
+NEXT_PUBLIC_MAP_PROVIDER=cesium
+NEXT_PUBLIC_CESIUM_ION_TOKEN=your_cesium_token_here
 ```
 
-**Backend (.env):**
-```
-AMD_API_KEY=your_amd_api_key
+### Backend: `backend/.env`
+
+```env
+ENVIRONMENT=development
+API_HOST=0.0.0.0
+API_PORT=8001
+
+AMD_API_KEY=your_amd_api_key_here
+AMD_API_URL=https://api.amd.cloud/v1
 AMD_MODEL_ENDPOINT=http://localhost:8000/v1/chat/completions
 AMD_MODEL_NAME=Qwen/Qwen3-32B
 AMD_GPU_TARGET=AMD MI300X
-VLLM_ENDPOINT=http://localhost:8000
+
+VLLM_API_URL=http://localhost:8000
+VLLM_MODEL_NAME=Qwen/Qwen3-32B
+VLLM_ENABLED=true
+
+AMD_GPU_ENABLED=true
+MODEL_NAME=Qwen/Qwen3-32B
+
+DATABASE_URL=postgresql://avocado_user:<password>@localhost:5432/avocado_ai
+LOG_LEVEL=INFO
 ```
 
-### vLLM Model Configuration
+Do not commit `.env` or `.env.local` files.
 
-**Primary Model: Qwen3-32B** (Recommended for AMD MI300X)
+---
+
+## Running the Application
+
+### 1. Start vLLM on the AMD MI300X droplet
+
+Primary model:
+
 ```bash
 python -m vllm.entrypoints.openai.api_server \
   --model Qwen/Qwen3-32B \
@@ -131,7 +247,8 @@ python -m vllm.entrypoints.openai.api_server \
   --max-model-len 32768
 ```
 
-**Fallback Model: Qwen2.5-32B-Instruct**
+Fallback model:
+
 ```bash
 python -m vllm.entrypoints.openai.api_server \
   --model Qwen/Qwen2.5-32B-Instruct \
@@ -140,171 +257,299 @@ python -m vllm.entrypoints.openai.api_server \
   --max-model-len 32768
 ```
 
-**LLM Usage:**
-The LLM handles agent reasoning and command interpretation:
-- Natural language command parsing
-- UI/backend action selection
-- Orchard detection result summarization
-- Vision/3D analysis explanation
-- Financial impact reasoning
-- Grower action recommendations
+### 2. Start the FastAPI backend on the droplet
 
-**Note:** Orchard detection uses dedicated computer vision services, not the LLM:
-- `orchard_detection_service` - Detection pipeline coordination
-- `satellite_imagery_service` - Satellite data processing
-- `orchard_detector` - NDVI analysis and ML classification
-- `vision_3d_analysis_service` - Tree-level 3D analysis
+```bash
+cd ~/avocado-orchard-digital-ai-application/backend
+source venv/bin/activate
+uvicorn main:app --host 0.0.0.0 --port 8001
+```
+
+### 3. Open SSH tunnel from local machine
+
+```bash
+ssh -i ~/.ssh/amd_cloud_key \
+  -L 8000:localhost:8000 \
+  -L 8001:localhost:8001 \
+  root@<droplet-ip>
+```
+
+### 4. Verify AMD backend status
+
+```bash
+curl http://localhost:8001/api/v1/amd/status
+```
+
+Expected response includes:
+
+```json
+{
+  "mode": "live",
+  "model_name": "Qwen/Qwen3-32B",
+  "gpu_target": "AMD MI300X"
+}
+```
+
+### 5. Start frontend locally
+
+```bash
+cd ~/avocado-orchard-digital-ai-application/frontend
+npm install
+rm -rf .next
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:3000/command-center
+```
 
 ---
 
-## Usage Guide
+## PostgreSQL Setup
 
-### 1. Globe View Navigation
-- View the Michoacán avocado belt and municipalities
-- Click municipalities to zoom in
-- See production metrics and stress levels
+On the droplet:
 
-### 2. Orchard Detection
-```
-Commands:
-- "Scan Tancítaro for orchards"
-- "Detect orchard parcels near Uruapan"
-- "Select largest orchard candidate"
-- "Select highest stress parcel"
+```bash
+apt update
+apt install postgresql postgresql-contrib -y
+sudo -u postgres psql
 ```
 
-When a municipality is selected, click **"Scan Area for Orchards"** to:
-- Analyze satellite imagery
-- Detect orchard boundaries
-- Calculate NDVI and stress levels
-- Estimate tree counts and area
+Inside `psql`:
 
-### 3. Orchard Analysis
-After detection, click on any orchard parcel to:
-- View detailed metrics (GPS, area, trees, NDVI, stress)
-- **Save to Archive** - Store for future reference
-- **Run Vision/3D Analysis** - Get tree-level insights
-- **Generate 3D Twin** - Create interactive 3D view
-
-### 4. AI Commands
-Use natural language in the AI Advisor panel:
+```sql
+CREATE DATABASE avocado_ai;
+CREATE USER avocado_user WITH PASSWORD 'your_secure_password';
+GRANT ALL PRIVILEGES ON DATABASE avocado_ai TO avocado_user;
+\q
 ```
-Navigation:
-- "Navigate to Tancítaro"
-- "Show highest production municipality"
-- "Find highest stress orchard in the avocado belt"
 
-Detection:
-- "Scan Uruapan for orchards"
-- "Save selected orchard to archive"
-- "Run vision pipeline"
-- "Generate 3D twin from selected orchard"
+Grant schema permissions:
 
-Analysis:
-- "Show financial impact"
-- "Create analytics summary"
-- "Compare Tancítaro and Uruapan"
+```bash
+sudo -u postgres psql -d avocado_ai
 ```
+
+```sql
+GRANT ALL ON SCHEMA public TO avocado_user;
+ALTER SCHEMA public OWNER TO avocado_user;
+\q
+```
+
+Test connection:
+
+```bash
+psql "postgresql://avocado_user:<password>@localhost:5432/avocado_ai" -c "\dt"
+```
+
+---
+
+## Main Demo Workflow
+
+1. Open the command center.
+2. Confirm AMD status shows live MI300X inference.
+3. Type:
+
+```text
+show highest production municipality
+```
+
+4. The globe navigates to Tancítaro.
+5. Type:
+
+```text
+scan Tancítaro for orchards
+```
+
+6. The system scans the municipality and displays orchard parcel polygons.
+7. Select an orchard parcel.
+8. View GPS, area, trees, NDVI, stress, confidence, and archive ID.
+9. Type:
+
+```text
+show financial impact
+```
+
+10. Review parcel-level financial risk.
+11. Type:
+
+```text
+create analytics summary
+```
+
+12. Review parcel, municipality, or network analytics.
+13. Type:
+
+```text
+run vision pipeline
+```
+
+14. Generate Vision/3D analysis.
+15. Type:
+
+```text
+generate 3D twin from selected orchard
+```
+
+16. View the orchard digital twin.
 
 ---
 
 ## API Endpoints
 
+### AMD / AI
+
+```text
+GET  /api/v1/amd/status
+POST /api/v1/agent
+POST /api/v1/agent/command
+```
+
+### Mexico Orchard Network
+
+```text
+GET /api/v1/orchard-network/mexico
+GET /api/v1/orchard-network/mexico/analytics
+```
+
 ### Orchard Detection
-- `POST /api/v1/orchard-detection/scan-municipality` - Scan municipality for orchards
-- `POST /api/v1/orchard-detection/scan-area` - Scan specific area
-- `GET /api/v1/orchard-detection/status` - Get detection status
+
+```text
+GET  /api/v1/orchard-detection/status
+POST /api/v1/orchard-detection/scan-municipality
+POST /api/v1/orchard-detection/scan-area
+POST /api/v1/orchard-detection/from-upload
+```
 
 ### Orchard Archive
-- `GET /api/v1/orchard-archive` - List archived orchards
-- `POST /api/v1/orchard-archive` - Save orchard to archive
-- `GET /api/v1/orchard-archive/{id}` - Get archived orchard
 
-### Vision/3D Analysis
-- `POST /api/v1/vision-3d/analyze` - Run vision analysis on orchard
-
-### AI Agent
-- `POST /api/v1/agent/command` - Send natural language command
-- `POST /api/v1/agent` - Get AI recommendation
-
----
-
-## AMD Integration
-
-### GPU Acceleration
-- **AMD MI300X** for model inference and simulation
-- **ROCm** compatibility for GPU compute
-- **vLLM** for efficient LLM serving
-- **HIP kernels** for custom compute workloads
-
-### Model Support
-- **Qwen models** for agricultural knowledge
-- **Llama models** for general reasoning
-- **Custom vision models** for orchard analysis
-
-### Performance Benefits
-- 10x faster inference vs CPU
-- Real-time simulation capabilities
-- Scalable multi-orchard processing
-
----
-
-## Development
-
-### Project Structure
-```
-├── frontend/                 # Next.js application
-│   ├── components/          # React components
-│   ├── lib/                # Utilities and API clients
-│   └── app/                # App Router pages
-├── backend/                 # FastAPI application
-│   ├── api/                # API routes
-│   ├── services/           # Business logic
-│   └── agents/             # AI agents
-├── ml/                     # ML models and inference
-│   ├── inference/          # Model inference code
-│   └── datasets/           # Training data
-└── docs/                   # Documentation
+```text
+GET    /api/v1/orchard-archive
+GET    /api/v1/orchard-archive/{archive_id}
+POST   /api/v1/orchard-archive
+PUT    /api/v1/orchard-archive/{archive_id}
+DELETE /api/v1/orchard-archive/{archive_id}
 ```
 
-### Key Components
-- **GlobeCommandView** - Cesium globe with orchard detection
-- **OrchardCandidatePanel** - Detected orchard details and actions
-- **AIAdvisorPanel** - Natural language command interface
-- **OrchardScene3D** - 3D digital twin visualization
+### Orchard Networks
 
-### Adding New Commands
-1. Add patterns to `frontend/lib/aiCommandParser.ts`
-2. Implement handler logic
-3. Add UI command mapping in components
-4. Test with AI Advisor panel
+```text
+GET    /api/v1/orchard-networks
+GET    /api/v1/orchard-networks/{network_id}
+POST   /api/v1/orchard-networks
+POST   /api/v1/orchard-networks/{network_id}/members
+DELETE /api/v1/orchard-networks/{network_id}/members/{archive_id}
+GET    /api/v1/orchard-networks/{network_id}/analytics
+```
+
+### Vision / 3D
+
+```text
+POST /api/v1/vision-3d/analyze
+```
 
 ---
 
-## Research Foundation
+## Testing
 
-Based on peer-reviewed research in:
-- Precision agriculture and remote sensing
-- NDVI analysis for crop health assessment
-- Machine learning for agricultural applications
-- Digital twin technology for farming
+### Test AMD live inference
+
+```bash
+API_BASE_URL=http://localhost:8001 bash TEST_LIVE_AMD_INFERENCE.sh
+```
+
+### Test orchard detection
+
+```bash
+curl -X POST http://localhost:8001/api/v1/orchard-detection/scan-municipality \
+  -H "Content-Type: application/json" \
+  -d '{"municipality_id":"tancitaro","save_to_archive":true}'
+```
+
+### Test archive
+
+```bash
+curl http://localhost:8001/api/v1/orchard-archive
+```
+
+---
+
+## Repository Structure
+
+```text
+.
+├── backend/
+│   ├── api/
+│   ├── agents/
+│   ├── core/
+│   ├── db/
+│   ├── realtime/
+│   ├── services/
+│   └── simulation/
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   ├── lib/
+│   └── types/
+├── ml/
+│   └── inference/
+├── infra/
+│   └── amd/
+├── docs/
+└── README.md
+```
+
+---
+
+## Current Status
+
+Implemented:
+
+- Cesium command center
+- Mexico avocado network
+- Municipality navigation
+- Orchard parcel detection workflow
+- Orchard archive workflow
+- PostgreSQL-ready persistence
+- AI Advisor command routing
+- Financial impact analysis
+- Analytics summaries
+- Vision/3D analysis workflow
+- AMD MI300X vLLM backend integration
+- Qwen3-32B model configuration
+- 3D digital twin workflow
+
+Future enhancements:
+
+- Real high-resolution satellite provider integration
+- Fine-tuned avocado orchard segmentation model
+- Drone image upload workflow
+- Multi-company dashboard
+- Advanced yield optimization
+- Production authentication and user roles
 
 ---
 
 ## License
 
-MIT License - See LICENSE file for details
+This project is licensed under the **Apache License, Version 2.0**.
+
+Copyright 2026 F Melgoza
+
+You may obtain a copy of the license at:
+
+```text
+http://www.apache.org/licenses/LICENSE-2.0
+```
+
+See the `LICENSE` file for details.
 
 ---
 
-## Contributing
+## Copyright
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+Copyright 2026 F Melgoza
 
----
-
-**Made with ❤️ for sustainable agriculture and AI innovation**
+Licensed under the Apache License, Version 2.0.
