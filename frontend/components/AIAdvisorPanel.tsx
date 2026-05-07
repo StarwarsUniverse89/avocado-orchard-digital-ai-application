@@ -179,6 +179,16 @@ export default function AIAdvisorPanel({ onCommand }: AIAdvisorPanelProps) {
           recommendationId: args.recommendation_id,
           autoExecute: true,
         };
+      case "show_financial_impact":
+        return {
+          type: "show_financial_impact",
+          focus: args.focus || true,
+        };
+      case "create_analytics_summary":
+        return {
+          type: "create_analytics_summary",
+          include_all: args.include_all || true,
+        };
       case "reset_view":
         return {
           type: "reset_view",

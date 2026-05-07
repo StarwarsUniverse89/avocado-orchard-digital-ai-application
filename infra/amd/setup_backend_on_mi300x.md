@@ -72,19 +72,25 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:3001
 AMD_API_KEY=your_amd_api_key_here
 AMD_API_URL=https://api.amd.cloud/v1
 AMD_MODEL_ENDPOINT=http://localhost:8000/v1/chat/completions
-AMD_MODEL_NAME=Qwen/Qwen2.5-7B-Instruct
+AMD_MODEL_NAME=Qwen/Qwen3-32B
 AMD_GPU_TARGET=AMD MI300X
 
 VLLM_API_KEY=
 VLLM_API_URL=http://localhost:8000
-VLLM_MODEL_NAME=Qwen/Qwen2.5-7B-Instruct
+VLLM_MODEL_NAME=Qwen/Qwen3-32B
 VLLM_ENABLED=true
 
 AMD_GPU_ENABLED=true
 ROCM_VERSION=6.2
-MODEL_NAME=Qwen/Qwen2.5-7B-Instruct
+MODEL_NAME=Qwen/Qwen3-32B
 LOG_LEVEL=INFO
 ```
+
+**Model Configuration Notes:**
+- **Primary Model**: Qwen/Qwen3-32B (recommended for AMD MI300X)
+- **Fallback Model**: Qwen/Qwen2.5-32B-Instruct (if Qwen3-32B unavailable)
+- The LLM is used for agent reasoning and command interpretation
+- Orchard detection uses dedicated computer vision services, not the LLM
 
 ### 5. Start the Backend Server
 

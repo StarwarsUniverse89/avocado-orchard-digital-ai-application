@@ -97,20 +97,39 @@ export function GlobeCommandView({
 
   // Handle scan municipality for orchards
   const handleScanMunicipality = async () => {
-    if (!selectedMunicipalityId) return;
+    if (!selectedMunicipalityId) {
+      console.error('No municipality selected');
+      return;
+    }
     
+    console.log('🛰️ Starting orchard scan for municipality:', selectedMunicipalityId);
     setScanning(true);
     setScanError(null);
     
     try {
+      console.log('API Request:', {
+        endpoint: 'POST /api/v1/orchard-detection/scan-municipality',
+        body: {
+          municipality_id: selectedMunicipalityId,
+          save_to_archive: false
+        }
+      });
+      
       const result = await scanMunicipalityForOrchards(selectedMunicipalityId, false);
       
+      console.log('API Response:', result);
+      
       if (result.success && result.data) {
-        setDetectedOrchards(result.data.detected_orchards || []);
+        const orchards = result.data.detected_orchards || [];
+        console.log(`✅ Scan successful! Detected ${orchards.length} orchards`);
+        setDetectedOrchards(orchards);
       } else {
-        setScanError(result.error || 'Failed to scan municipality');
+        const errorMsg = result.error || 'Failed to scan municipality';
+        console.error('❌ Scan failed:', errorMsg);
+        setScanError(errorMsg);
       }
     } catch (error) {
+      console.error('❌ Scan error:', error);
       setScanError(String(error));
     } finally {
       setScanning(false);
@@ -119,6 +138,13 @@ export function GlobeCommandView({
 
   // Handle orchard parcel selection
   const handleOrchardParcelClick = (orchard: DetectedOrchard) => {
+    console.log('🥑 Orchard parcel clicked:', {
+      orchard_id: orchard.orchard_id,
+      center: [orchard.center_lat, orchard.center_lng],
+      hectares: orchard.estimated_hectares,
+      stress_level: orchard.stress_level
+    });
+    
     setSelectedOrchardCandidate(orchard);
     onOrchardCandidateSelected?.(orchard);
     
@@ -318,14 +344,31 @@ export function GlobeCommandView({
       </div>
 
       {/* Controls */}
-      <div className="absolute top-4 left-4 z-10 bg-black/80 text-white p-4 rounded-lg space-y-2">
+      <div className="absolute top-4 left-4 z-10 bg-black/80 text-white p-4 rounded-lg space-y-2 max-w-xs">
         <h3 className="font-bold text-lg">Mexico Avocado Network</h3>
         <div className="space-y-1 text-sm">
           <div>Total Municipalities: {mexicoAvocadoMunicipalities.length}</div>
           <div>Total Synthetic Orchards: {michoacanSyntheticOrchards.length}</div>
           <div>Region: Michoacán Avocado Belt</div>
           {detectedOrchards.length > 0 && (
-            <div className="text-cyan-400">Detected Orchards: {detectedOrchards.length}</div>
+            <div className="text-cyan-400 font-semibold">Detected Orchards: {detectedOrchards.length}</div>
+          )}
+        </div>
+        
+        {/* Debug Info */}
+        <div className="pt-2 border-t border-gray-700 text-xs space-y-1">
+          <div className="text-yellow-400">
+            Selected Municipality: {selectedMunicipalityId || 'None'}
+          </div>
+          {selectedOrchardCandidate && (
+            <div className="text-green-400">
+              Selected Orchard: {selectedOrchardCandidate.orchard_id}
+            </div>
+          )}
+          {scanning && (
+            <div className="text-blue-400 animate-pulse">
+              Scanning in progress...
+            </div>
           )}
         </div>
         
@@ -446,6 +489,17 @@ export function GlobeCommandView({
                 </div>
               `}
               position={Cartesian3.fromDegrees(municipality.lng, municipality.lat)}
+              onClick={() => {
+                console.log('Municipality clicked:', municipality.id, municipality.name);
+                setSelectedMunicipalityId(municipality.id);
+                // Fly to municipality
+                const destination = Cartesian3.fromDegrees(
+                  municipality.lng,
+                  municipality.lat,
+                  15000
+                );
+                setCameraTarget({ destination, duration: 2 });
+              }}
             >
               <PointGraphics
                 pixelSize={isSelected ? 20 : 12}

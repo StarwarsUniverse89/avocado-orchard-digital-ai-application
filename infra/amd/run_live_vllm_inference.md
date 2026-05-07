@@ -9,6 +9,20 @@ This guide explains how to set up and run live vLLM inference on an AMD MI300X G
 - Python 3.10+
 - Access to Hugging Face models
 
+## Recommended Models
+
+### Primary: Qwen3-32B
+- **Best for**: AI Advisor reasoning, command interpretation, agricultural knowledge
+- **VRAM**: ~64GB (fits on single MI300X)
+- **Context**: 32K tokens
+- **Performance**: Superior reasoning and action selection
+
+### Fallback: Qwen2.5-32B-Instruct
+- **Use when**: Qwen3-32B unavailable
+- **VRAM**: ~64GB
+- **Context**: 32K tokens
+- **Performance**: Good reasoning capabilities
+
 ## Step 1: Install vLLM with ROCm Support
 
 On your AMD MI300X instance:
@@ -25,6 +39,8 @@ pip install -e .
 
 ## Step 2: Download Model
 
+### Primary Model (Qwen3-32B)
+
 ```bash
 # Install Hugging Face CLI
 pip install huggingface-hub
@@ -32,31 +48,57 @@ pip install huggingface-hub
 # Login (optional, for gated models)
 huggingface-cli login
 
-# Download Qwen2.5-7B-Instruct
-huggingface-cli download Qwen/Qwen2.5-7B-Instruct --local-dir /models/Qwen2.5-7B-Instruct
+# Download Qwen3-32B
+huggingface-cli download Qwen/Qwen3-32B --local-dir /models/Qwen3-32B
+```
+
+### Fallback Model (Qwen2.5-32B-Instruct)
+
+```bash
+# Download Qwen2.5-32B-Instruct
+huggingface-cli download Qwen/Qwen2.5-32B-Instruct --local-dir /models/Qwen2.5-32B-Instruct
 ```
 
 ## Step 3: Start vLLM Server
 
+### Primary Model (Qwen3-32B) - Recommended
+
 ```bash
 # Start vLLM with OpenAI-compatible API
 python -m vllm.entrypoints.openai.api_server \
-  --model /models/Qwen2.5-7B-Instruct \
+  --model Qwen/Qwen3-32B \
   --host 0.0.0.0 \
   --port 8000 \
+  --max-model-len 32768 \
   --tensor-parallel-size 1 \
   --gpu-memory-utilization 0.9 \
-  --max-model-len 4096 \
   --dtype float16
+```
 
-# For multi-GPU setup (if you have multiple MI300X GPUs):
+### Fallback Model (Qwen2.5-32B-Instruct)
+
+```bash
+# Use if Qwen3-32B is not available
 python -m vllm.entrypoints.openai.api_server \
-  --model /models/Qwen2.5-7B-Instruct \
+  --model Qwen/Qwen2.5-32B-Instruct \
   --host 0.0.0.0 \
   --port 8000 \
+  --max-model-len 32768 \
+  --tensor-parallel-size 1 \
+  --gpu-memory-utilization 0.9 \
+  --dtype float16
+```
+
+### Multi-GPU Setup (if you have multiple MI300X GPUs)
+
+```bash
+python -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-32B \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --max-model-len 32768 \
   --tensor-parallel-size 4 \
   --gpu-memory-utilization 0.9 \
-  --max-model-len 8192 \
   --dtype float16
 ```
 
@@ -64,12 +106,12 @@ python -m vllm.entrypoints.openai.api_server \
 
 | Option | Description | Recommended Value |
 |--------|-------------|-------------------|
-| `--model` | Path to model or HF model ID | `/models/Qwen2.5-7B-Instruct` |
+| `--model` | Path to model or HF model ID | `Qwen/Qwen3-32B` or `Qwen/Qwen2.5-32B-Instruct` |
 | `--host` | Server host | `0.0.0.0` (all interfaces) |
 | `--port` | Server port | `8000` |
 | `--tensor-parallel-size` | Number of GPUs for tensor parallelism | `1` (single GPU) or `4` (quad GPU) |
 | `--gpu-memory-utilization` | GPU memory usage fraction | `0.9` (90%) |
-| `--max-model-len` | Maximum sequence length | `4096` or `8192` |
+| `--max-model-len` | Maximum sequence length | `32768` (32K context) |
 | `--dtype` | Model data type | `float16` (faster) or `bfloat16` |
 
 ## Step 4: Test vLLM Server

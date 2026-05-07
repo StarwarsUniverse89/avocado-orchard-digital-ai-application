@@ -70,7 +70,7 @@ It combines:
 - **Orchard Detection** - NDVI analysis + ML classification
 - **Vision/3D Analysis** - Tree detection and health assessment
 - **Knowledge Agent** - Research-grounded recommendations
-- **LLM Integration** - Qwen/Llama models via AMD Cloud
+- **LLM Integration** - Qwen3-32B (primary) / Qwen2.5-32B-Instruct (fallback) on AMD MI300X
 
 ---
 
@@ -114,9 +114,46 @@ NEXT_PUBLIC_API_URL=http://localhost:8001
 **Backend (.env):**
 ```
 AMD_API_KEY=your_amd_api_key
-AMD_ENDPOINT=https://api.amd.com/v1
+AMD_MODEL_ENDPOINT=http://localhost:8000/v1/chat/completions
+AMD_MODEL_NAME=Qwen/Qwen3-32B
+AMD_GPU_TARGET=AMD MI300X
 VLLM_ENDPOINT=http://localhost:8000
 ```
+
+### vLLM Model Configuration
+
+**Primary Model: Qwen3-32B** (Recommended for AMD MI300X)
+```bash
+python -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-32B \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --max-model-len 32768
+```
+
+**Fallback Model: Qwen2.5-32B-Instruct**
+```bash
+python -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen2.5-32B-Instruct \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --max-model-len 32768
+```
+
+**LLM Usage:**
+The LLM handles agent reasoning and command interpretation:
+- Natural language command parsing
+- UI/backend action selection
+- Orchard detection result summarization
+- Vision/3D analysis explanation
+- Financial impact reasoning
+- Grower action recommendations
+
+**Note:** Orchard detection uses dedicated computer vision services, not the LLM:
+- `orchard_detection_service` - Detection pipeline coordination
+- `satellite_imagery_service` - Satellite data processing
+- `orchard_detector` - NDVI analysis and ML classification
+- `vision_3d_analysis_service` - Tree-level 3D analysis
 
 ---
 
