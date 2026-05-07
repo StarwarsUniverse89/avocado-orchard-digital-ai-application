@@ -16,7 +16,15 @@ export type UICommand =
   | CreateOrchardNetworkCommand
   | NavigateToMunicipalityCommand
   | SelectOrchardCommand
-  | CompareMunicipalitiesCommand;
+  | CompareMunicipalitiesCommand
+  | ScanMunicipalityOrchardsCommand
+  | SelectLargestOrchardCandidateCommand
+  | SelectHighestStressParcelCommand
+  | SaveOrchardToArchiveCommand
+  | RunVisionPipelineCommand
+  | Generate3DTwinFromOrchardCommand
+  | ShowGPSBoundaryCommand
+  | ShowOrchardArchiveCommand;
 
 export interface NavigateToOrchardCommand {
   type: 'navigate_to_orchard';
@@ -118,6 +126,42 @@ export interface CompareMunicipalitiesCommand {
     municipality_ids: string[];
     municipalities?: any[];
   };
+}
+
+// Orchard Detection Commands
+export interface ScanMunicipalityOrchardsCommand {
+  type: 'scan_municipality_orchards';
+  args?: {
+    municipality_id: string;
+  };
+}
+
+export interface SelectLargestOrchardCandidateCommand {
+  type: 'select_largest_orchard_candidate';
+}
+
+export interface SelectHighestStressParcelCommand {
+  type: 'select_highest_stress_parcel';
+}
+
+export interface SaveOrchardToArchiveCommand {
+  type: 'save_orchard_to_archive';
+}
+
+export interface RunVisionPipelineCommand {
+  type: 'run_vision_pipeline';
+}
+
+export interface Generate3DTwinFromOrchardCommand {
+  type: 'generate_3d_twin_from_orchard';
+}
+
+export interface ShowGPSBoundaryCommand {
+  type: 'show_gps_boundary';
+}
+
+export interface ShowOrchardArchiveCommand {
+  type: 'show_orchard_archive';
 }
 
 // Command handler type

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import {
   Viewer,
   Entity,
@@ -64,7 +64,11 @@ interface GlobeCommandViewProps {
   onOrchardCandidateSelected?: (candidate: DetectedOrchard) => void;
 }
 
-export function GlobeCommandView({
+export interface GlobeCommandViewRef {
+  handleCommand: (command: UICommand) => void;
+}
+
+export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandViewProps>(({
   onOrchardSelect,
   onSectionSelect,
   onEnter3DTwin,
@@ -72,7 +76,7 @@ export function GlobeCommandView({
   selectedSectionId,
   commandHandler,
   onOrchardCandidateSelected,
-}: GlobeCommandViewProps) {
+}, ref) => {
   const viewerRef = useRef<CesiumViewer | null>(null);
   const [cesiumReady, setCesiumReady] = useState<boolean>(false);
   const [cesiumError, setCesiumError] = useState<boolean>(false);
@@ -227,6 +231,8 @@ export function GlobeCommandView({
   // Handle UI commands
   const handleCommand = useCallback(
     (command: UICommand) => {
+      console.log('🎮 GlobeCommandView handling command:', command);
+      
       switch (command.type) {
         case 'show_avocado_belt':
           setShowAvocadoBelt(true);
@@ -254,6 +260,7 @@ export function GlobeCommandView({
             (m) => m.id === command.args?.municipality_id
           );
           if (municipality) {
+            console.log('🗺️ Flying to municipality:', municipality.name);
             const destination = Cartesian3.fromDegrees(
               municipality.lng,
               municipality.lat,
@@ -262,6 +269,54 @@ export function GlobeCommandView({
             setCameraTarget({ destination, duration: 2 });
             setSelectedMunicipalityId(municipality.id);
             setShowAvocadoBelt(true);
+          }
+          break;
+        }
+        case 'scan_municipality_orchards': {
+          const municipalityId = command.args?.municipality_id;
+          if (municipalityId) {
+            console.log('🛰️ Scanning municipality for orchards:', municipalityId);
+            // First navigate to the municipality
+            const municipality = mexicoAvocadoMunicipalities.find(
+              (m) => m.id === municipalityId
+            );
+            if (municipality) {
+              const destination = Cartesian3.fromDegrees(
+                municipality.lng,
+                municipality.lat,
+                15000
+              );
+              setCameraTarget({ destination, duration: 2 });
+              setSelectedMunicipalityId(municipality.id);
+              setShowAvocadoBelt(true);
+              
+              // Then trigger the scan after a short delay
+              setTimeout(() => {
+                handleScanMunicipality();
+              }, 2500);
+            }
+          }
+          break;
+        }
+        case 'select_largest_orchard_candidate': {
+          if (detectedOrchards.length > 0) {
+            const largest = [...detectedOrchards].sort((a, b) =>
+              b.estimated_hectares - a.estimated_hectares
+            )[0];
+            console.log('🥑 Selecting largest orchard:', largest.orchard_id);
+            handleOrchardParcelClick(largest);
+          }
+          break;
+        }
+        case 'select_highest_stress_parcel': {
+          if (detectedOrchards.length > 0) {
+            const stressMap = { low: 1, medium: 2, high: 3 };
+            const highestStress = [...detectedOrchards].sort((a, b) =>
+              (stressMap[b.stress_level as keyof typeof stressMap] || 0) -
+              (stressMap[a.stress_level as keyof typeof stressMap] || 0)
+            )[0];
+            console.log('⚠️ Selecting highest stress parcel:', highestStress.orchard_id);
+            handleOrchardParcelClick(highestStress);
           }
           break;
         }
@@ -307,8 +362,13 @@ export function GlobeCommandView({
           break;
       }
     },
-    [onOrchardSelect, onSectionSelect, onEnter3DTwin]
+    [onOrchardSelect, onSectionSelect, onEnter3DTwin, detectedOrchards, handleScanMunicipality, handleOrchardParcelClick]
   );
+
+  // Expose handleCommand to parent via ref
+  useImperativeHandle(ref, () => ({
+    handleCommand
+  }), [handleCommand]);
 
   // Register command handler
   useEffect(() => {
@@ -698,6 +758,8 @@ export function GlobeCommandView({
       )}
     </div>
   );
-}
+});
+
+GlobeCommandView.displayName = 'GlobeCommandView';
 
 // Made with Bob

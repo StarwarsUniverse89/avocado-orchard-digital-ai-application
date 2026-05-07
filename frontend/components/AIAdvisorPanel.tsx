@@ -137,6 +137,83 @@ export default function AIAdvisorPanel({ onCommand }: AIAdvisorPanelProps) {
     const { command, args } = parsed;
 
     switch (command) {
+      // Mexico Network Commands
+      case "navigate_to_municipality":
+        return {
+          type: "navigate_to_municipality",
+          args: {
+            municipality_id: args.municipality_id,
+            lat: args.lat,
+            lng: args.lng,
+            highlight: args.highlight,
+          },
+        };
+      case "show_avocado_belt":
+        return {
+          type: "show_avocado_belt",
+        };
+      case "show_production_clusters":
+        return {
+          type: "show_production_clusters",
+        };
+      case "create_orchard_network":
+        return {
+          type: "create_orchard_network",
+        };
+      case "scan_municipality_orchards":
+        return {
+          type: "scan_municipality_orchards",
+          args: {
+            municipality_id: args.municipality_id,
+          },
+        };
+      case "select_largest_orchard_candidate":
+        return {
+          type: "select_largest_orchard_candidate",
+        };
+      case "select_highest_stress_parcel":
+        return {
+          type: "select_highest_stress_parcel",
+        };
+      case "save_orchard_to_archive":
+        return {
+          type: "save_orchard_to_archive",
+        };
+      case "run_vision_pipeline":
+        return {
+          type: "run_vision_pipeline",
+        };
+      case "generate_3d_twin_from_orchard":
+        return {
+          type: "generate_3d_twin_from_orchard",
+        };
+      case "show_gps_boundary":
+        return {
+          type: "show_gps_boundary",
+        };
+      case "show_orchard_archive":
+        return {
+          type: "show_orchard_archive",
+        };
+      case "select_orchard":
+        return {
+          type: "select_orchard",
+          args: {
+            orchard_id: args.orchard_id,
+            lat: args.lat,
+            lng: args.lng,
+            highlight: args.highlight,
+          },
+        };
+      case "compare_municipalities":
+        return {
+          type: "compare_municipalities",
+          args: {
+            municipality_ids: args.municipality_ids,
+          },
+        };
+      
+      // Legacy Orchard Commands
       case "navigate_to_orchard":
         return {
           type: "navigate_to_orchard",

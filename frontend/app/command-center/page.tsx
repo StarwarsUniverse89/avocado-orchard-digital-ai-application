@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import Header from "@/components/Header";
+import type { GlobeCommandViewRef } from "@/components/GlobeCommandView";
 
 // Dynamically import GlobeCommandView to avoid SSR issues with Cesium
 const GlobeCommandView = dynamic(
@@ -41,7 +42,7 @@ export default function CommandCenter() {
   const [showAnalyticsSummary, setShowAnalyticsSummary] = useState(false);
   const [showFinancialPanel, setShowFinancialPanel] = useState(false);
   const viewContainerRef = useRef<HTMLDivElement>(null);
-  const globeCommandRef = useRef<any>(null);
+  const globeCommandRef = useRef<GlobeCommandViewRef>(null);
 
   // Simulate live data updates
   useEffect(() => {
@@ -102,9 +103,49 @@ export default function CommandCenter() {
 
   // UI Command handler for AI advisor
   const handleUICommand: UICommandHandler = (command: UICommand) => {
-    console.log('Executing command:', command);
+    console.log('🎯 Executing command:', command);
+    
+    // Ensure we're in globe view for navigation commands
+    const globeCommands = [
+      'navigate_to_municipality',
+      'show_avocado_belt',
+      'show_production_clusters',
+      'create_orchard_network',
+      'scan_municipality_orchards',
+      'navigate_to_orchard',
+      'show_network',
+      'show_stress_zones',
+      'select_section',
+      'select_orchard',
+    ];
+    
+    if (globeCommands.includes(command.type) && viewMode !== 'globe') {
+      setViewMode('globe');
+    }
     
     switch (command.type) {
+      // Mexico Network Commands - Pass directly to GlobeCommandView
+      case 'navigate_to_municipality':
+      case 'show_avocado_belt':
+      case 'show_production_clusters':
+      case 'create_orchard_network':
+      case 'scan_municipality_orchards':
+      case 'select_largest_orchard_candidate':
+      case 'select_highest_stress_parcel':
+      case 'save_orchard_to_archive':
+      case 'run_vision_pipeline':
+      case 'generate_3d_twin_from_orchard':
+      case 'show_gps_boundary':
+      case 'show_orchard_archive':
+      case 'select_orchard':
+      case 'compare_municipalities':
+        // These commands are handled by GlobeCommandView
+        // Pass the command through via ref if available
+        if (globeCommandRef.current?.handleCommand) {
+          globeCommandRef.current.handleCommand(command);
+        }
+        break;
+        
       case 'navigate_to_orchard':
         // Switch to globe view if not already
         if (viewMode !== 'globe') {
@@ -329,6 +370,7 @@ export default function CommandCenter() {
             <div ref={viewContainerRef}>
               {viewMode === 'globe' ? (
                 <GlobeCommandView
+                  ref={globeCommandRef}
                   onOrchardSelect={handleOrchardSelect}
                   onSectionSelect={handleSectionSelect}
                   onEnter3DTwin={handleEnter3DTwin}
