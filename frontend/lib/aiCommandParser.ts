@@ -534,6 +534,50 @@ const commandPatterns: CommandPattern[] = [
     },
   },
   
+  // Show financial impact (MUST come before generic orchard navigation)
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?financial\s+(?:impact|analysis|projection|data)/i,
+      /(?:display|view)\s+(?:financial|revenue|profit)\s+(?:data|impact|analysis)/i,
+      /what(?:'s|\s+is)\s+the\s+financial\s+impact/i,
+      /show\s+(?:me\s+)?(?:the\s+)?profit\s+risk/i,
+      /calculate\s+financial\s+impact/i,
+      /estimate\s+revenue\s+loss/i,
+    ],
+    command: 'show_financial_impact',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying financial impact analysis and projections.',
+        command: 'show_financial_impact',
+        args: {
+          focus: true,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Create analytics summary (MUST come before generic orchard navigation)
+  {
+    patterns: [
+      /(?:create|generate|show)\s+(?:an?\s+)?analytics\s+summary/i,
+      /show\s+(?:me\s+)?(?:the\s+)?(?:full\s+)?analytics/i,
+      /(?:give|show)\s+me\s+(?:a\s+)?summary/i,
+      /summarize\s+(?:the\s+)?(?:orchard\s+)?(?:network|data)/i,
+    ],
+    command: 'create_analytics_summary',
+    handler: (match, input) => {
+      return {
+        message: 'Generating comprehensive analytics summary.',
+        command: 'create_analytics_summary',
+        args: {
+          include_all: true,
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
   // Enter 3D twin for highest risk orchard
   {
     patterns: [
@@ -712,46 +756,6 @@ const commandPatterns: CommandPattern[] = [
           recommendation_id: 'top',
         },
         confidence: 0.95,
-      };
-    },
-  },
-  
-  // Show financial impact
-  {
-    patterns: [
-      /show\s+(?:me\s+)?(?:the\s+)?financial\s+(?:impact|analysis|projection)/i,
-      /(?:display|view)\s+(?:financial|revenue|profit)\s+(?:data|impact)/i,
-      /what(?:'s|\s+is)\s+the\s+financial\s+impact/i,
-    ],
-    command: 'show_financial_impact',
-    handler: (match, input) => {
-      return {
-        message: 'Displaying financial impact analysis and projections.',
-        command: 'show_financial_impact',
-        args: {
-          focus: true,
-        },
-        confidence: 0.95,
-      };
-    },
-  },
-  
-  // Create analytics summary
-  {
-    patterns: [
-      /(?:create|generate|show)\s+(?:an?\s+)?analytics\s+summary/i,
-      /show\s+(?:me\s+)?(?:the\s+)?(?:full\s+)?analytics/i,
-      /(?:give|show)\s+me\s+(?:a\s+)?summary/i,
-    ],
-    command: 'create_analytics_summary',
-    handler: (match, input) => {
-      return {
-        message: 'Generating comprehensive analytics summary.',
-        command: 'create_analytics_summary',
-        args: {
-          include_all: true,
-        },
-        confidence: 0.9,
       };
     },
   },

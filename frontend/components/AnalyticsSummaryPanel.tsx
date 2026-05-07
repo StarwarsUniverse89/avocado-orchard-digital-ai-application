@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { orchardNetwork } from "@/lib/orchardNetwork";
-import { getMexicoAvocadoAnalytics } from "@/lib/mexicoAvocadoNetwork";
+import { getMexicoAvocadoAnalytics, michoacanSyntheticOrchards } from "@/lib/mexicoAvocadoNetwork";
 
 interface AnalyticsSummaryPanelProps {
   visible?: boolean;
@@ -32,19 +31,22 @@ export default function AnalyticsSummaryPanel({
     // Get Mexico avocado analytics
     const mexicoAnalytics = getMexicoAvocadoAnalytics();
     
-    // Calculate analytics from orchard network
-    const totalOrchards = orchardNetwork.length + mexicoAnalytics.total_synthetic_orchards;
-    const totalTrees = orchardNetwork.reduce((sum, o) => sum + o.treeCount, 0) +
-                      mexicoAnalytics.total_estimated_trees;
-    const avgHealthScore =
-      orchardNetwork.reduce((sum, o) => sum + o.healthScore, 0) / orchardNetwork.length;
+    // Calculate analytics from Mexico synthetic orchards
+    const totalOrchards = mexicoAnalytics.total_synthetic_orchards;
+    const totalTrees = mexicoAnalytics.total_estimated_trees;
+    
+    // Calculate average health score from Mexico orchards
+    const avgHealthScore = michoacanSyntheticOrchards.reduce((sum, o) => {
+      const sectionAvg = o.sections.reduce((s, sec) => s + sec.health_score, 0) / o.sections.length;
+      return sum + sectionAvg;
+    }, 0) / michoacanSyntheticOrchards.length;
 
-    // Find highest stress orchard (prioritize Mexico data)
+    // Find highest stress orchard (Mexico data)
     const highestStressOrchard = mexicoAnalytics.highest_risk_orchard;
 
-    // Find lowest NDVI section across all orchards
+    // Find lowest NDVI section across Mexico orchards
     let lowestNDVISection = { name: "", ndvi: 1, orchardName: "" };
-    orchardNetwork.forEach((orchard) => {
+    michoacanSyntheticOrchards.forEach((orchard) => {
       orchard.sections.forEach((section) => {
         if (section.ndvi < lowestNDVISection.ndvi) {
           lowestNDVISection = {
@@ -55,29 +57,19 @@ export default function AnalyticsSummaryPanel({
         }
       });
     });
-    
-    // Check Mexico orchards for lower NDVI
-    if (highestStressOrchard.ndvi_average < lowestNDVISection.ndvi) {
-      lowestNDVISection = {
-        name: highestStressOrchard.name,
-        ndvi: highestStressOrchard.ndvi_average,
-        orchardName: "Michoacán",
-      };
-    }
 
-    // Count critical sections (high stress)
-    const criticalSections = orchardNetwork.reduce((count, orchard) => {
+    // Count critical sections (high stress) in Mexico orchards
+    const criticalSections = michoacanSyntheticOrchards.reduce((count, orchard) => {
       return (
-        count + orchard.sections.filter((s) => s.stressLevel === "high").length
+        count + orchard.sections.filter((s) => s.stress_level === "high").length
       );
     }, 0);
 
     // Calculate projected risk based on stress levels
-    const stressMap = { low: 1, medium: 2, high: 3 };
-    const highStressCount = orchardNetwork.filter(
-      (o) => o.stressLevel === "high"
+    const highStressCount = michoacanSyntheticOrchards.filter(
+      (o) => o.stress_level === "high"
     ).length;
-    const projectedYieldRisk = (highStressCount / orchardNetwork.length) * 100;
+    const projectedYieldRisk = (highStressCount / michoacanSyntheticOrchards.length) * 100;
 
     // Use Mexico profit at risk data
     const projectedProfitImpact = mexicoAnalytics.projected_profit_at_risk_usd;
@@ -85,11 +77,11 @@ export default function AnalyticsSummaryPanel({
     // Determine recommended action
     let recommendedAction = "Continue monitoring";
     if (highestStressOrchard.stress_level === "high") {
-      recommendedAction = `Priority: Address ${highestStressOrchard.name} in Michoacán (high stress, NDVI ${highestStressOrchard.ndvi_average})`;
+      recommendedAction = `Priority: Address ${highestStressOrchard.name} in Michoacán (high stress, NDVI ${highestStressOrchard.ndvi_average.toFixed(2)})`;
     } else if (criticalSections > 0) {
       recommendedAction = `Immediate irrigation needed in ${criticalSections} section${criticalSections > 1 ? "s" : ""}`;
     } else if (highStressCount > 0) {
-      recommendedAction = "Increase irrigation frequency";
+      recommendedAction = "Increase irrigation frequency in high-stress orchards";
     }
 
     setSummary({
