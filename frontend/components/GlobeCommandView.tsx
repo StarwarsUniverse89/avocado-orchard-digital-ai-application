@@ -107,22 +107,36 @@ export function GlobeCommandView({
     setScanError(null);
     
     try {
-      console.log('API Request:', {
+      console.log('🛰️ API Request:', {
         endpoint: 'POST /api/v1/orchard-detection/scan-municipality',
         body: {
           municipality_id: selectedMunicipalityId,
-          save_to_archive: false
+          save_to_archive: true  // Changed to true to save to archive
         }
       });
       
-      const result = await scanMunicipalityForOrchards(selectedMunicipalityId, false);
+      const result = await scanMunicipalityForOrchards(selectedMunicipalityId, true);
       
-      console.log('API Response:', result);
+      console.log('🛰️ Scan response:', result);
       
-      if (result.success && result.data) {
-        const orchards = result.data.detected_orchards || [];
-        console.log(`✅ Scan successful! Detected ${orchards.length} orchards`);
-        setDetectedOrchards(orchards);
+      if (result.success) {
+        // Support all response shapes
+        const resultAny = result as any;
+        const parcels =
+          resultAny.detected_orchards ||
+          resultAny.parcels ||
+          resultAny.data?.detected_orchards ||
+          resultAny.data?.parcels ||
+          [];
+        
+        console.log('🥑 Detected parcels:', parcels.length, parcels);
+        setDetectedOrchards(parcels);
+        
+        if (parcels.length > 0) {
+          console.log(`✅ Scan successful! Detected ${parcels.length} orchard parcels`);
+        } else {
+          console.warn('⚠️ Scan completed but no parcels detected');
+        }
       } else {
         const errorMsg = result.error || 'Failed to scan municipality';
         console.error('❌ Scan failed:', errorMsg);

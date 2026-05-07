@@ -53,7 +53,7 @@ class OrchardArchiveService:
     
     def save_orchard(self, orchard_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Save detected orchard to archive
+        Save detected orchard to archive with stable ID pattern
         
         Args:
             orchard_data: Orchard parcel data with boundary, metadata, etc.
@@ -61,19 +61,35 @@ class OrchardArchiveService:
         Returns:
             Saved orchard with archive_id
         """
+        municipality_id = orchard_data.get("municipality_id", "unknown").upper()
+        
+        # Generate stable archive_id if not provided
         archive_id = orchard_data.get("archive_id")
         if not archive_id:
-            # Generate archive ID if not provided
-            municipality_id = orchard_data.get("municipality_id", "unknown")
-            index = len([k for k in self.archive.keys() if municipality_id in k]) + 1
-            archive_id = f"orchard_{municipality_id}_{index:03d}_{int(time.time())}"
+            # Count existing parcels for this municipality
+            existing_parcels = [
+                k for k in self.archive.keys()
+                if k.startswith(f"MX-MICH-{municipality_id}-PARCEL-")
+            ]
+            index = len(existing_parcels) + 1
+            archive_id = f"MX-MICH-{municipality_id}-PARCEL-{index:03d}"
             orchard_data["archive_id"] = archive_id
         
-        # Add timestamps
+        # Check for duplicate and update if exists
         now = time.time()
-        if archive_id not in self.archive:
+        is_update = archive_id in self.archive
+        
+        if is_update:
+            # Update existing orchard
+            existing = self.archive[archive_id]
+            orchard_data["created_at"] = existing.get("created_at", now)
+            orchard_data["updated_at"] = now
+            message = f"Orchard {archive_id} updated in archive"
+        else:
+            # Create new orchard
             orchard_data["created_at"] = now
-        orchard_data["updated_at"] = now
+            orchard_data["updated_at"] = now
+            message = f"Orchard {archive_id} saved to archive"
         
         # Save to archive
         self.archive[archive_id] = orchard_data
@@ -83,7 +99,8 @@ class OrchardArchiveService:
             "success": True,
             "archive_id": archive_id,
             "orchard": orchard_data,
-            "message": "Orchard saved to archive"
+            "is_update": is_update,
+            "message": message
         }
     
     def get_orchard(self, archive_id: str) -> Optional[Dict[str, Any]]:

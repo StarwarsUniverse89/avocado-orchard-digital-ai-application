@@ -16,8 +16,8 @@ import os
 # Add ml/inference to path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'ml', 'inference'))
 
-from satellite_imagery_service import fetch_imagery_for_bbox
-from orchard_archive_service import save_orchard, list_orchards
+from services.satellite_imagery_service import fetch_imagery_for_bbox
+from services.orchard_archive_service import save_orchard, list_orchards
 try:
     from orchard_detector import detect_orchard_parcels, get_detection_status
     DETECTOR_AVAILABLE = True
@@ -36,7 +36,7 @@ class OrchardDetectionService:
         self,
         bbox: Dict[str, float],
         municipality_id: str,
-        save_to_archive: bool = False
+        save_to_archive: bool = True  # Default to True for frontend scans
     ) -> Dict[str, Any]:
         """
         Scan an area for orchard parcels
@@ -44,7 +44,7 @@ class OrchardDetectionService:
         Args:
             bbox: {"lat_min": float, "lat_max": float, "lng_min": float, "lng_max": float}
             municipality_id: Municipality identifier
-            save_to_archive: Whether to save detected parcels to archive
+            save_to_archive: Whether to save detected parcels to archive (default: True)
         
         Returns:
             Detection results with parcels
@@ -67,10 +67,18 @@ class OrchardDetectionService:
             imagery=None     # TODO: Pass imagery data
         )
         
-        # Optionally save to archive
+        # Save to archive if requested
+        saved_archive_ids = []
         if save_to_archive:
-            for parcel in parcels:
-                save_orchard(parcel)
+            for i, parcel in enumerate(parcels):
+                # Ensure municipality_id is set
+                parcel["municipality_id"] = municipality_id
+                parcel["scan_source"] = "area_scan"
+                
+                # Save to archive (will generate stable ID if not present)
+                result = save_orchard(parcel)
+                if result.get("success"):
+                    saved_archive_ids.append(result.get("archive_id"))
         
         return {
             "success": True,
@@ -80,13 +88,14 @@ class OrchardDetectionService:
             "parcels": parcels,
             "imagery_info": imagery_result,
             "saved_to_archive": save_to_archive,
+            "saved_archive_ids": saved_archive_ids if save_to_archive else [],
         }
     
     def scan_municipality(
         self,
         municipality_id: str,
         municipality_data: Optional[Dict[str, Any]] = None,
-        save_to_archive: bool = False
+        save_to_archive: bool = True  # Default to True for frontend scans
     ) -> Dict[str, Any]:
         """
         Scan a municipality for orchard parcels
@@ -94,7 +103,7 @@ class OrchardDetectionService:
         Args:
             municipality_id: Municipality identifier
             municipality_data: Optional municipality data with lat/lng
-            save_to_archive: Whether to save detected parcels
+            save_to_archive: Whether to save detected parcels (default: True)
         
         Returns:
             Detection results
