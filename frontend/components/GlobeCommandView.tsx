@@ -62,6 +62,9 @@ interface GlobeCommandViewProps {
   selectedSectionId?: string;
   commandHandler?: UICommandHandler;
   onOrchardCandidateSelected?: (candidate: DetectedOrchard) => void;
+  onMunicipalitySelected?: (municipality: any) => void;
+  onDetectedOrchardsChanged?: (orchards: DetectedOrchard[]) => void;
+  onVisionAnalysisCompleted?: (result: any) => void;
 }
 
 export interface GlobeCommandViewRef {
@@ -76,6 +79,9 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
   selectedSectionId,
   commandHandler,
   onOrchardCandidateSelected,
+  onMunicipalitySelected,
+  onDetectedOrchardsChanged,
+  onVisionAnalysisCompleted,
 }, ref) => {
   const viewerRef = useRef<CesiumViewer | null>(null);
   const [cesiumReady, setCesiumReady] = useState<boolean>(false);
@@ -135,6 +141,8 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
         
         console.log('🥑 Detected parcels:', parcels.length, parcels);
         setDetectedOrchards(parcels);
+        // Notify parent component
+        onDetectedOrchardsChanged?.(parcels);
         
         if (parcels.length > 0) {
           console.log(`✅ Scan successful! Detected ${parcels.length} orchard parcels`);
@@ -268,6 +276,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
             );
             setCameraTarget({ destination, duration: 2 });
             setSelectedMunicipalityId(municipality.id);
+            onMunicipalitySelected?.(municipality);
             setShowAvocadoBelt(true);
           }
           break;
@@ -288,6 +297,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
               );
               setCameraTarget({ destination, duration: 2 });
               setSelectedMunicipalityId(municipality.id);
+              onMunicipalitySelected?.(municipality);
               setShowAvocadoBelt(true);
               
               // Then trigger the scan after a short delay
@@ -566,6 +576,8 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
               onClick={() => {
                 console.log('Municipality clicked:', municipality.id, municipality.name);
                 setSelectedMunicipalityId(municipality.id);
+                // Notify parent component
+                onMunicipalitySelected?.(municipality);
                 // Fly to municipality
                 const destination = Cartesian3.fromDegrees(
                   municipality.lng,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { SelectionContext, getContextDisplayName } from "@/lib/selectionContext";
 
 interface FinancialMetrics {
   estimated_yield: number;
@@ -23,69 +24,133 @@ interface FinancialPrediction {
 }
 
 interface FinancialPredictionPanelProps {
-  orchardId?: string;
-  scenario?: {
-    temperature?: number;
-    soil_moisture?: number;
-    pest_pressure?: number;
-    ndvi?: number;
-  };
+  selectionContext: SelectionContext;
+  selectedOrchardCandidate?: any;
+  selectedMunicipality?: any;
+  detectedOrchards?: any[];
+  archivedOrchards?: any[];
+  visible?: boolean;
+  onClose?: () => void;
 }
 
 export default function FinancialPredictionPanel({
-  orchardId = "orchard_A",
-  scenario,
+  selectionContext,
+  selectedOrchardCandidate,
+  selectedMunicipality,
+  detectedOrchards = [],
+  archivedOrchards = [],
+  visible = true,
+  onClose,
 }: FinancialPredictionPanelProps) {
   const [prediction, setPrediction] = useState<FinancialPrediction | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Calculate financial impact based on selection context
   useEffect(() => {
-    if (scenario) {
-      fetchPrediction();
-    }
-  }, [orchardId, scenario]);
+    calculateFinancialImpact();
+  }, [selectionContext, selectedOrchardCandidate, selectedMunicipality]);
 
-  const fetchPrediction = async () => {
+  const calculateFinancialImpact = () => {
     setLoading(true);
+    
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
-      const response = await fetch(`${API_BASE_URL}/api/v1/financial/predict`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orchard_id: orchardId,
-          scenario: scenario || {},
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setPrediction(data.data);
+      // Priority 1: Selected orchard candidate (detected parcel)
+      if (selectionContext.context_type === 'orchard_candidate' && selectedOrchardCandidate) {
+        const candidate = selectedOrchardCandidate;
+        const estimatedYield = (candidate.estimated_tree_count || 0) * 65; // kg per tree average
+        const revenue = estimatedYield * 2.8; // $2.80 per kg
+        const profit = revenue * 0.55; // 55% profit margin
+        const profitAtRisk = candidate.stress_level === 'high' ? profit * 0.25 :
+                            candidate.stress_level === 'medium' ? profit * 0.12 :
+                            profit * 0.05;
+        
+        setPrediction({
+          orchard_id: candidate.orchard_id || candidate.id,
+          baseline: {
+            estimated_yield: estimatedYield,
+            revenue: Math.round(revenue),
+            profit: Math.round(profit),
+            roi: 8.5,
+          },
+          scenario: {
+            estimated_yield: Math.round(estimatedYield * 0.92),
+            revenue: Math.round(revenue * 0.92),
+            profit: Math.round(profit * 0.92),
+            roi: 7.8,
+          },
+          prediction: {
+            projected_gain_or_loss: -Math.round(profitAtRisk),
+            yield_change_percent: -8.0,
+            roi: 7.8,
+            risk_level: candidate.stress_level || 'medium',
+            message: `${candidate.stress_level === 'high' ? 'High' : candidate.stress_level === 'medium' ? 'Medium' : 'Low'} stress detected. Estimated profit at risk: $${Math.round(profitAtRisk).toLocaleString()}.`,
+          },
+        });
+      }
+      // Priority 2: Selected municipality
+      else if (selectionContext.context_type === 'municipality' && selectedMunicipality) {
+        const muni = selectedMunicipality;
+        const estimatedYield = (muni.estimated_hectares || 0) * 12000; // kg per hectare
+        const revenue = estimatedYield * 2.8;
+        const profit = revenue * 0.55;
+        const profitAtRisk = muni.projected_profit_usd ? muni.projected_profit_usd * 0.15 : profit * 0.15;
+        
+        setPrediction({
+          orchard_id: muni.id,
+          baseline: {
+            estimated_yield: estimatedYield,
+            revenue: Math.round(revenue),
+            profit: Math.round(profit),
+            roi: 9.2,
+          },
+          scenario: {
+            estimated_yield: Math.round(estimatedYield * 0.95),
+            revenue: Math.round(revenue * 0.95),
+            profit: Math.round(profit * 0.95),
+            roi: 8.7,
+          },
+          prediction: {
+            projected_gain_or_loss: -Math.round(profitAtRisk),
+            yield_change_percent: -5.0,
+            roi: 8.7,
+            risk_level: muni.stress_level || 'medium',
+            message: `Municipality-level estimate for ${muni.name}. Scan for orchards to get parcel-level accuracy.`,
+          },
+        });
+      }
+      // Priority 3: Mexico network fallback
+      else {
+        const totalHectares = selectionContext.estimated_hectares || 114500;
+        const estimatedYield = totalHectares * 12000;
+        const revenue = estimatedYield * 2.8;
+        const profit = revenue * 0.55;
+        const profitAtRisk = selectionContext.projected_profit_at_risk_usd || profit * 0.18;
+        
+        setPrediction({
+          orchard_id: 'michoacan_network',
+          baseline: {
+            estimated_yield: estimatedYield,
+            revenue: Math.round(revenue),
+            profit: Math.round(profit),
+            roi: 8.8,
+          },
+          scenario: {
+            estimated_yield: Math.round(estimatedYield * 0.93),
+            revenue: Math.round(revenue * 0.93),
+            profit: Math.round(profit * 0.93),
+            roi: 8.2,
+          },
+          prediction: {
+            projected_gain_or_loss: -Math.round(profitAtRisk),
+            yield_change_percent: -7.0,
+            roi: 8.2,
+            risk_level: 'medium',
+            message: `Network-wide estimate for Michoacán avocado belt. Select a municipality and scan for orchards to get detailed analysis.`,
+          },
+        });
       }
     } catch (error) {
-      console.error("Failed to fetch financial prediction:", error);
-      // Use mock data for demo
-      setPrediction({
-        orchard_id: orchardId,
-        baseline: {
-          estimated_yield: 19500,
-          revenue: 54600,
-          profit: 32400,
-          roi: 8.5,
-        },
-        scenario: {
-          estimated_yield: 17800,
-          revenue: 49840,
-          profit: 29640,
-          roi: 7.8,
-        },
-        prediction: {
-          projected_gain_or_loss: -2760,
-          yield_change_percent: -8.7,
-          roi: 7.8,
-          risk_level: "medium",
-          message: "Suboptimal conditions may reduce profit by $2,760.",
-        },
-      });
+      console.error("Failed to calculate financial impact:", error);
     } finally {
       setLoading(false);
     }
@@ -160,9 +225,19 @@ export default function FinancialPredictionPanel({
             Financial Impact Analysis
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Scenario vs. Baseline Comparison
+            {getContextDisplayName(selectionContext)}
           </p>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-300 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
         <div
           className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${getRiskBgColor(
             prediction.prediction.risk_level
@@ -298,10 +373,10 @@ export default function FinancialPredictionPanel({
       {/* Action Button */}
       <div className="mt-6">
         <button
-          onClick={fetchPrediction}
+          onClick={calculateFinancialImpact}
           className="w-full px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-gray-950 font-semibold transition-colors"
         >
-          Refresh Prediction
+          Recalculate Impact
         </button>
       </div>
     </div>

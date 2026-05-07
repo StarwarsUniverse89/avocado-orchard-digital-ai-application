@@ -27,8 +27,8 @@ import {
   TreeData,
   AIRecommendation,
 } from "@/lib/mockData";
-import { orchardNetwork } from "@/lib/orchardNetwork";
 import { UICommand, UICommandHandler } from "@/types/uiCommands";
+import { resolveSelectionContext, SelectionContext, getContextDisplayName } from "@/lib/selectionContext";
 import gsap from "gsap";
 
 export default function CommandCenter() {
@@ -43,6 +43,20 @@ export default function CommandCenter() {
   const [showFinancialPanel, setShowFinancialPanel] = useState(false);
   const viewContainerRef = useRef<HTMLDivElement>(null);
   const globeCommandRef = useRef<GlobeCommandViewRef>(null);
+
+  // Selection state lifted from GlobeCommandView
+  const [selectedMunicipality, setSelectedMunicipality] = useState<any>(null);
+  const [selectedOrchardCandidate, setSelectedOrchardCandidate] = useState<any>(null);
+  const [detectedOrchards, setDetectedOrchards] = useState<any[]>([]);
+  const [archivedOrchards, setArchivedOrchards] = useState<any[]>([]);
+  const [visionAnalysisResult, setVisionAnalysisResult] = useState<any>(null);
+
+  // Resolve selection context for panels
+  const selectionContext: SelectionContext = resolveSelectionContext({
+    selectedOrchardCandidate,
+    selectedArchivedOrchard: null, // TODO: implement archive selection
+    selectedMunicipality,
+  });
 
   // Simulate live data updates
   useEffect(() => {
@@ -377,6 +391,10 @@ export default function CommandCenter() {
                   selectedOrchardId={selectedOrchardId || undefined}
                   selectedSectionId={selectedSection || undefined}
                   commandHandler={handleUICommand}
+                  onMunicipalitySelected={setSelectedMunicipality}
+                  onOrchardCandidateSelected={setSelectedOrchardCandidate}
+                  onDetectedOrchardsChanged={setDetectedOrchards}
+                  onVisionAnalysisCompleted={setVisionAnalysisResult}
                 />
               ) : (
                 <OrchardScene3D trees={trees} />
@@ -388,40 +406,54 @@ export default function CommandCenter() {
           <div className="lg:col-span-1 space-y-6">
             <AMDStatusPanel />
             
-            {/* Selected Orchard Info */}
-            {selectedOrchardId && (
+            {/* Current Selection Info */}
+            {(selectedOrchardCandidate || selectedMunicipality) && (
               <div className="glass-elevated rounded-xl p-4 animate-fade-in">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50 mb-3">
-                  Selected Orchard
+                  Current Selection
                 </h3>
-                {(() => {
-                  const orchard = orchardNetwork.find(o => o.id === selectedOrchardId);
-                  if (!orchard) return null;
-                  return (
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Name:</span>
-                        <span className="text-gray-900 dark:text-gray-50 font-medium">{orchard.name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Trees:</span>
-                        <span className="text-gray-900 dark:text-gray-50 font-medium">{orchard.treeCount.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Health:</span>
-                        <span className="text-gray-900 dark:text-gray-50 font-medium">{orchard.healthScore}%</span>
-                      </div>
-                      {selectedSection && (
-                        <div className="pt-2 border-t border-gray-700 mt-2">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-400">Section:</span>
-                            <span className="text-gray-900 dark:text-gray-50 font-medium">{selectedSection}</span>
-                          </div>
-                        </div>
-                      )}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Type:</span>
+                    <span className="text-gray-900 dark:text-gray-50 font-medium capitalize">
+                      {selectionContext.context_type.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Name:</span>
+                    <span className="text-gray-900 dark:text-gray-50 font-medium">
+                      {getContextDisplayName(selectionContext)}
+                    </span>
+                  </div>
+                  {selectionContext.estimated_tree_count && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Trees:</span>
+                      <span className="text-gray-900 dark:text-gray-50 font-medium">
+                        {selectionContext.estimated_tree_count.toLocaleString()}
+                      </span>
                     </div>
-                  );
-                })()}
+                  )}
+                  {selectionContext.ndvi_average && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">NDVI:</span>
+                      <span className="text-gray-900 dark:text-gray-50 font-medium">
+                        {selectionContext.ndvi_average.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  {selectionContext.stress_level && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Stress:</span>
+                      <span className={`font-medium ${
+                        selectionContext.stress_level === 'high' ? 'text-error' :
+                        selectionContext.stress_level === 'medium' ? 'text-warning' :
+                        'text-success'
+                      }`}>
+                        {selectionContext.stress_level}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             
@@ -466,6 +498,12 @@ export default function CommandCenter() {
         {showAnalyticsSummary && (
           <section id="analytics-panel" className="mb-8">
             <AnalyticsSummaryPanel
+              selectionContext={selectionContext}
+              selectedOrchardCandidate={selectedOrchardCandidate}
+              selectedMunicipality={selectedMunicipality}
+              detectedOrchards={detectedOrchards}
+              archivedOrchards={archivedOrchards}
+              visionAnalysisResult={visionAnalysisResult}
               visible={showAnalyticsSummary}
               onClose={() => setShowAnalyticsSummary(false)}
             />
@@ -475,7 +513,15 @@ export default function CommandCenter() {
         {/* Financial Prediction Panel (conditionally shown) */}
         {showFinancialPanel && (
           <section id="financial-panel" className="mb-8">
-            <FinancialPredictionPanel />
+            <FinancialPredictionPanel
+              selectionContext={selectionContext}
+              selectedOrchardCandidate={selectedOrchardCandidate}
+              selectedMunicipality={selectedMunicipality}
+              detectedOrchards={detectedOrchards}
+              archivedOrchards={archivedOrchards}
+              visible={showFinancialPanel}
+              onClose={() => setShowFinancialPanel(false)}
+            />
           </section>
         )}
 

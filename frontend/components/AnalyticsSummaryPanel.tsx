@@ -2,13 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { getMexicoAvocadoAnalytics, michoacanSyntheticOrchards } from "@/lib/mexicoAvocadoNetwork";
+import { SelectionContext, getContextDisplayName } from "@/lib/selectionContext";
 
 interface AnalyticsSummaryPanelProps {
+  selectionContext: SelectionContext;
+  selectedOrchardCandidate?: any;
+  selectedMunicipality?: any;
+  detectedOrchards?: any[];
+  archivedOrchards?: any[];
+  visionAnalysisResult?: any;
   visible?: boolean;
   onClose?: () => void;
 }
 
 export default function AnalyticsSummaryPanel({
+  selectionContext,
+  selectedOrchardCandidate,
+  selectedMunicipality,
+  detectedOrchards = [],
+  archivedOrchards = [],
+  visionAnalysisResult,
   visible = true,
   onClose,
 }: AnalyticsSummaryPanelProps) {
@@ -28,74 +41,70 @@ export default function AnalyticsSummaryPanel({
   useEffect(() => {
     setLastUpdated(new Date().toLocaleTimeString());
     
-    // Get Mexico avocado analytics
-    const mexicoAnalytics = getMexicoAvocadoAnalytics();
-    
-    // Calculate analytics from Mexico synthetic orchards
-    const totalOrchards = mexicoAnalytics.total_synthetic_orchards;
-    const totalTrees = mexicoAnalytics.total_estimated_trees;
-    
-    // Calculate average health score from Mexico orchards
-    const avgHealthScore = michoacanSyntheticOrchards.reduce((sum, o) => {
-      const sectionAvg = o.sections.reduce((s, sec) => s + sec.health_score, 0) / o.sections.length;
-      return sum + sectionAvg;
-    }, 0) / michoacanSyntheticOrchards.length;
-
-    // Find highest stress orchard (Mexico data)
-    const highestStressOrchard = mexicoAnalytics.highest_risk_orchard;
-
-    // Find lowest NDVI section across Mexico orchards
-    let lowestNDVISection = { name: "", ndvi: 1, orchardName: "" };
-    michoacanSyntheticOrchards.forEach((orchard) => {
-      orchard.sections.forEach((section) => {
-        if (section.ndvi < lowestNDVISection.ndvi) {
-          lowestNDVISection = {
-            name: section.name,
-            ndvi: section.ndvi,
-            orchardName: orchard.name,
-          };
-        }
+    // Priority 1: Selected orchard candidate (detected parcel)
+    if (selectionContext.context_type === 'orchard_candidate' && selectedOrchardCandidate) {
+      const candidate = selectedOrchardCandidate;
+      const estimatedYield = (candidate.estimated_tree_count || 0) * 65;
+      const profitAtRisk = candidate.stress_level === 'high' ? estimatedYield * 2.8 * 0.55 * 0.25 :
+                          candidate.stress_level === 'medium' ? estimatedYield * 2.8 * 0.55 * 0.12 :
+                          estimatedYield * 2.8 * 0.55 * 0.05;
+      
+      setSummary({
+        highestStressOrchard: candidate.archive_id || candidate.orchard_id,
+        lowestNDVISection: `NDVI: ${candidate.ndvi_average?.toFixed(2) || 'N/A'}`,
+        projectedYieldRisk: candidate.stress_level === 'high' ? 25 : candidate.stress_level === 'medium' ? 12 : 5,
+        projectedProfitImpact: Math.round(profitAtRisk),
+        recommendedAction: candidate.stress_level === 'high'
+          ? `High stress detected. Immediate irrigation and pest control recommended.`
+          : candidate.stress_level === 'medium'
+          ? `Medium stress. Monitor closely and increase irrigation frequency.`
+          : `Low stress. Continue current management practices.`,
+        totalOrchards: 1,
+        totalTrees: candidate.estimated_tree_count || 0,
+        avgHealthScore: candidate.stress_level === 'high' ? 60 : candidate.stress_level === 'medium' ? 75 : 85,
+        criticalSections: candidate.stress_level === 'high' ? 1 : 0,
       });
-    });
-
-    // Count critical sections (high stress) in Mexico orchards
-    const criticalSections = michoacanSyntheticOrchards.reduce((count, orchard) => {
-      return (
-        count + orchard.sections.filter((s) => s.stress_level === "high").length
-      );
-    }, 0);
-
-    // Calculate projected risk based on stress levels
-    const highStressCount = michoacanSyntheticOrchards.filter(
-      (o) => o.stress_level === "high"
-    ).length;
-    const projectedYieldRisk = (highStressCount / michoacanSyntheticOrchards.length) * 100;
-
-    // Use Mexico profit at risk data
-    const projectedProfitImpact = mexicoAnalytics.projected_profit_at_risk_usd;
-
-    // Determine recommended action
-    let recommendedAction = "Continue monitoring";
-    if (highestStressOrchard.stress_level === "high") {
-      recommendedAction = `Priority: Address ${highestStressOrchard.name} in Michoacán (high stress, NDVI ${highestStressOrchard.ndvi_average.toFixed(2)})`;
-    } else if (criticalSections > 0) {
-      recommendedAction = `Immediate irrigation needed in ${criticalSections} section${criticalSections > 1 ? "s" : ""}`;
-    } else if (highStressCount > 0) {
-      recommendedAction = "Increase irrigation frequency in high-stress orchards";
     }
-
-    setSummary({
-      highestStressOrchard: highestStressOrchard.name,
-      lowestNDVISection: `${lowestNDVISection.orchardName} - ${lowestNDVISection.name}`,
-      projectedYieldRisk: Math.round(projectedYieldRisk),
-      projectedProfitImpact,
-      recommendedAction,
-      totalOrchards,
-      totalTrees,
-      avgHealthScore: Math.round(avgHealthScore),
-      criticalSections,
-    });
-  }, []);
+    // Priority 2: Selected municipality
+    else if (selectionContext.context_type === 'municipality' && selectedMunicipality) {
+      const muni = selectedMunicipality;
+      const parcelsInMuni = detectedOrchards.filter(o => o.municipality_id === muni.id);
+      const totalTrees = parcelsInMuni.reduce((sum, o) => sum + (o.estimated_tree_count || 0), 0);
+      const highStressCount = parcelsInMuni.filter(o => o.stress_level === 'high').length;
+      const profitAtRisk = muni.projected_profit_usd ? muni.projected_profit_usd * 0.15 : 0;
+      
+      setSummary({
+        highestStressOrchard: muni.name,
+        lowestNDVISection: `Avg NDVI: ${muni.ndvi_average?.toFixed(2) || 'N/A'}`,
+        projectedYieldRisk: parcelsInMuni.length > 0 ? Math.round((highStressCount / parcelsInMuni.length) * 100) : 15,
+        projectedProfitImpact: Math.round(profitAtRisk),
+        recommendedAction: parcelsInMuni.length > 0
+          ? `${parcelsInMuni.length} parcels detected. ${highStressCount} require immediate attention.`
+          : `Scan ${muni.name} for orchards to get detailed parcel-level analytics.`,
+        totalOrchards: parcelsInMuni.length,
+        totalTrees: totalTrees,
+        avgHealthScore: muni.stress_level === 'high' ? 65 : muni.stress_level === 'medium' ? 75 : 82,
+        criticalSections: highStressCount,
+      });
+    }
+    // Priority 3: Mexico network fallback
+    else {
+      const mexicoAnalytics = getMexicoAvocadoAnalytics();
+      const highestStressOrchard = mexicoAnalytics.highest_risk_orchard;
+      
+      setSummary({
+        highestStressOrchard: highestStressOrchard.name,
+        lowestNDVISection: `Network Avg NDVI: ${mexicoAnalytics.average_ndvi.toFixed(2)}`,
+        projectedYieldRisk: 18,
+        projectedProfitImpact: mexicoAnalytics.projected_profit_at_risk_usd,
+        recommendedAction: `Select a municipality and scan for orchards to get detailed analytics.`,
+        totalOrchards: detectedOrchards.length + mexicoAnalytics.total_synthetic_orchards,
+        totalTrees: mexicoAnalytics.total_estimated_trees,
+        avgHealthScore: 78,
+        criticalSections: Math.round(mexicoAnalytics.total_synthetic_orchards * 0.15),
+      });
+    }
+  }, [selectionContext, selectedOrchardCandidate, selectedMunicipality, detectedOrchards]);
 
   if (!visible) return null;
 
