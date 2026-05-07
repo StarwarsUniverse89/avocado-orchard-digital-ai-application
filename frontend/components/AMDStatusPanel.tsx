@@ -18,27 +18,32 @@ export default function AMDStatusPanel() {
   const [amdStatus, setAmdStatus] = useState<AMDStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch AMD status from backend
-  useEffect(() => {
-    const fetchAMDStatus = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/v1/amd/status');
-        const result = await response.json();
-        if (result.success) {
-          setAmdStatus(result.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch AMD status:', error);
-      } finally {
-        setLoading(false);
+// Fetch AMD status from backend
+useEffect(() => {
+  const fetchAMDStatus = async () => {
+    try {
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
+
+      const response = await fetch(`${API_BASE_URL}/api/v1/amd/status`);
+      const result = await response.json();
+
+      if (result.success) {
+        setAmdStatus(result.data);
       }
-    };
-    
-    fetchAMDStatus();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchAMDStatus, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    } catch (error) {
+      console.error("Failed to fetch AMD status:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAMDStatus();
+
+  // Refresh every 30 seconds
+  const interval = setInterval(fetchAMDStatus, 30000);
+  return () => clearInterval(interval);
+}, []);
 
   // Simulate latency updates
   useEffect(() => {

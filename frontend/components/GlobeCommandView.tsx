@@ -34,6 +34,25 @@ import {
 } from '@/lib/mexicoAvocadoNetwork';
 import { UICommand, UICommandHandler } from '@/types/uiCommands';
 import SatelliteOrchardView from './SatelliteOrchardView';
+import OrchardCandidatePanel from './OrchardCandidatePanel';
+import { scanMunicipalityForOrchards } from '@/lib/api';
+
+interface DetectedOrchard {
+  archive_id: string;
+  orchard_id: string;
+  municipality_id: string;
+  center_lat: number;
+  center_lng: number;
+  boundary_coordinates: number[][];
+  estimated_hectares: number;
+  estimated_acres: number;
+  estimated_tree_count: number;
+  ndvi_average: number;
+  stress_level: string;
+  confidence: number;
+  detection_method: string;
+  imagery_source: string;
+}
 
 interface GlobeCommandViewProps {
   onOrchardSelect?: (orchardId: string) => void;
@@ -42,6 +61,7 @@ interface GlobeCommandViewProps {
   selectedOrchardId?: string;
   selectedSectionId?: string;
   commandHandler?: UICommandHandler;
+  onOrchardCandidateSelected?: (candidate: DetectedOrchard) => void;
 }
 
 export function GlobeCommandView({
@@ -51,6 +71,7 @@ export function GlobeCommandView({
   selectedOrchardId,
   selectedSectionId,
   commandHandler,
+  onOrchardCandidateSelected,
 }: GlobeCommandViewProps) {
   const viewerRef = useRef<CesiumViewer | null>(null);
   const [cesiumReady, setCesiumReady] = useState<boolean>(false);
@@ -65,8 +86,52 @@ export function GlobeCommandView({
     duration: number;
   } | null>(null);
   
+  // Orchard detection state
+  const [detectedOrchards, setDetectedOrchards] = useState<DetectedOrchard[]>([]);
+  const [scanning, setScanning] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const [selectedOrchardCandidate, setSelectedOrchardCandidate] = useState<DetectedOrchard | null>(null);
+  
   // Get Mexico analytics
   const mexicoAnalytics = getMexicoAvocadoAnalytics();
+
+  // Handle scan municipality for orchards
+  const handleScanMunicipality = async () => {
+    if (!selectedMunicipalityId) return;
+    
+    setScanning(true);
+    setScanError(null);
+    
+    try {
+      const result = await scanMunicipalityForOrchards(selectedMunicipalityId, false);
+      
+      if (result.success && result.data) {
+        setDetectedOrchards(result.data.detected_orchards || []);
+      } else {
+        setScanError(result.error || 'Failed to scan municipality');
+      }
+    } catch (error) {
+      setScanError(String(error));
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  // Handle orchard parcel selection
+  const handleOrchardParcelClick = (orchard: DetectedOrchard) => {
+    setSelectedOrchardCandidate(orchard);
+    onOrchardCandidateSelected?.(orchard);
+    
+    // Fly to the orchard
+    if (viewerRef.current) {
+      const destination = Cartesian3.fromDegrees(
+        orchard.center_lng,
+        orchard.center_lat,
+        3000
+      );
+      setCameraTarget({ destination, duration: 1.5 });
+    }
+  };
 
   // Initialize Cesium token before rendering
   useEffect(() => {
@@ -259,7 +324,26 @@ export function GlobeCommandView({
           <div>Total Municipalities: {mexicoAvocadoMunicipalities.length}</div>
           <div>Total Synthetic Orchards: {michoacanSyntheticOrchards.length}</div>
           <div>Region: Michoacán Avocado Belt</div>
+          {detectedOrchards.length > 0 && (
+            <div className="text-cyan-400">Detected Orchards: {detectedOrchards.length}</div>
+          )}
         </div>
+        
+        {/* Scan Button - shown when municipality is selected */}
+        {selectedMunicipalityId && (
+          <div className="pt-2 border-t border-gray-700">
+            <button
+              onClick={handleScanMunicipality}
+              disabled={scanning}
+              className="w-full px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded font-semibold text-sm transition-colors"
+            >
+              {scanning ? 'Scanning...' : '🛰️ Scan Area for Orchards'}
+            </button>
+            {scanError && (
+              <div className="mt-2 text-xs text-red-400">{scanError}</div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Legend */}
@@ -466,7 +550,84 @@ export function GlobeCommandView({
             </Entity>
           );
         })}
+
+        {/* Render detected orchard parcels as polygons */}
+        {detectedOrchards.map((orchard) => {
+          const isSelected = selectedOrchardCandidate?.orchard_id === orchard.orchard_id;
+          const stressColor = orchard.stress_level === 'high' ? Color.RED :
+                             orchard.stress_level === 'medium' ? Color.YELLOW :
+                             Color.GREEN;
+          
+          // Convert boundary coordinates to Cesium format
+          const boundaryPositions = Cartesian3.fromDegreesArray(
+            orchard.boundary_coordinates.flat()
+          );
+          
+          return (
+            <React.Fragment key={orchard.orchard_id}>
+              {/* Polygon for orchard boundary */}
+              <Entity
+                name={`Detected: ${orchard.orchard_id}`}
+                description={`
+                  <div style="font-family: sans-serif;">
+                    <h3>Detected Orchard Parcel</h3>
+                    <p><strong>ID:</strong> ${orchard.orchard_id}</p>
+                    <p><strong>Area:</strong> ${orchard.estimated_hectares} ha (${orchard.estimated_acres} acres)</p>
+                    <p><strong>Trees:</strong> ${orchard.estimated_tree_count.toLocaleString()}</p>
+                    <p><strong>NDVI:</strong> ${orchard.ndvi_average.toFixed(2)}</p>
+                    <p><strong>Stress Level:</strong> ${orchard.stress_level}</p>
+                    <p><strong>Confidence:</strong> ${(orchard.confidence * 100).toFixed(0)}%</p>
+                    <p><strong>Detection:</strong> ${orchard.detection_method}</p>
+                    <p><strong>Imagery:</strong> ${orchard.imagery_source}</p>
+                  </div>
+                `}
+                onClick={() => handleOrchardParcelClick(orchard)}
+              >
+                <PolygonGraphics
+                  hierarchy={boundaryPositions}
+                  material={isSelected ? Color.CYAN.withAlpha(0.4) : stressColor.withAlpha(0.3)}
+                  outline={true}
+                  outlineColor={isSelected ? Color.CYAN : stressColor}
+                  outlineWidth={isSelected ? 3 : 2}
+                  heightReference={HeightReference.CLAMP_TO_GROUND}
+                />
+              </Entity>
+              
+              {/* Center point marker */}
+              <Entity
+                position={Cartesian3.fromDegrees(orchard.center_lng, orchard.center_lat)}
+                onClick={() => handleOrchardParcelClick(orchard)}
+              >
+                <PointGraphics
+                  pixelSize={isSelected ? 10 : 6}
+                  color={isSelected ? Color.CYAN : stressColor}
+                  outlineColor={Color.WHITE}
+                  outlineWidth={1}
+                  heightReference={HeightReference.CLAMP_TO_GROUND}
+                />
+              </Entity>
+            </React.Fragment>
+          );
+        })}
       </Viewer>
+
+      {/* Orchard Candidate Panel */}
+      {selectedOrchardCandidate && (
+        <OrchardCandidatePanel
+          candidate={selectedOrchardCandidate}
+          onClose={() => setSelectedOrchardCandidate(null)}
+          onSaveSuccess={(archiveId) => {
+            console.log('Orchard saved to archive:', archiveId);
+          }}
+          onAnalysisComplete={(analysisData) => {
+            console.log('Vision/3D analysis complete:', analysisData);
+          }}
+          onGenerate3DTwin={(candidate, analysisData) => {
+            // Switch to 3D twin view
+            onEnter3DTwin?.(candidate.orchard_id);
+          }}
+        />
+      )}
     </div>
   );
 }

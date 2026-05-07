@@ -357,6 +357,183 @@ const commandPatterns: CommandPattern[] = [
     },
   },
   
+  // Scan municipality for orchards
+  {
+    patterns: [
+      /scan\s+Tancítaro\s+for\s+orchards/i,
+      /detect\s+orchards?\s+(?:in\s+)?Tancítaro/i,
+      /find\s+orchards?\s+(?:in\s+)?Tancítaro/i,
+    ],
+    command: 'scan_municipality_orchards',
+    handler: (match, input) => {
+      return {
+        message: 'Scanning Tancítaro for orchard parcels using satellite imagery...',
+        command: 'scan_municipality_orchards',
+        args: {
+          municipality_id: 'tancitaro',
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /scan\s+Uruapan\s+for\s+orchards/i,
+      /detect\s+orchards?\s+(?:in\s+)?Uruapan/i,
+      /find\s+orchards?\s+(?:in\s+)?Uruapan/i,
+    ],
+    command: 'scan_municipality_orchards',
+    handler: (match, input) => {
+      return {
+        message: 'Scanning Uruapan for orchard parcels using satellite imagery...',
+        command: 'scan_municipality_orchards',
+        args: {
+          municipality_id: 'uruapan',
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /detect\s+orchard\s+parcels?\s+near\s+Tancítaro/i,
+      /scan\s+(?:for\s+)?orchards?\s+near\s+Tancítaro/i,
+    ],
+    command: 'scan_municipality_orchards',
+    handler: (match, input) => {
+      return {
+        message: 'Detecting orchard parcels near Tancítaro using satellite analysis...',
+        command: 'scan_municipality_orchards',
+        args: {
+          municipality_id: 'tancitaro',
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Select orchard candidates
+  {
+    patterns: [
+      /select\s+(?:the\s+)?largest\s+orchard\s+candidate/i,
+      /show\s+(?:me\s+)?(?:the\s+)?largest\s+(?:detected\s+)?orchard/i,
+    ],
+    command: 'select_largest_orchard_candidate',
+    handler: (match, input) => {
+      return {
+        message: 'Selecting the largest detected orchard candidate...',
+        command: 'select_largest_orchard_candidate',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  {
+    patterns: [
+      /select\s+(?:the\s+)?highest\s+stress\s+parcel/i,
+      /show\s+(?:me\s+)?(?:the\s+)?highest\s+stress\s+(?:detected\s+)?parcel/i,
+    ],
+    command: 'select_highest_stress_parcel',
+    handler: (match, input) => {
+      return {
+        message: 'Selecting the highest stress detected orchard parcel...',
+        command: 'select_highest_stress_parcel',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Save to archive
+  {
+    patterns: [
+      /save\s+(?:the\s+)?selected\s+orchard\s+to\s+archive/i,
+      /save\s+(?:this\s+)?orchard\s+(?:to\s+)?archive/i,
+      /archive\s+(?:the\s+)?selected\s+orchard/i,
+    ],
+    command: 'save_orchard_to_archive',
+    handler: (match, input) => {
+      return {
+        message: 'Saving selected orchard to archive...',
+        command: 'save_orchard_to_archive',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Run vision pipeline
+  {
+    patterns: [
+      /run\s+vision\s+pipeline/i,
+      /run\s+vision\s+analysis/i,
+      /analyze\s+(?:with\s+)?vision/i,
+    ],
+    command: 'run_vision_pipeline',
+    handler: (match, input) => {
+      return {
+        message: 'Running Vision/3D analysis pipeline on selected orchard...',
+        command: 'run_vision_pipeline',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Generate 3D twin from selected orchard
+  {
+    patterns: [
+      /generate\s+3d\s+twin\s+from\s+selected\s+orchard/i,
+      /create\s+3d\s+twin\s+from\s+(?:this\s+)?orchard/i,
+      /generate\s+(?:digital\s+)?twin\s+from\s+(?:selected\s+)?orchard/i,
+    ],
+    command: 'generate_3d_twin_from_orchard',
+    handler: (match, input) => {
+      return {
+        message: 'Generating 3D digital twin from selected orchard parcel...',
+        command: 'generate_3d_twin_from_orchard',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Show GPS boundary
+  {
+    patterns: [
+      /show\s+(?:the\s+)?gps\s+boundary/i,
+      /display\s+(?:the\s+)?boundary\s+coordinates/i,
+      /show\s+(?:me\s+)?(?:the\s+)?orchard\s+boundary/i,
+    ],
+    command: 'show_gps_boundary',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying GPS boundary coordinates for selected orchard...',
+        command: 'show_gps_boundary',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Show orchard archive
+  {
+    patterns: [
+      /show\s+(?:the\s+)?orchard\s+archive/i,
+      /display\s+(?:the\s+)?archive/i,
+      /view\s+(?:the\s+)?archived\s+orchards/i,
+    ],
+    command: 'show_orchard_archive',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying orchard archive with all saved parcels...',
+        command: 'show_orchard_archive',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
   // Enter 3D twin for highest risk orchard
   {
     patterns: [
@@ -626,6 +803,18 @@ export function parseAICommand(input: string): ParsedCommand {
     • "Find highest stress orchard in the avocado belt"
     • "Compare Tancítaro and Uruapan"
     • "Enter 3D twin for the highest risk orchard"
+    
+    Orchard Detection:
+    • "Scan Tancítaro for orchards"
+    • "Scan Uruapan for orchards"
+    • "Detect orchard parcels near Tancítaro"
+    • "Select largest orchard candidate"
+    • "Select highest stress parcel"
+    • "Save selected orchard to archive"
+    • "Run vision pipeline"
+    • "Generate 3D twin from selected orchard"
+    • "Show GPS boundary"
+    • "Show orchard archive"
     
     General Commands:
     • "Show me the highest stress orchard"

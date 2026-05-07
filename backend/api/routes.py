@@ -741,3 +741,257 @@ async def analyze_vision_3d_endpoint(request: Dict[str, Any]):
 
 
 # Made with Bob
+
+
+# Orchard Detection endpoints
+@router.post("/orchard-detection/scan-area", tags=["Orchard Detection"])
+async def scan_area_for_orchards(request: Dict[str, Any]):
+    """
+    Scan an area for orchard parcels using vision/detection pipeline
+    
+    Request body:
+    {
+        "bbox": {
+            "lat_min": 19.30,
+            "lat_max": 19.36,
+            "lng_min": -102.40,
+            "lng_max": -102.32
+        },
+        "municipality_id": "tancitaro",
+        "save_to_archive": false
+    }
+    """
+    try:
+        from services.orchard_detection_service import scan_area
+        
+        bbox = request.get("bbox")
+        municipality_id = request.get("municipality_id")
+        save_to_archive = request.get("save_to_archive", False)
+        
+        if not bbox or not municipality_id:
+            raise HTTPException(status_code=400, detail="bbox and municipality_id are required")
+        
+        result = scan_area(bbox, municipality_id, save_to_archive=save_to_archive)
+        
+        return {
+            "success": True,
+            "data": result,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/orchard-detection/scan-municipality", tags=["Orchard Detection"])
+async def scan_municipality_for_orchards(request: Dict[str, Any]):
+    """
+    Scan a municipality for orchard parcels
+    
+    Request body:
+    {
+        "municipality_id": "tancitaro",
+        "save_to_archive": false
+    }
+    """
+    try:
+        from services.orchard_detection_service import scan_municipality
+        
+        municipality_id = request.get("municipality_id")
+        save_to_archive = request.get("save_to_archive", False)
+        
+        if not municipality_id:
+            raise HTTPException(status_code=400, detail="municipality_id is required")
+        
+        result = scan_municipality(municipality_id, save_to_archive=save_to_archive)
+        
+        return {
+            "success": True,
+            "data": result,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/orchard-detection/from-upload", tags=["Orchard Detection"])
+async def detect_orchards_from_upload(request: Dict[str, Any]):
+    """
+    Detect orchards from uploaded aerial/drone image
+    
+    Request body:
+    {
+        "image_data": "base64_encoded_image",
+        "municipality_id": "tancitaro",
+        "metadata": {
+            "gps_lat": 19.33,
+            "gps_lng": -102.36,
+            "timestamp": "2024-01-15T10:30:00Z"
+        },
+        "save_to_archive": false
+    }
+    """
+    try:
+        from services.orchard_detection_service import scan_from_upload
+        import base64
+        
+        image_b64 = request.get("image_data")
+        municipality_id = request.get("municipality_id")
+        metadata = request.get("metadata", {})
+        save_to_archive = request.get("save_to_archive", False)
+        
+        if not image_b64 or not municipality_id:
+            raise HTTPException(status_code=400, detail="image_data and municipality_id are required")
+        
+        # Decode base64 image
+        image_data = base64.b64decode(image_b64)
+        
+        result = scan_from_upload(
+            image_data,
+            municipality_id,
+            metadata=metadata,
+            save_to_archive=save_to_archive
+        )
+        
+        return {
+            "success": True,
+            "data": result,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/orchard-detection/status", tags=["Orchard Detection"])
+async def get_detection_status():
+    """Get orchard detection pipeline status"""
+    try:
+        from services.orchard_detection_service import get_detection_pipeline_status
+        
+        status = get_detection_pipeline_status()
+        
+        return {
+            "success": True,
+            "data": status,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Orchard Archive endpoints
+@router.get("/orchard-archive", tags=["Orchard Archive"])
+async def get_orchard_archive(
+    municipality_id: str = None,
+    stress_level: str = None,
+    min_hectares: float = None,
+    max_hectares: float = None
+):
+    """
+    Get archived orchards with optional filters
+    
+    Query parameters:
+    - municipality_id: Filter by municipality
+    - stress_level: Filter by stress level (low, medium, high)
+    - min_hectares: Minimum hectares
+    - max_hectares: Maximum hectares
+    """
+    try:
+        from services.orchard_archive_service import list_orchards, get_archive_stats
+        
+        orchards = list_orchards(
+            municipality_id=municipality_id,
+            stress_level=stress_level,
+            min_hectares=min_hectares,
+            max_hectares=max_hectares
+        )
+        
+        stats = get_archive_stats()
+        
+        return {
+            "success": True,
+            "count": len(orchards),
+            "stats": stats,
+            "data": orchards,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/orchard-archive/{archive_id}", tags=["Orchard Archive"])
+async def get_archived_orchard(archive_id: str):
+    """Get a specific archived orchard by ID"""
+    try:
+        from services.orchard_archive_service import get_orchard
+        
+        orchard = get_orchard(archive_id)
+        
+        if not orchard:
+            raise HTTPException(status_code=404, detail=f"Orchard {archive_id} not found in archive")
+        
+        return {
+            "success": True,
+            "data": orchard,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/orchard-archive", tags=["Orchard Archive"])
+async def save_orchard_to_archive(request: Dict[str, Any]):
+    """
+    Save an orchard to the archive
+    
+    Request body: Orchard data with boundary_coordinates, metadata, etc.
+    """
+    try:
+        from services.orchard_archive_service import save_orchard
+        
+        result = save_orchard(request)
+        
+        return {
+            "success": True,
+            "data": result,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/orchard-archive/{archive_id}", tags=["Orchard Archive"])
+async def update_archived_orchard(archive_id: str, request: Dict[str, Any]):
+    """Update an archived orchard"""
+    try:
+        from services.orchard_archive_service import update_orchard
+        
+        result = update_orchard(archive_id, request)
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=404, detail=result.get("error"))
+        
+        return {
+            "success": True,
+            "data": result,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/orchard-archive/{archive_id}", tags=["Orchard Archive"])
+async def delete_archived_orchard(archive_id: str):
+    """Delete an archived orchard"""
+    try:
+        from services.orchard_archive_service import delete_orchard
+        
+        result = delete_orchard(archive_id)
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=404, detail=result.get("error"))
+        
+        return {
+            "success": True,
+            "data": result,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

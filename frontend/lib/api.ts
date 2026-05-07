@@ -1,6 +1,7 @@
 // API client for backend communication
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Port 8001 is FastAPI backend, Port 8000 is vLLM
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -140,6 +141,186 @@ export async function getNDVITimeseries(orchardId: string, days: number = 30): P
 export async function getStressHeatmap(orchardId: string): Promise<ApiResponse<any>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/v1/satellite/${orchardId}/heatmap`);
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Orchard Detection API
+
+// Scan area for orchards
+export async function scanAreaForOrchards(bbox: any, municipalityId: string, saveToArchive: boolean = false): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/orchard-detection/scan-area`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bbox,
+        municipality_id: municipalityId,
+        save_to_archive: saveToArchive,
+      }),
+    });
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Scan municipality for orchards
+export async function scanMunicipalityForOrchards(municipalityId: string, saveToArchive: boolean = false): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/orchard-detection/scan-municipality`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        municipality_id: municipalityId,
+        save_to_archive: saveToArchive,
+      }),
+    });
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Get detection status
+export async function getDetectionStatus(): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/orchard-detection/status`);
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Orchard Archive API
+
+// Get orchard archive
+export async function getOrchardArchive(filters?: {
+  municipalityId?: string;
+  stressLevel?: string;
+  minHectares?: number;
+  maxHectares?: number;
+}): Promise<ApiResponse<any>> {
+  try {
+    const params = new URLSearchParams();
+    if (filters?.municipalityId) params.append("municipality_id", filters.municipalityId);
+    if (filters?.stressLevel) params.append("stress_level", filters.stressLevel);
+    if (filters?.minHectares) params.append("min_hectares", filters.minHectares.toString());
+    if (filters?.maxHectares) params.append("max_hectares", filters.maxHectares.toString());
+    
+    const url = `${API_BASE_URL}/api/v1/orchard-archive${params.toString() ? `?${params.toString()}` : ""}`;
+    const response = await fetch(url);
+    const result = await response.json();
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Get archived orchard by ID
+export async function getArchivedOrchard(archiveId: string): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/orchard-archive/${archiveId}`);
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Save orchard to archive
+export async function saveOrchardToArchive(orchardData: any): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/orchard-archive`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orchardData),
+    });
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Vision/3D Analysis API
+
+// Run vision/3D analysis on orchard parcel
+export async function runVision3DAnalysis(orchardData: any): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/vision-3d/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orchardData),
+    });
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// AMD Status API
+
+// Get AMD status
+export async function getAMDStatus(): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/amd/status`);
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Mexico Network API
+
+// Get Mexico analytics
+export async function getMexicoAnalytics(): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/orchard-network/mexico/analytics`);
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Agent Command API
+
+// Send agent command
+export async function sendAgentCommand(command: string, context?: any): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/agent/command`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command, context: context || {} }),
+    });
+    const result = await response.json();
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+// Get agent recommendation
+export async function getAgentRecommendation(municipalityName?: string, orchardId?: string, command?: string): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/agent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        municipality_name: municipalityName,
+        orchard_id: orchardId,
+        command: command,
+      }),
+    });
     const result = await response.json();
     return { success: true, data: result.data };
   } catch (error) {

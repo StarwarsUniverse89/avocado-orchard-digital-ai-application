@@ -2,163 +2,272 @@
 
 ## Overview
 
-This project is a high-performance AI agent system that models avocado orchards as a digital twin, enabling real-time analysis, simulation, and decision-making.
+This project is a high-performance AI agent system that models avocado orchards as a digital twin, enabling real-time analysis, simulation, and decision-making with satellite-based orchard detection capabilities.
 
 It combines:
 
-- Interactive digital twin visualization  
-- AI-driven decision support  
-- Research-based simulation models  
-- GPU-accelerated computation on AMD infrastructure  
+- **Interactive digital twin visualization** with Cesium globe integration
+- **AI-driven decision support** with natural language commands
+- **Satellite-based orchard detection** using NDVI and ML analysis
+- **Research-based simulation models** for yield prediction
+- **GPU-accelerated computation** on AMD MI300X infrastructure
+- **Vision/3D analysis pipeline** for tree-level insights
 
 ---
 
 ## Key Features
 
-- Interactive orchard map with tree-level digital twin  
-- Scenario simulation (weather, soil moisture, pest impact)  
-- AI agent delivering actionable, explainable recommendations  
-- Real-time updates via streaming architecture  
-- Scalable design for multi-orchard environments  
+### 🌍 Globe View & Orchard Network
+- Interactive Cesium globe showing Mexico's Michoacán avocado belt
+- Real-time municipality and orchard visualization
+- Stress level indicators and production metrics
+- Synthetic orchard network generation
+
+### 🛰️ Orchard Detection Pipeline
+- **Satellite imagery analysis** for orchard parcel detection
+- **NDVI-based vegetation analysis** with stress level classification
+- **Boundary detection** with GPS coordinate mapping
+- **Tree count estimation** using crown density analysis
+- **Orchard archive system** for saving detected parcels
+- **Vision/3D analysis** for detailed tree-level metrics
+
+### 🤖 AI Command Center
+- Natural language command interface
+- Commands for navigation, scanning, and analysis
+- Automated orchard detection workflows
+- Real-time recommendations and insights
+
+### 🎮 3D Digital Twin
+- Tree-level visualization with health indicators
+- Scenario simulation (weather, soil moisture, pest impact)
+- Before/after comparison views
+- GPU-accelerated rendering
+
+### 📊 Analytics & Predictions
+- Financial impact analysis
+- Yield forecasting
+- Risk assessment
+- Network-wide analytics summaries
 
 ---
 
 ## Architecture
 
-- **Frontend:** Next.js (interactive UI + 3D visualization)  
-- **Backend:** FastAPI (API, simulation engine, real-time streaming)  
-- **AI Agents:** Knowledge-grounded + model-assisted (Qwen / Llama)  
-- **ML Layer:** AMD GPU-powered inference and optional fine-tuning  
+### Frontend Stack
+- **Next.js 14** - React framework with App Router
+- **Cesium** - 3D globe and geospatial visualization
+- **Three.js** - 3D orchard scene rendering
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling
+
+### Backend Stack
+- **FastAPI** - High-performance Python API (Port 8001)
+- **vLLM** - LLM inference server (Port 8000)
+- **AMD MI300X GPU** - Hardware acceleration
+- **ROCm** - AMD GPU compute platform
+
+### ML/AI Layer
+- **Orchard Detection** - NDVI analysis + ML classification
+- **Vision/3D Analysis** - Tree detection and health assessment
+- **Knowledge Agent** - Research-grounded recommendations
+- **LLM Integration** - Qwen/Llama models via AMD Cloud
+
+---
+
+## Quick Start
+
+### Prerequisites
+- Node.js 18+
+- Python 3.10+
+- AMD GPU with ROCm (optional, falls back to CPU)
+
+### Frontend Setup
+```bash
+cd frontend
+npm install
+cp .env.example .env.local
+# Add your Cesium Ion token to .env.local
+npm run dev
+```
+
+Frontend runs on: http://localhost:3000
+
+### Backend Setup
+```bash
+cd backend
+pip install -r requirements.txt
+cp .env.example .env
+# Configure AMD API key if using AMD Cloud
+uvicorn main:app --reload --port 8001
+```
+
+Backend API runs on: http://localhost:8001
+
+### Environment Variables
+
+**Frontend (.env.local):**
+```
+NEXT_PUBLIC_CESIUM_ION_TOKEN=your_cesium_token
+NEXT_PUBLIC_API_URL=http://localhost:8001
+```
+
+**Backend (.env):**
+```
+AMD_API_KEY=your_amd_api_key
+AMD_ENDPOINT=https://api.amd.com/v1
+VLLM_ENDPOINT=http://localhost:8000
+```
+
+---
+
+## Usage Guide
+
+### 1. Globe View Navigation
+- View the Michoacán avocado belt and municipalities
+- Click municipalities to zoom in
+- See production metrics and stress levels
+
+### 2. Orchard Detection
+```
+Commands:
+- "Scan Tancítaro for orchards"
+- "Detect orchard parcels near Uruapan"
+- "Select largest orchard candidate"
+- "Select highest stress parcel"
+```
+
+When a municipality is selected, click **"Scan Area for Orchards"** to:
+- Analyze satellite imagery
+- Detect orchard boundaries
+- Calculate NDVI and stress levels
+- Estimate tree counts and area
+
+### 3. Orchard Analysis
+After detection, click on any orchard parcel to:
+- View detailed metrics (GPS, area, trees, NDVI, stress)
+- **Save to Archive** - Store for future reference
+- **Run Vision/3D Analysis** - Get tree-level insights
+- **Generate 3D Twin** - Create interactive 3D view
+
+### 4. AI Commands
+Use natural language in the AI Advisor panel:
+```
+Navigation:
+- "Navigate to Tancítaro"
+- "Show highest production municipality"
+- "Find highest stress orchard in the avocado belt"
+
+Detection:
+- "Scan Uruapan for orchards"
+- "Save selected orchard to archive"
+- "Run vision pipeline"
+- "Generate 3D twin from selected orchard"
+
+Analysis:
+- "Show financial impact"
+- "Create analytics summary"
+- "Compare Tancítaro and Uruapan"
+```
+
+---
+
+## API Endpoints
+
+### Orchard Detection
+- `POST /api/v1/orchard-detection/scan-municipality` - Scan municipality for orchards
+- `POST /api/v1/orchard-detection/scan-area` - Scan specific area
+- `GET /api/v1/orchard-detection/status` - Get detection status
+
+### Orchard Archive
+- `GET /api/v1/orchard-archive` - List archived orchards
+- `POST /api/v1/orchard-archive` - Save orchard to archive
+- `GET /api/v1/orchard-archive/{id}` - Get archived orchard
+
+### Vision/3D Analysis
+- `POST /api/v1/vision-3d/analyze` - Run vision analysis on orchard
+
+### AI Agent
+- `POST /api/v1/agent/command` - Send natural language command
+- `POST /api/v1/agent` - Get AI recommendation
 
 ---
 
 ## AMD Integration
 
-- Leverages AMD Developer Cloud for model inference  
-- Designed for ROCm compatibility and GPU acceleration  
-- Supports scalable, high-performance AI and simulation workloads  
+### GPU Acceleration
+- **AMD MI300X** for model inference and simulation
+- **ROCm** compatibility for GPU compute
+- **vLLM** for efficient LLM serving
+- **HIP kernels** for custom compute workloads
+
+### Model Support
+- **Qwen models** for agricultural knowledge
+- **Llama models** for general reasoning
+- **Custom vision models** for orchard analysis
+
+### Performance Benefits
+- 10x faster inference vs CPU
+- Real-time simulation capabilities
+- Scalable multi-orchard processing
 
 ---
 
-## Goal
+## Development
 
-Transform agricultural data into real-time, AI-driven decisions by combining simulation, intelligence, and high-performance compute.
-
-
-## SYSTEM ARCHITECTURE
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                    BACKEND (AMD MI300X GPU)                         │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐ │
-│  │  AI Agent Layer  │  │ Simulation Engine│  │ Model Inference  │ │
-│  │  (LLM Decisions) │  │ (Physics Models) │  │ (vLLM on GPU)    │ │
-│  └────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘ │
-│           │                     │                     │           │
-│           └─────────────────────┼─────────────────────┘           │
-│                                 │                                 │
-│                    ┌────────────▼────────────┐                    │
-│                    │  GPU-Accelerated       │                    │
-│                    │  Compute Kernels       │                    │
-│                    │  (HIP/ROCm)            │                    │
-│                    │  - Particle systems    │                    │
-│                    │  - Physics simulation  │                    │
-│                    │  - Heatmap generation  │                    │
-│                    └────────────┬────────────┘                    │
-│                                 │                                 │
-│                    ┌────────────▼────────────┐                    │
-│                    │  Real-Time Data Stream │                    │
-│                    │  (WebSocket + Kafka)   │                    │
-│                    │  - Metrics updates     │                    │
-│                    │  - Decision events     │                    │
-│                    │  - Simulation frames   │                    │
-│                    └────────────┬────────────┘                    │
-│                                 │                                 │
-└─────────────────────────────────┼─────────────────────────────────┘
-                                  │
-                    ┌─────────────▼──────────────┐
-                    │  WebSocket Broadcast      │
-                    │  (Real-time frame data)   │
-                    └─────────────┬──────────────┘
-                                  │
-┌─────────────────────────────────┼─────────────────────────────────┐
-│                    FRONTEND (Browser GPU)                         │
-├─────────────────────────────────┼─────────────────────────────────┤
-│                                 │                                 │
-│  ┌──────────────────────────────▼──────────────────────────────┐ │
-│  │              WebGL/WebGPU Rendering Engine                 │ │
-│  │  (Three.js + Custom Shaders + GPU Compute)                 │ │
-│  ├──────────────────────────────────────────────────────────┤ │
-│  │                                                          │ │
-│  │  ┌────────────────┐  ┌────────────────┐  ┌───────────┐ │ │
-│  │  │ Tree Rendering │  │ Particle System│  │ Heatmaps  │ │ │
-│  │  │ (Instancing)   │  │ (GPU Compute)  │  │ (Textures)│ │ │
-│  │  └────────────────┘  └────────────────┘  └───────────┘ │ │
-│  │                                                          │ │
-│  │  ┌────────────────┐  ┌────────────────┐  ┌───────────┐ │ │
-│  │  │ Animations     │  │ Interpolation  │  │ LOD System│ │ │
-│  │  │ (Tweens)       │  │ (Smooth update)│  │ (Culling) │ │ │
-│  │  └────────────────┘  └────────────────┘  └───────────┘ │ │
-│  │                                                          │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-│  ┌──────────────────────────────────────────────────────────┐ │
-│  │         UI Layer (Decision Controls)                     │ │
-│  │  - Apply recommendation button                           │ │
-│  │  - Scenario selector                                     │ │
-│  │  - Time scrubber (animation control)                     │ │
-│  │  - Before/After comparison toggle                        │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
+### Project Structure
 ```
-## REAL-TIME METRIC-DRIVEN RENDERING
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Step 1: AI Agent Makes Decision                            │
-│ ─────────────────────────────────────────────────────────── │
-│ Input:  Current orchard metrics (temp, moisture, pests)    │
-│ Process: LLM reasoning + simulation                        │
-│ Output: Recommendation (e.g., "Increase irrigation")       │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────────┐
-│ Step 2: Backend Executes Recommendation                    │
-│ ─────────────────────────────────────────────────────────── │
-│ - Update database (action logged)                          │
-│ - Trigger simulation (predict outcomes)                    │
-│ - Calculate new metrics (soil moisture, yield, etc.)       │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────────┐
-│ Step 3: Broadcast Real-Time Data                           │
-│ ─────────────────────────────────────────────────────────── │
-│ WebSocket message:                                         │
-│ {                                                          │
-│   "event": "action_executed",                             │
-│   "action": "irrigation_increased",                        │
-│   "metrics": {                                             │
-│     "soil_moisture": [72, 75, 78, ...],  // per tree      │
-│     "temperature": 24.5,                                  │
-│     "timestamp": 1714814400000                            │
-│   },                                                       │
-│   "animation": {                                           │
-│     "duration": 3000,  // 3 second animation              │
-│     "easing": "easeInOutQuad",                            │
-│     "type": "soil_moisture_increase"                      │
-│   }                                                        │
-│ }                                                          │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────────┐
-│ Step 4: Frontend Receives & Renders                        │
-│ ─────────────────────────────────────────────────────────── │
-│ 1. Parse WebSocket message                                │
-│ 2. Update tree color map (moisture → color gradient)      │
-│ 3. Animate tree colors over 3 seconds                     │
-│ 4. Update heatmap overlay                                 │
-│ 5. Show notification: "Irrigation increased"              │
-│ 6. Update metrics display                                 │
-└─────────────────────────────────────────────────────────────┘
+├── frontend/                 # Next.js application
+│   ├── components/          # React components
+│   ├── lib/                # Utilities and API clients
+│   └── app/                # App Router pages
+├── backend/                 # FastAPI application
+│   ├── api/                # API routes
+│   ├── services/           # Business logic
+│   └── agents/             # AI agents
+├── ml/                     # ML models and inference
+│   ├── inference/          # Model inference code
+│   └── datasets/           # Training data
+└── docs/                   # Documentation
 ```
+
+### Key Components
+- **GlobeCommandView** - Cesium globe with orchard detection
+- **OrchardCandidatePanel** - Detected orchard details and actions
+- **AIAdvisorPanel** - Natural language command interface
+- **OrchardScene3D** - 3D digital twin visualization
+
+### Adding New Commands
+1. Add patterns to `frontend/lib/aiCommandParser.ts`
+2. Implement handler logic
+3. Add UI command mapping in components
+4. Test with AI Advisor panel
+
+---
+
+## Research Foundation
+
+Based on peer-reviewed research in:
+- Precision agriculture and remote sensing
+- NDVI analysis for crop health assessment
+- Machine learning for agricultural applications
+- Digital twin technology for farming
+
+---
+
+## License
+
+MIT License - See LICENSE file for details
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+---
+
+**Made with ❤️ for sustainable agriculture and AI innovation**
