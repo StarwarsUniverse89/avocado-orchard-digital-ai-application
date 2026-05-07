@@ -58,6 +58,18 @@ export default function CommandCenter() {
     selectedMunicipality,
   });
 
+  // Clear selectedOrchardCandidate when municipality changes
+  useEffect(() => {
+    if (selectedMunicipality && selectedOrchardCandidate) {
+      // Only clear if the selected orchard doesn't belong to the new municipality
+      if (selectedOrchardCandidate.municipality_id !== selectedMunicipality.id) {
+        console.log('🔄 Municipality changed, clearing selected orchard candidate');
+        setSelectedOrchardCandidate(null);
+        setVisionAnalysisResult(null);
+      }
+    }
+  }, [selectedMunicipality?.id]);
+
   // Simulate live data updates
   useEffect(() => {
     const interval = setInterval(() => {
@@ -152,12 +164,67 @@ export default function CommandCenter() {
       case 'show_gps_boundary':
       case 'show_orchard_archive':
       case 'select_orchard':
-      case 'compare_municipalities':
         // These commands are handled by GlobeCommandView
         // Pass the command through via ref if available
         if (globeCommandRef.current?.handleCommand) {
           globeCommandRef.current.handleCommand(command);
         }
+        break;
+      
+      // Data Query Commands
+      case 'show_belt_metric':
+        // Show analytics panel with belt-wide focus
+        setShowAnalyticsSummary(true);
+        setTimeout(() => {
+          document.getElementById('analytics-panel')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }, 100);
+        break;
+      
+      case 'show_municipality_metric':
+        // Show analytics panel focused on specific municipality
+        setShowAnalyticsSummary(true);
+        setTimeout(() => {
+          document.getElementById('analytics-panel')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }, 100);
+        break;
+      
+      case 'show_detected_orchards':
+      case 'show_archived_orchards':
+      case 'show_high_stress_parcels':
+        // Pass to GlobeCommandView to filter and display parcels
+        if (globeCommandRef.current?.handleCommand) {
+          globeCommandRef.current.handleCommand(command);
+        }
+        break;
+      
+      case 'show_selected_context_summary':
+        // Show both analytics and financial panels
+        setShowAnalyticsSummary(true);
+        setShowFinancialPanel(true);
+        setTimeout(() => {
+          document.getElementById('analytics-panel')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }, 100);
+        break;
+      
+      case 'compare_municipalities':
+        // TODO: Implement municipality comparison panel
+        // For now, show analytics panel which will display comparison data
+        setShowAnalyticsSummary(true);
+        setTimeout(() => {
+          document.getElementById('analytics-panel')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }, 100);
         break;
         
       case 'navigate_to_orchard':
@@ -304,6 +371,25 @@ export default function CommandCenter() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
+        {/* Debug: Current Context */}
+        {process.env.NODE_ENV === 'development' && (
+          <section className="mb-4">
+            <div className="glass-elevated rounded-lg p-4 text-xs font-mono">
+              <div className="font-bold text-primary mb-2">🔍 Debug: Current Context</div>
+              <div className="grid grid-cols-2 gap-2 text-gray-300">
+                <div>context_type: <span className="text-success">{selectionContext.context_type}</span></div>
+                <div>context_id: <span className="text-success">{selectionContext.id}</span></div>
+                <div>context_name: <span className="text-success">{selectionContext.name}</span></div>
+                <div>municipality_id: <span className="text-success">{selectionContext.municipality_id || 'null'}</span></div>
+                <div>selectedMunicipality: <span className="text-warning">{selectedMunicipality?.id || 'null'}</span></div>
+                <div>selectedOrchardCandidate: <span className="text-warning">{selectedOrchardCandidate?.orchard_id || 'null'}</span></div>
+                <div>detectedOrchards: <span className="text-info">{detectedOrchards.length}</span></div>
+                <div>archivedOrchards: <span className="text-info">{archivedOrchards.length}</span></div>
+              </div>
+            </div>
+          </section>
+        )}
+        
         {/* Key Metrics */}
         <section className="mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

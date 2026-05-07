@@ -47,8 +47,15 @@ export default function FinancialPredictionPanel({
 
   // Calculate financial impact based on selection context
   useEffect(() => {
+    console.log('💰 FinancialPredictionPanel: Recalculating for context:', selectionContext.context_type, selectionContext.name);
     calculateFinancialImpact();
-  }, [selectionContext, selectedOrchardCandidate, selectedMunicipality]);
+  }, [
+    selectionContext.context_type,
+    selectionContext.id,
+    selectedOrchardCandidate?.orchard_id,
+    selectedMunicipality?.id,
+    detectedOrchards.length,
+  ]);
 
   const calculateFinancialImpact = () => {
     setLoading(true);

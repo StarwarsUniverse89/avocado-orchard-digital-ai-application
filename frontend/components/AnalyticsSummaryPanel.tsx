@@ -39,6 +39,7 @@ export default function AnalyticsSummaryPanel({
   const [lastUpdated, setLastUpdated] = useState("");
 
   useEffect(() => {
+    console.log('📊 AnalyticsSummaryPanel: Recalculating for context:', selectionContext.context_type, selectionContext.name);
     setLastUpdated(new Date().toLocaleTimeString());
     
     // Priority 1: Selected orchard candidate (detected parcel)
@@ -104,7 +105,14 @@ export default function AnalyticsSummaryPanel({
         criticalSections: Math.round(mexicoAnalytics.total_synthetic_orchards * 0.15),
       });
     }
-  }, [selectionContext, selectedOrchardCandidate, selectedMunicipality, detectedOrchards]);
+  }, [
+    selectionContext.context_type,
+    selectionContext.id,
+    selectedOrchardCandidate?.orchard_id,
+    selectedMunicipality?.id,
+    detectedOrchards.length,
+    archivedOrchards.length,
+  ]);
 
   if (!visible) return null;
 

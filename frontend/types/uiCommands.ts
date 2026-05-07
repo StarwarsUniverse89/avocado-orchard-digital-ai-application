@@ -24,7 +24,13 @@ export type UICommand =
   | RunVisionPipelineCommand
   | Generate3DTwinFromOrchardCommand
   | ShowGPSBoundaryCommand
-  | ShowOrchardArchiveCommand;
+  | ShowOrchardArchiveCommand
+  | ShowBeltMetricCommand
+  | ShowMunicipalityMetricCommand
+  | ShowDetectedOrchardsCommand
+  | ShowArchivedOrchardsCommand
+  | ShowHighStressParcelsCommand
+  | ShowSelectedContextSummaryCommand;
 
 export interface NavigateToOrchardCommand {
   type: 'navigate_to_orchard';
@@ -162,6 +168,35 @@ export interface ShowGPSBoundaryCommand {
 
 export interface ShowOrchardArchiveCommand {
   type: 'show_orchard_archive';
+}
+
+// Data Query Commands
+export interface ShowBeltMetricCommand {
+  type: 'show_belt_metric';
+  metric: 'total_hectares' | 'total_trees' | 'average_ndvi' | 'profit_at_risk';
+}
+
+export interface ShowMunicipalityMetricCommand {
+  type: 'show_municipality_metric';
+  municipality_id?: string;
+  metric: 'hectares' | 'ndvi' | 'stress_level' | 'projected_profit' | 'production_rank';
+}
+
+export interface ShowDetectedOrchardsCommand {
+  type: 'show_detected_orchards';
+  filter?: 'all' | 'high_stress' | 'medium_stress' | 'low_stress';
+}
+
+export interface ShowArchivedOrchardsCommand {
+  type: 'show_archived_orchards';
+}
+
+export interface ShowHighStressParcelsCommand {
+  type: 'show_high_stress_parcels';
+}
+
+export interface ShowSelectedContextSummaryCommand {
+  type: 'show_selected_context_summary';
 }
 
 // Command handler type

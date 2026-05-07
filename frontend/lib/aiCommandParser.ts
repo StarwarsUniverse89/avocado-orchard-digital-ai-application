@@ -534,6 +534,165 @@ const commandPatterns: CommandPattern[] = [
     },
   },
   
+  // Belt-wide metrics
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?total\s+hectares\s+(?:in\s+)?(?:the\s+)?(?:avocado\s+)?belt/i,
+      /what(?:'s|\s+is)\s+the\s+total\s+(?:area|hectares)\s+(?:in\s+)?(?:the\s+)?belt/i,
+      /how\s+many\s+hectares\s+(?:in\s+)?(?:the\s+)?(?:avocado\s+)?belt/i,
+      /show\s+belt\s+(?:total|metrics|statistics)/i,
+    ],
+    command: 'show_belt_metric',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying total hectares across the Michoacán avocado belt.',
+        command: 'show_belt_metric',
+        args: {
+          metric: 'total_hectares',
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Municipality metrics
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?hectares\s+for\s+([a-záéíóúñ]+)/i,
+      /what(?:'s|\s+is)\s+the\s+(?:total\s+)?(?:area|hectares)\s+(?:in|for)\s+([a-záéíóúñ]+)/i,
+      /how\s+many\s+hectares\s+(?:in|for)\s+([a-záéíóúñ]+)/i,
+      /show\s+([a-záéíóúñ]+)\s+(?:metrics|statistics|data)/i,
+    ],
+    command: 'show_municipality_metric',
+    handler: (match, input) => {
+      const municipalityName = match[1].toLowerCase();
+      const municipality = mexicoAvocadoMunicipalities.find(m =>
+        m.name.toLowerCase().includes(municipalityName) ||
+        m.id.toLowerCase().includes(municipalityName)
+      );
+      
+      return {
+        message: municipality
+          ? `Displaying metrics for ${municipality.name}.`
+          : `Could not find municipality "${municipalityName}".`,
+        command: 'show_municipality_metric',
+        args: {
+          municipality_id: municipality?.id,
+          metric: 'hectares',
+        },
+        confidence: municipality ? 0.95 : 0.4,
+      };
+    },
+  },
+  
+  // Municipality comparison
+  {
+    patterns: [
+      /compare\s+([a-záéíóúñ]+)\s+(?:and|vs|versus)\s+([a-záéíóúñ]+)/i,
+      /show\s+(?:me\s+)?(?:a\s+)?comparison\s+(?:of|between)\s+([a-záéíóúñ]+)\s+(?:and|vs)\s+([a-záéíóúñ]+)/i,
+      /([a-záéíóúñ]+)\s+vs\s+([a-záéíóúñ]+)/i,
+    ],
+    command: 'compare_municipalities',
+    handler: (match, input) => {
+      const name1 = match[1].toLowerCase();
+      const name2 = match[2].toLowerCase();
+      
+      const muni1 = mexicoAvocadoMunicipalities.find(m =>
+        m.name.toLowerCase().includes(name1) || m.id.toLowerCase().includes(name1)
+      );
+      const muni2 = mexicoAvocadoMunicipalities.find(m =>
+        m.name.toLowerCase().includes(name2) || m.id.toLowerCase().includes(name2)
+      );
+      
+      return {
+        message: (muni1 && muni2)
+          ? `Comparing ${muni1.name} and ${muni2.name}.`
+          : `Could not find one or both municipalities.`,
+        command: 'compare_municipalities',
+        args: {
+          municipality_id_1: muni1?.id,
+          municipality_id_2: muni2?.id,
+        },
+        confidence: (muni1 && muni2) ? 0.95 : 0.4,
+      };
+    },
+  },
+  
+  // Show detected orchards
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?detected\s+orchards?/i,
+      /(?:display|list)\s+(?:all\s+)?detected\s+(?:orchard\s+)?parcels?/i,
+      /what\s+orchards?\s+(?:were|have\s+been)\s+detected/i,
+    ],
+    command: 'show_detected_orchards',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying all detected orchard parcels.',
+        command: 'show_detected_orchards',
+        args: {
+          filter: 'all',
+        },
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Show high stress parcels
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?high\s+stress\s+(?:orchards?|parcels?)/i,
+      /(?:display|list)\s+high\s+stress\s+(?:areas?|zones?|parcels?)/i,
+      /which\s+(?:orchards?|parcels?)\s+(?:have|are)\s+high\s+stress/i,
+      /show\s+(?:orchards?|parcels?)\s+(?:at|with)\s+risk/i,
+    ],
+    command: 'show_high_stress_parcels',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying high stress orchard parcels.',
+        command: 'show_high_stress_parcels',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Show archived orchards
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?archived\s+orchards?/i,
+      /(?:display|list)\s+(?:all\s+)?archived\s+(?:orchard\s+)?parcels?/i,
+      /what(?:'s|\s+is)\s+in\s+the\s+(?:orchard\s+)?archive/i,
+    ],
+    command: 'show_archived_orchards',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying archived orchard parcels.',
+        command: 'show_archived_orchards',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
+  // Show selected context summary
+  {
+    patterns: [
+      /show\s+(?:me\s+)?(?:the\s+)?(?:current\s+)?(?:selection|context)\s+summary/i,
+      /what(?:'s|\s+is)\s+(?:currently\s+)?selected/i,
+      /summarize\s+(?:the\s+)?(?:current\s+)?selection/i,
+    ],
+    command: 'show_selected_context_summary',
+    handler: (match, input) => {
+      return {
+        message: 'Displaying summary of current selection.',
+        command: 'show_selected_context_summary',
+        args: {},
+        confidence: 0.95,
+      };
+    },
+  },
+  
   // Show financial impact (MUST come before generic orchard navigation)
   {
     patterns: [

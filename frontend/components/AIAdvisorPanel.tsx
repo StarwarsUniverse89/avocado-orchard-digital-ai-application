@@ -205,14 +205,6 @@ export default function AIAdvisorPanel({ onCommand }: AIAdvisorPanelProps) {
             highlight: args.highlight,
           },
         };
-      case "compare_municipalities":
-        return {
-          type: "compare_municipalities",
-          args: {
-            municipality_ids: args.municipality_ids,
-          },
-        };
-      
       // Legacy Orchard Commands
       case "navigate_to_orchard":
         return {
@@ -266,6 +258,43 @@ export default function AIAdvisorPanel({ onCommand }: AIAdvisorPanelProps) {
           type: "create_analytics_summary",
           include_all: args.include_all || true,
         };
+      
+      // Data Query Commands
+      case "show_belt_metric":
+        return {
+          type: "show_belt_metric",
+          metric: args.metric || "total_hectares",
+        };
+      case "show_municipality_metric":
+        return {
+          type: "show_municipality_metric",
+          municipality_id: args.municipality_id,
+          metric: args.metric || "hectares",
+        };
+      case "show_detected_orchards":
+        return {
+          type: "show_detected_orchards",
+          filter: args.filter || "all",
+        };
+      case "show_archived_orchards":
+        return {
+          type: "show_archived_orchards",
+        };
+      case "show_high_stress_parcels":
+        return {
+          type: "show_high_stress_parcels",
+        };
+      case "show_selected_context_summary":
+        return {
+          type: "show_selected_context_summary",
+        };
+      case "compare_municipalities":
+        return {
+          type: "compare_municipalities",
+          municipality_id_1: args.municipality_id_1,
+          municipality_id_2: args.municipality_id_2,
+        };
+      
       case "reset_view":
         return {
           type: "reset_view",
