@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 from typing import List, Dict, Any
+from core.drone_mission_agent import drone_agent
 import json
 from pathlib import Path
 import sys
@@ -17,6 +19,9 @@ from services.financial_service import (
 
 router = APIRouter()
 
+class DroneMissionRequest(BaseModel):
+    orchard_id: str
+
 # Orchards endpoints
 @router.get("/orchards", tags=["Orchards"])
 async def get_all_orchards():
@@ -31,6 +36,13 @@ async def get_all_orchards():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/drone/plan-mission", tags=["Drone Missions"])
+async def plan_drone_mission(request: DroneMissionRequest):
+    """Plan a virtual drone inspection mission for an orchard."""
+    try:
+        return drone_agent.plan_mission(request.orchard_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/orchards/{orchard_id}", tags=["Orchards"])
 async def get_orchard(orchard_id: str):
@@ -994,4 +1006,3 @@ async def delete_archived_orchard(archive_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-

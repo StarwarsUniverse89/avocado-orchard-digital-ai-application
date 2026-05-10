@@ -328,4 +328,34 @@ export async function getAgentRecommendation(municipalityName?: string, orchardI
   }
 }
 
+// Drone Mission API
+export async function planDroneMission(orchardId: string): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/drone/plan-mission`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orchard_id: orchardId }),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Drone Mission API Error (${response.status}):`, errorText);
+      return { 
+        success: false, 
+        error: `Server error ${response.status}: ${errorText.substring(0, 50)}...` 
+      };
+    }
+    
+    const result = await response.json();
+    console.log("Drone Mission Plan Received:", result);
+    
+    // Support both direct object return and wrapped { data: ... } format
+    const missionData = result.data !== undefined ? result.data : result;
+    return { success: true, data: missionData };
+  } catch (error) {
+    console.error("Drone Mission API Network Failure:", error);
+    return { success: false, error: String(error) };
+  }
+}
+
 // Made with Bob

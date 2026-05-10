@@ -66,6 +66,12 @@ class Config:
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
+    # Google Cloud / Gemini Configuration (Hackathon Expansion)
+    GOOGLE_CLOUD_PROJECT: Optional[str] = os.getenv("GOOGLE_CLOUD_PROJECT")
+    GOOGLE_CLOUD_LOCATION: str = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
+    GOOGLE_GENAI_MODEL: str = os.getenv("GOOGLE_GENAI_MODEL", "gemini-1.5-pro")
+    GOOGLE_AGENT_MODE: str = os.getenv("GOOGLE_AGENT_MODE", "mock") # "mock" or "live"
+    
     @classmethod
     def is_amd_cloud_configured(cls) -> bool:
         """Check if AMD Cloud API is configured"""
@@ -103,6 +109,10 @@ class Config:
             print(f"  - Model: {cls.VLLM_MODEL_NAME}")
         print(f"AMD GPU: {'✅ Enabled' if cls.AMD_GPU_ENABLED else '❌ Disabled'}")
         print(f"HuggingFace: {'✅ Configured' if cls.HUGGINGFACE_TOKEN else '❌ Not configured'}")
+        print(f"Google Cloud Agent: {'✅ Live' if cls.GOOGLE_AGENT_MODE == 'live' else '☁️ Mock Mode'}")
+        if cls.GOOGLE_CLOUD_PROJECT:
+            print(f"  - Project: {cls.GOOGLE_CLOUD_PROJECT}")
+            print(f"  - Model: {cls.GOOGLE_GENAI_MODEL}")
         print("="*60 + "\n")
 
 

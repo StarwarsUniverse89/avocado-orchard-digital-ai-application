@@ -15,6 +15,7 @@ import AIAdvisorPanel from "@/components/AIAdvisorPanel";
 import SimulationControls from "@/components/SimulationControls";
 import AMDStatusPanel from "@/components/AMDStatusPanel";
 import MetricCard from "@/components/MetricCard";
+import DroneMissionPanel from "@/components/DroneMissionPanel";
 import AnalyticsSummaryPanel from "@/components/AnalyticsSummaryPanel";
 import FinancialPredictionPanel from "@/components/FinancialPredictionPanel";
 import {
@@ -125,6 +126,11 @@ export default function CommandCenter() {
     } else {
       setViewMode(mode);
     }
+  };
+
+  // Drone Mission placeholder for future Cesium route rendering
+  const handleMissionPlanned = (missionData: any) => {
+    console.log("🛸 Mission planned for Cesium visualization:", missionData);
   };
 
   // UI Command handler for AI advisor
@@ -491,6 +497,12 @@ export default function CommandCenter() {
           {/* Right Column - AMD Status and Selected Orchard Details */}
           <div className="lg:col-span-1 space-y-6">
             <AMDStatusPanel />
+
+            {/* Drone Mission Control Panel */}
+            <DroneMissionPanel 
+              orchardId={selectedOrchardId || "tancitaro"} 
+              onMissionPlanned={handleMissionPlanned}
+            />
             
             {/* Current Selection Info */}
             {(selectedOrchardCandidate || selectedMunicipality) && (
