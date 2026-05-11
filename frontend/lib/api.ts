@@ -358,4 +358,34 @@ export async function planDroneMission(orchardId: string): Promise<ApiResponse<a
   }
 }
 
+export async function analyzeDroneInspection(payload: {
+  mission_id: string;
+  orchard_id: string;
+  mock_image_targets: string[];
+}): Promise<ApiResponse<any>> {
+  console.log("📡 API: Posting to analyze-inspection", payload);
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/drone/analyze-inspection`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      return { success: false, error: errorText };
+    }
+    
+    const result = await response.json();
+    console.log("Drone Inspection Analysis Received:", result);
+    
+    // Support both direct object return and wrapped { data: ... } format
+    const analysisData = result?.data ?? result;
+    return { success: true, data: analysisData };
+  } catch (error) {
+    console.error("Drone Inspection API Network Failure:", error);
+    return { success: false, error: String(error) };
+  }
+}
+
 // Made with Bob

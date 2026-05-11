@@ -7,6 +7,7 @@ import {
   PolygonGraphics,
   PointGraphics,
   LabelGraphics,
+  PolylineGraphics,
   CameraFlyTo,
 } from 'resium';
 import {
@@ -65,6 +66,7 @@ interface GlobeCommandViewProps {
   onMunicipalitySelected?: (municipality: any) => void;
   onDetectedOrchardsChanged?: (orchards: DetectedOrchard[]) => void;
   onVisionAnalysisCompleted?: (result: any) => void;
+  plannedMission?: any;
 }
 
 export interface GlobeCommandViewRef {
@@ -82,6 +84,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
   onMunicipalitySelected,
   onDetectedOrchardsChanged,
   onVisionAnalysisCompleted,
+  plannedMission,
 }, ref) => {
   const viewerRef = useRef<CesiumViewer | null>(null);
   const [cesiumReady, setCesiumReady] = useState<boolean>(false);
@@ -235,6 +238,23 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
       });
     }
   }, [cesiumReady]);
+
+  // Fly to drone mission when planned
+  useEffect(() => {
+    if (plannedMission) {
+      console.log("🛸 GlobeCommandView received plannedMission", plannedMission);
+      
+      if (plannedMission.waypoints && plannedMission.waypoints.length > 0) {
+        const first = plannedMission.waypoints[0];
+        if (viewerRef.current) {
+          viewerRef.current.camera.flyTo({
+            destination: Cartesian3.fromDegrees(first.lng, first.lat, 8000),
+            duration: 1.5,
+          });
+        }
+      }
+    }
+  }, [plannedMission]);
 
   // Handle UI commands
   const handleCommand = useCallback(
@@ -519,6 +539,48 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
             onComplete={() => setCameraTarget(null)}
           />
         )}
+
+        {/* Render Planned Drone Mission Route */}
+        {plannedMission && plannedMission.waypoints && (
+          <Entity
+            name={`Drone Mission: ${plannedMission.mission_id}`}
+            description={`Status: ${plannedMission.status}`}
+          >
+            <PolylineGraphics
+              positions={Cartesian3.fromDegreesArrayHeights(
+                plannedMission.waypoints.flatMap((w: any) => [w.lng, w.lat, 500])
+              )}
+              width={8}
+              material={Color.CYAN}
+            />
+          </Entity>
+        )}
+
+        {/* Render Drone Priority Zones */}
+        {plannedMission && plannedMission.priority_zones && plannedMission.priority_zones.map((zone: any, i: number) => (
+          <Entity
+            key={`priority-${plannedMission.mission_id}-${i}`}
+            position={Cartesian3.fromDegrees(zone.lng, zone.lat)}
+            name={`Priority Zone: ${zone.id}`}
+          >
+            <PointGraphics
+              pixelSize={15}
+              color={Color.MAGENTA.withAlpha(0.6)}
+              outlineColor={Color.WHITE}
+              outlineWidth={2}
+              heightReference={HeightReference.CLAMP_TO_GROUND}
+            />
+            <LabelGraphics
+              text={`PRIORITY: ${zone.severity}`}
+              font="10px sans-serif"
+              fillColor={Color.WHITE}
+              outlineColor={Color.BLACK}
+              outlineWidth={2}
+              pixelOffset={new Cartesian3(0, -20, 0)}
+              heightReference={HeightReference.CLAMP_TO_GROUND}
+            />
+          </Entity>
+        ))}
 
         {/* Render Mexico Avocado Belt boundary */}
         {showAvocadoBelt && (

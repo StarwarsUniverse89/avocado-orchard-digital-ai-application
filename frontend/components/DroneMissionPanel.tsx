@@ -1,30 +1,40 @@
 "use client";
 
 import { useState } from "react";
-import { planDroneMission } from "@/lib/api";
+import { planDroneMission, analyzeDroneInspection } from "@/lib/api";
 
 interface DroneMissionPanelProps {
   orchardId: string;
+  targetType?: string;
   onMissionPlanned?: (missionData: any) => void;
 }
 
-export default function DroneMissionPanel({ orchardId, onMissionPlanned }: DroneMissionPanelProps) {
+export default function DroneMissionPanel({ orchardId, targetType = "demo", onMissionPlanned }: DroneMissionPanelProps) {
   const [loading, setLoading] = useState(false);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
   const [missionData, setMissionData] = useState<any>(null);
+  const [analysisData, setAnalysisData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handlePlanMission = async () => {
     setLoading(true);
     setError(null);
+    setAnalysisData(null);
     try {
       const response = await planDroneMission(orchardId);
-      if (response.success && response.data) {
-        setMissionData(response.data);
+      console.log("🛸 DroneMissionPanel raw response:", response);
+
+      const mission = response?.data ?? response;
+
+      if (mission?.mission_id) {
+        setMissionData(mission);
+
         if (onMissionPlanned) {
-          onMissionPlanned(response.data);
+          console.log("🛸 Sending mission to parent:", mission);
+          onMissionPlanned(mission);
         }
       } else {
-        setError(response.error || "Failed to generate flight plan.");
+        setError(response?.error || "Failed to generate flight plan.");
       }
     } catch (err) {
       console.error("Drone Mission Panel Execution Error:", err);
@@ -34,13 +44,42 @@ export default function DroneMissionPanel({ orchardId, onMissionPlanned }: Drone
     }
   };
 
+  const handleAnalyzeInspection = async () => {
+    if (!missionData) return;
+    
+    setAnalysisLoading(true);
+    setError(null);
+    
+    console.log("🧪 Initiating Drone Inspection Analysis...");
+    console.log("🧪 Source Mission Data:", missionData);
+    try {
+      const payload = {
+        mission_id: missionData.mission_id,
+        orchard_id: missionData.orchard_id || orchardId,
+        mock_image_targets: missionData.mock_image_targets || []
+      };
+      
+      console.log("🧪 Sending Analysis Payload:", payload);
+      const response = await analyzeDroneInspection(payload);
+      if (response.success) {
+        setAnalysisData(response.data);
+      } else {
+        setError(response.error || "Failed to analyze inspection data.");
+      }
+    } catch (err) {
+      setError("Analysis system offline. Check backend logs.");
+    } finally {
+      setAnalysisLoading(false);
+    }
+  };
+
   return (
     <div className="glass-elevated rounded-xl p-4 animate-fade-in border-l-2 border-l-primary/50">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-xl">🛸</span>
           <h3 className="text-sm font-bold text-gray-900 dark:text-gray-50 uppercase tracking-tighter">
-            Drone Mission Ops
+            Mission Target: <span className="text-primary">{targetType} / {orchardId}</span>
           </h3>
         </div>
         <button
@@ -82,6 +121,86 @@ export default function DroneMissionPanel({ orchardId, onMissionPlanned }: Drone
               <span className="text-primary font-bold">{missionData.battery_estimate_percent}%</span>
             </div>
           </div>
+
+          {/* Analysis Trigger Button */}
+          {!analysisData && (
+            <button
+              onClick={handleAnalyzeInspection}
+              disabled={analysisLoading || !missionData?.mission_id}
+              className={`w-full py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border border-success/30 transition-all ${
+                analysisLoading 
+                  ? "bg-success/10 text-success/50 cursor-not-allowed" 
+                  : "bg-success/10 text-success hover:bg-success/20 shadow-sm"
+              }`}
+            >
+              {analysisLoading ? "Processing Imagery..." : "Analyze Inspection Results"}
+            </button>
+          )}
+
+          {/* Analysis Results Display */}
+          {analysisData && (
+            <div className="space-y-4 pt-4 border-t border-gray-800 animate-slide-in">
+               <div className="flex items-center gap-2 mb-2">
+                 <span className="text-xs">🧠</span>
+                 <h4 className="text-[10px] font-bold text-success uppercase">Inspection Findings</h4>
+               </div>
+
+               <div className="space-y-2">
+                 <div className="flex justify-between text-[10px] font-mono">
+                   <span className="text-gray-500">SEVERITY</span>
+                   <span className="text-warning font-bold uppercase">{analysisData.severity}</span>
+                 </div>
+                 <div className="flex justify-between text-[10px] font-mono">
+                   <span className="text-gray-500">CONFIDENCE</span>
+                   <span className="text-gray-100">{(analysisData.confidence * 100).toFixed(0)}%</span>
+                 </div>
+                 <div className="flex justify-between text-[10px] font-mono">
+                   <span className="text-gray-500">YIELD_RISK</span>
+                   <span className="text-error">{analysisData.estimated_yield_risk}</span>
+                 </div>
+               </div>
+
+               <div className="space-y-1">
+                 <h5 className="text-[9px] font-bold text-gray-500 uppercase">Detected Anomalies</h5>
+                 <ul className="text-[10px] space-y-1">
+                   {analysisData.detected_issues.map((item: any, i: number) => {
+                     const issueText = typeof item === 'string' ? item : (item.issue || item.description || "Anomaly detected");
+                     return (
+                       <li key={i} className="flex gap-2 text-gray-300">
+                         <span className="text-success">•</span> {issueText}
+                       </li>
+                     );
+                   })}
+                 </ul>
+               </div>
+
+               <div className="space-y-1">
+                 <h5 className="text-[9px] font-bold text-gray-500 uppercase">Recommended Interventions</h5>
+                 <ul className="text-[10px] space-y-1">
+                   {analysisData.recommended_actions.map((action: string, i: number) => (
+                     <li key={i} className="flex gap-2 text-gray-300">
+                       <span className="text-primary">→</span> {action}
+                     </li>
+                   ))}
+                 </ul>
+               </div>
+
+               <div className="bg-success/5 border border-success/20 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold text-success uppercase">Gemini Vision Report</span>
+                    <div className="flex-1 h-[1px] bg-success/20"></div>
+                  </div>
+                  <p className="text-[11px] text-gray-400 italic leading-relaxed font-serif">
+                    "{analysisData.gemini_analysis_summary}"
+                  </p>
+               </div>
+
+               <div className="bg-black/40 p-2 rounded border border-gray-800 text-[9px] font-mono">
+                  <span className="text-gray-500 block uppercase">Follow-up Protocol</span>
+                  <span className="text-primary">{analysisData.follow_up_recommendation}</span>
+               </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">

@@ -51,6 +51,7 @@ export default function CommandCenter() {
   const [detectedOrchards, setDetectedOrchards] = useState<any[]>([]);
   const [archivedOrchards, setArchivedOrchards] = useState<any[]>([]);
   const [visionAnalysisResult, setVisionAnalysisResult] = useState<any>(null);
+  const [activeDroneMission, setActiveDroneMission] = useState<any>(null);
 
   // Resolve selection context for panels
   const selectionContext: SelectionContext = resolveSelectionContext({
@@ -58,6 +59,20 @@ export default function CommandCenter() {
     selectedArchivedOrchard: null, // TODO: implement archive selection
     selectedMunicipality,
   });
+
+  // Determine drone mission target using explicit hierarchy priority
+  const droneMissionTargetId = 
+    selectedOrchardCandidate?.id || 
+    selectedOrchardCandidate?.orchard_id || 
+    selectedOrchardCandidate?.name || 
+    selectedMunicipality?.id || 
+    selectedMunicipality?.name || 
+    "tancitaro";
+
+  const droneMissionTargetType = 
+    selectedOrchardCandidate ? "orchard" : 
+    selectedMunicipality ? "municipality" : 
+    "demo";
 
   // Clear selectedOrchardCandidate when municipality changes
   useEffect(() => {
@@ -131,6 +146,7 @@ export default function CommandCenter() {
   // Drone Mission placeholder for future Cesium route rendering
   const handleMissionPlanned = (missionData: any) => {
     console.log("🛸 Mission planned for Cesium visualization:", missionData);
+    setActiveDroneMission(missionData);
   };
 
   // UI Command handler for AI advisor
@@ -487,6 +503,7 @@ export default function CommandCenter() {
                   onOrchardCandidateSelected={setSelectedOrchardCandidate}
                   onDetectedOrchardsChanged={setDetectedOrchards}
                   onVisionAnalysisCompleted={setVisionAnalysisResult}
+                  plannedMission={activeDroneMission}
                 />
               ) : (
                 <OrchardScene3D trees={trees} />
@@ -500,7 +517,8 @@ export default function CommandCenter() {
 
             {/* Drone Mission Control Panel */}
             <DroneMissionPanel 
-              orchardId={selectedOrchardId || "tancitaro"} 
+              orchardId={droneMissionTargetId}
+              targetType={droneMissionTargetType}
               onMissionPlanned={handleMissionPlanned}
             />
             

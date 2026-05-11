@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
 from core.drone_mission_agent import drone_agent
+from core.inspection_analysis_agent import inspection_analysis_agent
 import json
 from pathlib import Path
 import sys
@@ -22,6 +23,11 @@ router = APIRouter()
 class DroneMissionRequest(BaseModel):
     orchard_id: str
 
+class InspectionAnalysisRequest(BaseModel):
+    mission_id: str
+    orchard_id: str
+    mock_image_targets: List[str]
+
 # Orchards endpoints
 @router.get("/orchards", tags=["Orchards"])
 async def get_all_orchards():
@@ -41,6 +47,18 @@ async def plan_drone_mission(request: DroneMissionRequest):
     """Plan a virtual drone inspection mission for an orchard."""
     try:
         return drone_agent.plan_mission(request.orchard_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/drone/analyze-inspection", tags=["Drone Missions"])
+async def analyze_drone_inspection(request: InspectionAnalysisRequest):
+    """Analyze imagery from a completed drone mission."""
+    try:
+        return inspection_analysis_agent.analyze_inspection(
+            request.mission_id,
+            request.orchard_id,
+            request.mock_image_targets
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
