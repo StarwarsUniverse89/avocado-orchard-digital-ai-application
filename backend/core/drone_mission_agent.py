@@ -7,7 +7,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from services.orchard_service import get_orchard_by_id
-from core.google_agent_service import google_agent_service
+from services.gemini_service import gemini_service
 
 class DroneMissionAgent:
     """
@@ -27,11 +27,11 @@ class DroneMissionAgent:
         if not orchard:
             return {"error": f"Orchard {orchard_id} not found in Mexico network archive."}
 
-        # Generate agentic reasoning via Google Agent Service (Gemini/Vertex AI)
-        reasoning = google_agent_service.generate_mission_reasoning(
-            orchard.get("name", "Unknown Orchard"),
-            orchard.get("stress_level", "unknown")
-        )
+        # Generate agentic reasoning via Gemini Service
+        reasoning = gemini_service.generate_mission_reasoning({
+            "name": orchard.get("name", "Unknown Orchard"),
+            "stress_level": orchard.get("stress_level", "unknown")
+        })
 
         # Base coordinates from orchard location
         center_lat = orchard.get("lat", 19.33)

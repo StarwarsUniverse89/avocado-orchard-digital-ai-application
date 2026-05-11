@@ -66,11 +66,13 @@ class Config:
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
-    # Google Cloud / Gemini Configuration (Hackathon Expansion)
+    # Google Cloud / Gemini Configuration (Hackathon Alignment)
     GOOGLE_CLOUD_PROJECT: Optional[str] = os.getenv("GOOGLE_CLOUD_PROJECT")
     GOOGLE_CLOUD_LOCATION: str = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
     GOOGLE_GENAI_MODEL: str = os.getenv("GOOGLE_GENAI_MODEL", "gemini-1.5-pro")
     GOOGLE_AGENT_MODE: str = os.getenv("GOOGLE_AGENT_MODE", "mock") # "mock" or "live"
+    GOOGLE_API_KEY: Optional[str] = os.getenv("GOOGLE_API_KEY")
+    GEMINI_MODE: str = os.getenv("GEMINI_MODE", os.getenv("GOOGLE_AGENT_MODE", "mock"))
     
     # MongoDB Configuration (Mission Memory)
     MONGODB_URI: Optional[str] = os.getenv("MONGODB_URI")

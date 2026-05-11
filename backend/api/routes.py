@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Any
 from core.drone_mission_agent import drone_agent
 from core.inspection_analysis_agent import inspection_analysis_agent
+from core.orchard_operations_agent import orchard_operations_agent
 from services.mission_memory_service import mission_memory
 import json
 from pathlib import Path
@@ -64,6 +65,14 @@ async def analyze_drone_inspection(request: InspectionAnalysisRequest):
         )
         mission_memory.save_inspection_analysis(result)
         return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/operations/regional-summary", tags=["Operations"])
+async def get_regional_summary():
+    """Get high-level regional operations summary from the Gemini Operations Agent"""
+    try:
+        return orchard_operations_agent.get_regional_summary()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

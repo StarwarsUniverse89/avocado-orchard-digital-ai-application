@@ -1,10 +1,17 @@
-# 🥑 Avocado Orchard Digital AI Application
+# 🥑 Gemini Orchard Operations Agent
+
+> **A Gemini-powered regional orchard operations agent that monitors the avocado belt, plans virtual drone inspections, analyzes crop stress, estimates yield/profit exposure, and stores mission memory through MongoDB MCP.**
+
+## 🚀 Hackathon Alignment
+This project is a submission for the **Google Building Agents for Real-World Challenges** hackathon.
+
+- **Core Brain**: Powered by **Gemini 1.5 Pro**.
+- **Agent Architecture**: Designed for **Google Cloud Agent Builder** compatibility.
+- **Partner Track**: Integrated with **MongoDB** for operational memory.
+- **MCP Superpower**: Uses Model Context Protocol concepts to provide the agent with historical orchard intelligence.
 
 ## Overview
-
-**Avocado Orchard Digital AI** is an AI-powered digital twin command center for avocado orchards. The application helps growers, operators, and agricultural teams scan avocado-producing regions, detect orchard parcel candidates, archive orchard records, analyze production and risk, and generate 3D digital twin views for decision support.
-
-This project was built as a solo submission for the **AMD AI Developer Challenge**. It demonstrates how AMD GPU infrastructure can support live AI inference, geospatial intelligence, orchard risk analysis, and a vision-to-3D simulation workflow.
+**Gemini Orchard Operations Agent** is a multi-step digital twin command center. It moves beyond simple chat interfaces to perform operational tasks: detecting regional risk, planning drone missions, and analyzing multimodal inspection data to protect agricultural yields.
 
 The current implementation focuses on the Michoacán avocado belt in Mexico and combines:
 
@@ -63,9 +70,16 @@ The archive system enables:
 - Creating company/grower orchard networks
 - Running analytics on a single orchard, municipality, or network
 
-### 🤖 AI Advisor
+### 🤖 Gemini Operations Agent
+The agent oversees the regional avocado network and prioritizes work across many orchards. It leverages MongoDB MCP to remember previous interventions and outcomes.
 
-The AI Advisor converts natural language into application workflows and UI actions.
+**Operational Flow:**
+1. **Monitor**: Review the **Regional Operations Summary** for belt-wide risks.
+2. **Analyze**: Select a municipality and scan for high-stress parcels.
+3. **Plan**: Deploy a **Drone Mission Agent** to generate Cesium flight paths.
+4. **Inspect**: Run the **Inspection Analysis** workflow on simulated imagery.
+5. **Act**: Review Gemini's recommendations and financial exposure.
+6. **Remember**: All actions are stored in **MongoDB Memory** for future reasoning.
 
 Example commands:
 
@@ -181,6 +195,15 @@ Persistence:
 - **Vision/3D analysis service** - Tree-level simulation and digital twin parameters
 - **NDVI/stress estimation** - Crop health and risk indicators
 
+## 🛠️ Environment Variables
+```env
+GOOGLE_API_KEY=your_key_here
+GEMINI_MODE=live
+GOOGLE_GENAI_MODEL=gemini-1.5-pro
+MONGODB_URI=your_mongodb_uri
+MONGODB_DATABASE=avocado_ops
+```
+
 ---
 
 ## Ports
@@ -261,7 +284,6 @@ python -m vllm.entrypoints.openai.api_server \
 
 ```bash
 cd ~/avocado-orchard-digital-ai-application/backend
-source venv/bin/activate
 uvicorn main:app --host 0.0.0.0 --port 8001
 ```
 
