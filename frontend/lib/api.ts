@@ -388,4 +388,17 @@ export async function analyzeDroneInspection(payload: {
   }
 }
 
+export async function getDroneHistory(orchardId: string): Promise<ApiResponse<any[]>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/drone/history/${orchardId}`);
+    if (!response.ok) return { success: false, error: "History offline" };
+    
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    console.error("Drone History Failure:", error);
+    return { success: false, error: String(error) };
+  }
+}
+
 // Made with Bob

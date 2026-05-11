@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { planDroneMission, analyzeDroneInspection } from "@/lib/api";
+import { useState, useEffect } from "react";
+import { planDroneMission, analyzeDroneInspection, getDroneHistory } from "@/lib/api";
 
 interface DroneMissionPanelProps {
   orchardId: string;
@@ -14,7 +14,19 @@ export default function DroneMissionPanel({ orchardId, targetType = "demo", onMi
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [missionData, setMissionData] = useState<any>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!orchardId) return;
+      const res = await getDroneHistory(orchardId);
+      if (res.success && res.data) {
+        setHistory(res.data);
+      }
+    };
+    fetchHistory();
+  }, [orchardId, missionData, analysisData]);
 
   const handlePlanMission = async () => {
     setLoading(true);
@@ -199,6 +211,32 @@ export default function DroneMissionPanel({ orchardId, targetType = "demo", onMi
                   <span className="text-gray-500 block uppercase">Follow-up Protocol</span>
                   <span className="text-primary">{analysisData.follow_up_recommendation}</span>
                </div>
+            </div>
+          )}
+
+          {/* Operational History Section */}
+          {history.length > 0 && (
+            <div className="space-y-2 pt-4 border-t border-gray-800">
+              <h4 className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Recent Ops History</h4>
+              <div className="space-y-2">
+                {history.map((entry, i) => (
+                  <div key={i} className="bg-black/20 p-2 rounded border border-gray-800/50 flex justify-between items-center text-[10px]">
+                    <div className="flex flex-col">
+                      <span className="text-gray-400 font-mono">
+                        {entry.created_at ? new Date(entry.created_at).toLocaleDateString() : 'Previous Scan'}
+                      </span>
+                      <span className="text-gray-500 italic truncate max-w-[120px]">
+                        {entry.severity} severity detected
+                      </span>
+                    </div>
+                    <div className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${
+                      entry.severity === 'high' ? 'bg-error/10 text-error' : 'bg-success/10 text-success'
+                    }`}>
+                      {entry.status}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

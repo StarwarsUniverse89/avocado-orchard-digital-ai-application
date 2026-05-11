@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Any
 from core.drone_mission_agent import drone_agent
 from core.inspection_analysis_agent import inspection_analysis_agent
+from services.mission_memory_service import mission_memory
 import json
 from pathlib import Path
 import sys
@@ -46,7 +47,9 @@ async def get_all_orchards():
 async def plan_drone_mission(request: DroneMissionRequest):
     """Plan a virtual drone inspection mission for an orchard."""
     try:
-        return drone_agent.plan_mission(request.orchard_id)
+        result = drone_agent.plan_mission(request.orchard_id)
+        mission_memory.save_mission(result)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -54,11 +57,25 @@ async def plan_drone_mission(request: DroneMissionRequest):
 async def analyze_drone_inspection(request: InspectionAnalysisRequest):
     """Analyze imagery from a completed drone mission."""
     try:
-        return inspection_analysis_agent.analyze_inspection(
+        result = inspection_analysis_agent.analyze_inspection(
             request.mission_id,
             request.orchard_id,
             request.mock_image_targets
         )
+        mission_memory.save_inspection_analysis(result)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/drone/history/{orchard_id}", tags=["Drone Missions"])
+async def get_drone_history(orchard_id: str):
+    """Retrieve historical mission/analysis data for an orchard."""
+    try:
+        history = mission_memory.get_recent_orchard_history(orchard_id)
+        return {
+            "success": True,
+            "data": history
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

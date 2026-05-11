@@ -72,6 +72,10 @@ class Config:
     GOOGLE_GENAI_MODEL: str = os.getenv("GOOGLE_GENAI_MODEL", "gemini-1.5-pro")
     GOOGLE_AGENT_MODE: str = os.getenv("GOOGLE_AGENT_MODE", "mock") # "mock" or "live"
     
+    # MongoDB Configuration (Mission Memory)
+    MONGODB_URI: Optional[str] = os.getenv("MONGODB_URI")
+    MONGODB_DATABASE: str = os.getenv("MONGODB_DATABASE", "avocado_ops")
+
     @classmethod
     def is_amd_cloud_configured(cls) -> bool:
         """Check if AMD Cloud API is configured"""
