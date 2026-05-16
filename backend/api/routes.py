@@ -1279,15 +1279,28 @@ async def archive_manual_boundary(request: ManualBoundaryRequest):
     record = {
         "archive_id": archive_id,
         "boundary_id": request.boundary_id or archive_id,
+        "orchard_id": archive_id,
         "municipality_id": request.municipality_id,
         "label_type": request.label_type,
         "polygon": request.polygon,
+        "boundary_coordinates": [[point[1], point[0]] for point in request.polygon],
         "manual_metadata": request.manual_metadata,
+        "estimated_hectares": request.manual_metadata.get("estimated_hectares"),
+        "estimated_tree_count": request.manual_metadata.get("tree_count_estimate"),
+        "confidence": 1.0,
+        "detection_method": "manual_operator_label",
+        "imagery_source": "operator_cesium_outline",
+        "scan_source": "manual_boundary_mode",
         "boundary_source": "human_labeled",
         "ml_training_label": request.ml_training_label,
         "status": "archived",
     }
     memory_status = mission_memory.save_manual_boundary(record)
+    try:
+        from services.orchard_archive_service import save_orchard
+        save_orchard(record)
+    except Exception:
+        pass
     return {
         "success": True,
         "data": {
@@ -1314,112 +1327,58 @@ async def get_manual_boundaries(municipality_id: str):
     }
 
 
-def _closed_polygon_ring(polygon: List[List[float]]) -> List[List[float]]:
-    if not polygon:
-        return []
-    ring = [point for point in polygon]
-    if ring[0] != ring[-1]:
-        ring.append(ring[0])
-    return ring
-
-
-def _manual_boundary_feature(boundary: Dict[str, Any]) -> Dict[str, Any]:
-    metadata = boundary.get("manual_metadata", {})
-    label_type = boundary.get("label_type", "needs_review")
-    review_status = "needs_review" if label_type == "needs_review" else "accepted"
-    if label_type == "non_orchard":
-        review_status = "non_orchard"
-
-    return {
-        "type": "Feature",
-        "geometry": {
-            "type": "Polygon",
-            "coordinates": [_closed_polygon_ring(boundary.get("polygon", []))],
-        },
-        "properties": {
-            "archive_id": boundary.get("archive_id"),
-            "label_type": label_type,
-            "crop_type": metadata.get("crop_type", "avocado"),
-            "municipality_id": boundary.get("municipality_id"),
-            "estimated_hectares": metadata.get("estimated_hectares"),
-            "tree_count_estimate": metadata.get("tree_count_estimate"),
-            "boundary_source": boundary.get("boundary_source", "human_labeled"),
-            "ml_training_label": boundary.get("ml_training_label", True),
-            "review_status": review_status,
-        },
-    }
-
-
 @router.get("/ml/training-dataset/orchard-boundaries", tags=["ML Training Dataset"])
 async def get_orchard_boundary_training_dataset():
-    """Return manual orchard boundaries in an ML-ready GeoJSON-style dataset envelope."""
-    import uuid
+    """Return archived orchard boundaries in an ML-ready GeoJSON-style dataset envelope."""
+    from backend.ml.prepare_dataset import dataset_envelope
 
-    boundaries = [
-        boundary for boundary in mission_memory.get_all_manual_boundaries()
-        if boundary.get("boundary_source") == "human_labeled"
-    ]
-    examples = [_manual_boundary_feature(boundary) for boundary in boundaries]
-
-    return {
-        "success": True,
-        "data": {
-            "dataset_id": f"orchard_boundary_labels_{uuid.uuid4().hex[:8]}",
-            "label_type": "orchard_boundary_segmentation",
-            "total_examples": len(examples),
-            "format": "geojson",
-            "examples": examples,
-        },
-    }
+    return {"success": True, "data": dataset_envelope()}
 
 
 @router.get("/ml/training-dataset/orchard-boundaries.geojson", tags=["ML Training Dataset"])
 async def export_orchard_boundary_training_geojson():
-    """Export human-labeled manual boundaries as GeoJSON FeatureCollection."""
-    boundaries = [
-        boundary for boundary in mission_memory.get_all_manual_boundaries()
-        if boundary.get("boundary_source") == "human_labeled"
-    ]
+    """Export archived orchard boundaries as GeoJSON FeatureCollection."""
+    from backend.ml.prepare_dataset import build_feature_collection
+
+    return build_feature_collection()
+
+
+@router.post("/ml/training-dataset/export-orchard-boundaries", tags=["ML Training Dataset"])
+async def export_orchard_boundary_training_dataset():
+    """Build and persist a GeoJSON export plus metadata for orchard boundary labels."""
+    from backend.ml.prepare_dataset import export_dataset
+
+    export = export_dataset()
     return {
-        "type": "FeatureCollection",
-        "name": "human_labeled_avocado_orchard_boundaries",
-        "features": [_manual_boundary_feature(boundary) for boundary in boundaries],
+        "success": True,
+        "data": {
+            "status": "exported",
+            **export,
+        },
+    }
+
+
+@router.get("/ml/training-dataset/exports", tags=["ML Training Dataset"])
+async def list_orchard_boundary_training_exports():
+    """List saved orchard boundary dataset exports."""
+    from backend.ml.prepare_dataset import list_exports
+
+    exports = list_exports()
+    return {
+        "success": True,
+        "data": {
+            "total_exports": len(exports),
+            "exports": exports,
+        },
     }
 
 
 @router.get("/ml/training-dataset/summary", tags=["ML Training Dataset"])
 async def get_training_dataset_summary():
-    """Summarize human-labeled boundaries available for training dataset preparation."""
-    boundaries = [
-        boundary for boundary in mission_memory.get_all_manual_boundaries()
-        if boundary.get("boundary_source") == "human_labeled"
-    ]
-    total = len(boundaries)
-    accepted = sum(1 for boundary in boundaries if boundary.get("label_type") in ["orchard_block", "orchard_cluster"])
-    needs_review = sum(1 for boundary in boundaries if boundary.get("label_type") == "needs_review")
-    non_orchard = sum(1 for boundary in boundaries if boundary.get("label_type") == "non_orchard")
-    municipalities = sorted({
-        boundary.get("municipality_id")
-        for boundary in boundaries
-        if boundary.get("municipality_id")
-    })
+    """Summarize archived labels available for training dataset preparation."""
+    from backend.ml.prepare_dataset import summarize_dataset
 
-    return {
-        "success": True,
-        "data": {
-            "total_human_labeled_boundaries": total,
-            "accepted_labels": accepted,
-            "needs_review_labels": needs_review,
-            "non_orchard_labels": non_orchard,
-            "municipalities_covered": municipalities,
-            "ready_for_training": accepted >= 10 and needs_review == 0,
-            "recommended_next_step": (
-                "Export GeoJSON and begin training dataset preparation once review labels are resolved."
-                if total > 0
-                else "Create human-labeled orchard boundaries in Manual Boundary Mode."
-            ),
-        },
-    }
+    return {"success": True, "data": summarize_dataset()}
 
 
 @router.post("/twin/reconstruct", tags=["Twin"])

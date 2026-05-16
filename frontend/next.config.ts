@@ -8,10 +8,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   webpack: (config) => {
     config.plugins.push(
       new webpack.DefinePlugin({

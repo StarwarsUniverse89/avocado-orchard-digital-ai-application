@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { planDroneMission, analyzeDroneInspection, getDroneHistory } from "@/lib/api";
+import { planDroneMission, analyzeDroneInspection, getDroneHistory, delegateTask, simulateInterventionROI } from "@/lib/api";
 
 interface DroneMissionPanelProps {
   orchardId: string;
@@ -14,6 +14,10 @@ export default function DroneMissionPanel({ orchardId, targetType = "demo", onMi
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [missionData, setMissionData] = useState<any>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
+  const [roiLoading, setRoiLoading] = useState(false);
+  const [roiData, setRoiData] = useState<any>(null);
+  const [taskLoading, setTaskLoading] = useState(false);
+  const [taskData, setTaskData] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +36,8 @@ export default function DroneMissionPanel({ orchardId, targetType = "demo", onMi
     setLoading(true);
     setError(null);
     setAnalysisData(null);
+    setRoiData(null);
+    setTaskData(null);
     try {
       const response = await planDroneMission(orchardId);
       console.log("🛸 DroneMissionPanel raw response:", response);
@@ -82,6 +88,64 @@ export default function DroneMissionPanel({ orchardId, targetType = "demo", onMi
       setError("Analysis system offline. Check backend logs.");
     } finally {
       setAnalysisLoading(false);
+    }
+  };
+
+  const handleSimulateROI = async () => {
+    if (!analysisData) return;
+    
+    setRoiLoading(true);
+    setError(null);
+    try {
+      const payload = {
+        orchard_id: analysisData.orchard_id,
+        mission_id: analysisData.mission_id,
+        severity: analysisData.severity,
+        detected_issues: analysisData.detected_issues,
+        recommended_actions: analysisData.recommended_actions,
+        estimated_financial_impact: analysisData.estimated_financial_impact
+      };
+      
+      const response = await simulateInterventionROI(payload);
+      if (response.success) {
+        setRoiData(response.data);
+      } else {
+        setError("ROI simulation unavailable.");
+      }
+    } catch (err) {
+      setError("ROI engine connection error.");
+    } finally {
+      setRoiLoading(false);
+    }
+  };
+
+  const handleDelegateTask = async () => {
+    if (!analysisData) return;
+    
+    setTaskLoading(true);
+    setError(null);
+    try {
+      const payload = {
+        orchard_id: analysisData.orchard_id,
+        mission_id: analysisData.mission_id,
+        analysis_id: analysisData.analysis_id,
+        recipient_role: "operator",
+        recommended_actions: analysisData.recommended_actions,
+        severity: analysisData.severity,
+        estimated_financial_impact: analysisData.estimated_financial_impact,
+        follow_up_recommendation: analysisData.follow_up_recommendation
+      };
+      
+      const response = await delegateTask(payload);
+      if (response.success) {
+        setTaskData(response.data);
+      } else {
+        setError("Failed to draft operational task.");
+      }
+    } catch (err) {
+      setError("Task delegation service error.");
+    } finally {
+      setTaskLoading(false);
     }
   };
 
@@ -210,6 +274,125 @@ export default function DroneMissionPanel({ orchardId, targetType = "demo", onMi
                <div className="bg-black/40 p-2 rounded border border-gray-800 text-[9px] font-mono">
                   <span className="text-gray-500 block uppercase">Follow-up Protocol</span>
                   <span className="text-primary">{analysisData.follow_up_recommendation}</span>
+               </div>
+            </div>
+          )}
+
+          {/* ROI Simulation Section */}
+          {analysisData && !roiData && (
+            <button
+              onClick={handleSimulateROI}
+              disabled={roiLoading}
+              className={`w-full py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border border-warning/30 transition-all ${
+                roiLoading 
+                  ? "bg-warning/10 text-warning/50 cursor-not-allowed" 
+                  : "bg-warning/10 text-warning hover:bg-warning/20 shadow-sm"
+              }`}
+            >
+              {roiLoading ? "Calculating ROI trade-offs..." : "Simulate Intervention ROI"}
+            </button>
+          )}
+
+          {roiData && (
+            <div className="space-y-4 pt-4 border-t border-gray-800 animate-slide-in">
+               <div className="flex items-center gap-2">
+                 <span className="text-xs">💰</span>
+                 <h4 className="text-[10px] font-bold text-warning uppercase">Operational ROI Analysis</h4>
+               </div>
+
+               <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                 <div className="bg-black/40 p-2 rounded border border-gray-800">
+                   <span className="text-gray-500 block uppercase">Intervention Cost</span>
+                   <span className="text-gray-100">${roiData.estimated_intervention_cost.toLocaleString()}</span>
+                 </div>
+                 <div className="bg-black/40 p-2 rounded border border-gray-800">
+                   <span className="text-gray-500 block uppercase">Avoided Loss</span>
+                   <span className="text-success font-bold">${roiData.avoided_loss_estimate.toLocaleString()}</span>
+                 </div>
+               </div>
+
+               <div className="bg-error/5 border border-error/20 rounded p-3 text-[10px]">
+                  <div className="flex justify-between items-center mb-1 font-bold text-error">
+                    <span className="uppercase">14-Day Delay Risk</span>
+                    <span>+{roiData.delay_14_day_risk.spread_risk_increase_percent}% Spread</span>
+                  </div>
+                  <p className="text-gray-400">
+                    Waiting 14 days adds <span className="text-gray-100 font-bold">${roiData.delay_14_day_risk.additional_exposure.toLocaleString()}</span> in revenue exposure.
+                  </p>
+               </div>
+
+               <div className="bg-warning/5 border border-warning/20 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold text-warning uppercase">Strategic Reasoning</span>
+                    <div className="flex-1 h-[1px] bg-warning/20"></div>
+                  </div>
+                  <p className="text-[11px] text-gray-400 italic leading-relaxed font-serif">
+                    "{roiData.gemini_roi_reasoning}"
+                  </p>
+               </div>
+            </div>
+          )}
+
+          {/* Task Delegation Trigger - now follows ROI */}
+          {roiData && !taskData && (
+            <button
+              onClick={handleDelegateTask}
+              disabled={taskLoading}
+              className={`w-full py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border border-primary/30 transition-all ${
+                taskLoading 
+                  ? "bg-primary/10 text-primary/50 cursor-not-allowed" 
+                  : "bg-primary/10 text-primary hover:bg-primary/20 shadow-sm"
+              }`}
+            >
+              {taskLoading ? "Drafting Task..." : "Draft Field Task"}
+            </button>
+          )}
+
+          {/* Task Delegation Preview */}
+          {taskData && (
+            <div className="space-y-4 pt-4 border-t border-gray-800 animate-slide-in">
+               <div className="flex items-center gap-2">
+                 <span className="text-xs">📋</span>
+                 <h4 className="text-[10px] font-bold text-primary uppercase">Field Task Delegation</h4>
+               </div>
+
+               <div className="bg-black/40 p-3 rounded border border-gray-800 space-y-3">
+                 <div className="flex justify-between items-center text-[9px] font-mono">
+                   <span className="text-gray-500 uppercase">TITLE: {taskData.task_title}</span>
+                   <span className="text-error font-black uppercase">[{taskData.priority}]</span>
+                 </div>
+                 
+                 <div className="text-[10px] space-y-1">
+                   <span className="text-gray-500 block uppercase font-bold">Message Draft:</span>
+                   <p className="text-gray-300 leading-relaxed bg-black/60 p-2 rounded border border-gray-800/50 italic">
+                     "{taskData.task_message}"
+                   </p>
+                 </div>
+
+                 <div className="flex justify-between items-center text-[9px]">
+                    <div className="flex gap-2">
+                      {taskData.delivery_channels.map((ch: string) => (
+                        <span key={ch} className="text-primary opacity-60 uppercase">{ch}</span>
+                      ))}
+                    </div>
+                    <span className="text-warning italic">Approval Required</span>
+                 </div>
+               </div>
+
+               <div className="grid grid-cols-2 gap-2">
+                  <button className="py-1.5 rounded bg-success text-gray-950 text-[9px] font-black uppercase">
+                    Approve Task
+                  </button>
+                  <button className="py-1.5 rounded border border-gray-700 text-gray-400 text-[9px] font-bold uppercase hover:bg-gray-800">
+                    Copy Message
+                  </button>
+               </div>
+               
+               <div className="bg-primary/5 border border-primary/20 rounded p-2 flex items-center gap-2">
+                  <span className="text-[10px]">🤖</span>
+                  <p className="text-[10px] text-gray-400 font-mono">
+                    {taskData.gemini_task_summary}
+                  </p>
                </div>
             </div>
           )}

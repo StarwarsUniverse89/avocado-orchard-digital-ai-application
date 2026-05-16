@@ -83,4 +83,50 @@ class GeminiService:
         except Exception:
             return "Gemini Vision analysis confirms suspected anomalies."
 
+    def generate_task_delegation_message(self, context: Dict[str, Any]) -> str:
+        """Generates a professional task message for farm personnel."""
+        if self.mode == "mock":
+            role = context.get("recipient_role", "operator").replace("_", " ")
+            actions = ", ".join(context.get("recommended_actions", []))
+            return (
+                f"OPERATIONAL NOTIFICATION - Role: {role.title()}\n"
+                f"Orchard: {context.get('orchard_id')}\n\n"
+                f"Automated inspection for mission {context.get('mission_id')} has identified "
+                f"critical priorities requiring attention. Please review and execute the following "
+                f"protocol: {actions}. Financial impact of non-intervention is estimated at "
+                f"{context.get('estimated_financial_impact')}."
+            )
+
+        prompt = (
+            f"Draft a professional and concise agricultural task message for a {context.get('recipient_role')} "
+            f"regarding avocado orchard {context.get('orchard_id')}. Use these recommended actions: {context.get('recommended_actions')}. "
+            f"Emphasize the financial impact: {context.get('estimated_financial_impact')}."
+        )
+        try:
+            response = self.model.generate_content(prompt)
+            return response.text
+        except Exception:
+            return "Task message drafting failed. Please review recommendations manually."
+
+    def generate_roi_reasoning(self, context: Dict[str, Any]) -> str:
+        """Reasons about the financial trade-offs of intervention."""
+        if self.mode == "mock":
+            return (
+                f"Gemini ROI Analysis for {context.get('orchard_id')}: Acting on the identified "
+                f"{context.get('severity')} stress zones immediately will prevent exponential spread. "
+                "Our models suggest that for every $1 spent now, we protect $12 in harvest revenue "
+                "at risk from Persea Mite degradation."
+            )
+
+        prompt = (
+            f"Analyze the financial ROI for an avocado orchard intervention. Severity: {context.get('severity')}. "
+            f"Detected issues: {context.get('detected_issues')}. Context: {context.get('estimated_financial_impact')}. "
+            "Explain why immediate action is strategically superior to a 14-day delay."
+        )
+        try:
+            response = self.model.generate_content(prompt)
+            return response.text
+        except Exception:
+            return "Financial reasoning indicates high-priority intervention status."
+
 gemini_service = GeminiService()

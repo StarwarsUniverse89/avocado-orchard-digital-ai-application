@@ -1,0 +1,33 @@
+{
+  "dataset_id": "orchard_boundaries_20260516T033009Z",
+  "label_type": "orchard_boundary_segmentation",
+  "format": "geojson",
+  "geojson_file": "orchard_boundaries_20260516T033009Z.geojson",
+  "metadata_file": "orchard_boundaries_20260516T033009Z.metadata.json",
+  "total_examples": 32,
+  "created_at": "2026-05-16T03:30:09.584561+00:00",
+  "source_archive": "backend/data/orchard_archive/archive.json",
+  "summary": {
+    "total_human_labeled_boundaries": 32,
+    "total_labels": 32,
+    "accepted_labels": 32,
+    "needs_review_labels": 0,
+    "non_orchard_labels": 0,
+    "municipalities_covered": [
+      "uruapan"
+    ],
+    "latest_export": {
+      "dataset_id": "orchard_boundaries_20260516T033009Z",
+      "created_at": "2026-05-16T03:30:09.584561+00:00",
+      "total_examples": 32,
+      "format": "geojson",
+      "geojson_file": "orchard_boundaries_20260516T033009Z.geojson",
+      "metadata_file": "orchard_boundaries_20260516T033009Z.metadata.json",
+      "geojson_path": "/Users/fmelgoza/avocado-orchard-digital-ai-application/backend/data/ml_exports/orchard_boundaries_20260516T033009Z.geojson",
+      "metadata_path": "/Users/fmelgoza/avocado-orchard-digital-ai-application/backend/data/ml_exports/orchard_boundaries_20260516T033009Z.metadata.json"
+    },
+    "ready_for_training": true,
+    "recommended_next_step": "Export GeoJSON and begin training dataset preparation once review labels are resolved."
+  },
+  "note": "Dataset export for training dataset preparation only; no model training was run."
+}

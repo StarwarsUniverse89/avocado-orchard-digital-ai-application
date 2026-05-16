@@ -1,0 +1,1318 @@
+{
+  "type": "FeatureCollection",
+  "name": "human_labeled_avocado_orchard_boundaries",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.125942,
+              19.339658
+            ],
+            [
+              -102.125942,
+              19.367942
+            ],
+            [
+              -102.097658,
+              19.367942
+            ],
+            [
+              -102.097658,
+              19.339658
+            ],
+            [
+              -102.125942,
+              19.339658
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_001_1778887131",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 8,
+        "tree_count_estimate": 960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.068383,
+              19.337217
+            ],
+            [
+              -102.068383,
+              19.370383
+            ],
+            [
+              -102.035217,
+              19.370383
+            ],
+            [
+              -102.035217,
+              19.337217
+            ],
+            [
+              -102.068383,
+              19.337217
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_002_1778887131",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 11,
+        "tree_count_estimate": 1430,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.010508,
+              19.335092
+            ],
+            [
+              -102.010508,
+              19.372508
+            ],
+            [
+              -101.973092,
+              19.372508
+            ],
+            [
+              -101.973092,
+              19.335092
+            ],
+            [
+              -102.010508,
+              19.335092
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_003_1778887131",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 14,
+        "tree_count_estimate": 1960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.132416,
+              19.393184
+            ],
+            [
+              -102.132416,
+              19.434416
+            ],
+            [
+              -102.091184,
+              19.434416
+            ],
+            [
+              -102.091184,
+              19.393184
+            ],
+            [
+              -102.132416,
+              19.393184
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_004_1778887131",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 17,
+        "tree_count_estimate": 2040,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.074161,
+              19.391439
+            ],
+            [
+              -102.074161,
+              19.436161
+            ],
+            [
+              -102.029439,
+              19.436161
+            ],
+            [
+              -102.029439,
+              19.391439
+            ],
+            [
+              -102.074161,
+              19.391439
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_005_1778887131",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 20,
+        "tree_count_estimate": 2600,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.015779,
+              19.389821
+            ],
+            [
+              -102.015779,
+              19.437779
+            ],
+            [
+              -101.967821,
+              19.437779
+            ],
+            [
+              -101.967821,
+              19.389821
+            ],
+            [
+              -102.015779,
+              19.389821
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_006_1778887131",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 23,
+        "tree_count_estimate": 3220,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.125942,
+              19.459658
+            ],
+            [
+              -102.125942,
+              19.487942
+            ],
+            [
+              -102.097658,
+              19.487942
+            ],
+            [
+              -102.097658,
+              19.459658
+            ],
+            [
+              -102.125942,
+              19.459658
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_007_1778887131",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 8,
+        "tree_count_estimate": 960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.068383,
+              19.457217
+            ],
+            [
+              -102.068383,
+              19.490383
+            ],
+            [
+              -102.035217,
+              19.490383
+            ],
+            [
+              -102.035217,
+              19.457217
+            ],
+            [
+              -102.068383,
+              19.457217
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_008_1778887131",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 11,
+        "tree_count_estimate": 1430,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.125942,
+              19.339658
+            ],
+            [
+              -102.125942,
+              19.367942
+            ],
+            [
+              -102.097658,
+              19.367942
+            ],
+            [
+              -102.097658,
+              19.339658
+            ],
+            [
+              -102.125942,
+              19.339658
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_001_1778887137",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 8,
+        "tree_count_estimate": 960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.068383,
+              19.337217
+            ],
+            [
+              -102.068383,
+              19.370383
+            ],
+            [
+              -102.035217,
+              19.370383
+            ],
+            [
+              -102.035217,
+              19.337217
+            ],
+            [
+              -102.068383,
+              19.337217
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_002_1778887137",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 11,
+        "tree_count_estimate": 1430,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.010508,
+              19.335092
+            ],
+            [
+              -102.010508,
+              19.372508
+            ],
+            [
+              -101.973092,
+              19.372508
+            ],
+            [
+              -101.973092,
+              19.335092
+            ],
+            [
+              -102.010508,
+              19.335092
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_003_1778887137",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 14,
+        "tree_count_estimate": 1960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.132416,
+              19.393184
+            ],
+            [
+              -102.132416,
+              19.434416
+            ],
+            [
+              -102.091184,
+              19.434416
+            ],
+            [
+              -102.091184,
+              19.393184
+            ],
+            [
+              -102.132416,
+              19.393184
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_004_1778887137",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 17,
+        "tree_count_estimate": 2040,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.074161,
+              19.391439
+            ],
+            [
+              -102.074161,
+              19.436161
+            ],
+            [
+              -102.029439,
+              19.436161
+            ],
+            [
+              -102.029439,
+              19.391439
+            ],
+            [
+              -102.074161,
+              19.391439
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_005_1778887137",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 20,
+        "tree_count_estimate": 2600,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.015779,
+              19.389821
+            ],
+            [
+              -102.015779,
+              19.437779
+            ],
+            [
+              -101.967821,
+              19.437779
+            ],
+            [
+              -101.967821,
+              19.389821
+            ],
+            [
+              -102.015779,
+              19.389821
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_006_1778887137",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 23,
+        "tree_count_estimate": 3220,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.125942,
+              19.459658
+            ],
+            [
+              -102.125942,
+              19.487942
+            ],
+            [
+              -102.097658,
+              19.487942
+            ],
+            [
+              -102.097658,
+              19.459658
+            ],
+            [
+              -102.125942,
+              19.459658
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_007_1778887137",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 8,
+        "tree_count_estimate": 960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.068383,
+              19.457217
+            ],
+            [
+              -102.068383,
+              19.490383
+            ],
+            [
+              -102.035217,
+              19.490383
+            ],
+            [
+              -102.035217,
+              19.457217
+            ],
+            [
+              -102.068383,
+              19.457217
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_008_1778887137",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 11,
+        "tree_count_estimate": 1430,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.125942,
+              19.339658
+            ],
+            [
+              -102.125942,
+              19.367942
+            ],
+            [
+              -102.097658,
+              19.367942
+            ],
+            [
+              -102.097658,
+              19.339658
+            ],
+            [
+              -102.125942,
+              19.339658
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_001_1778887138",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 8,
+        "tree_count_estimate": 960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.068383,
+              19.337217
+            ],
+            [
+              -102.068383,
+              19.370383
+            ],
+            [
+              -102.035217,
+              19.370383
+            ],
+            [
+              -102.035217,
+              19.337217
+            ],
+            [
+              -102.068383,
+              19.337217
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_002_1778887138",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 11,
+        "tree_count_estimate": 1430,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.010508,
+              19.335092
+            ],
+            [
+              -102.010508,
+              19.372508
+            ],
+            [
+              -101.973092,
+              19.372508
+            ],
+            [
+              -101.973092,
+              19.335092
+            ],
+            [
+              -102.010508,
+              19.335092
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_003_1778887138",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 14,
+        "tree_count_estimate": 1960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.132416,
+              19.393184
+            ],
+            [
+              -102.132416,
+              19.434416
+            ],
+            [
+              -102.091184,
+              19.434416
+            ],
+            [
+              -102.091184,
+              19.393184
+            ],
+            [
+              -102.132416,
+              19.393184
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_004_1778887138",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 17,
+        "tree_count_estimate": 2040,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.074161,
+              19.391439
+            ],
+            [
+              -102.074161,
+              19.436161
+            ],
+            [
+              -102.029439,
+              19.436161
+            ],
+            [
+              -102.029439,
+              19.391439
+            ],
+            [
+              -102.074161,
+              19.391439
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_005_1778887138",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 20,
+        "tree_count_estimate": 2600,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.015779,
+              19.389821
+            ],
+            [
+              -102.015779,
+              19.437779
+            ],
+            [
+              -101.967821,
+              19.437779
+            ],
+            [
+              -101.967821,
+              19.389821
+            ],
+            [
+              -102.015779,
+              19.389821
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_006_1778887138",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 23,
+        "tree_count_estimate": 3220,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.125942,
+              19.459658
+            ],
+            [
+              -102.125942,
+              19.487942
+            ],
+            [
+              -102.097658,
+              19.487942
+            ],
+            [
+              -102.097658,
+              19.459658
+            ],
+            [
+              -102.125942,
+              19.459658
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_007_1778887138",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 8,
+        "tree_count_estimate": 960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.068383,
+              19.457217
+            ],
+            [
+              -102.068383,
+              19.490383
+            ],
+            [
+              -102.035217,
+              19.490383
+            ],
+            [
+              -102.035217,
+              19.457217
+            ],
+            [
+              -102.068383,
+              19.457217
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_008_1778887138",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 11,
+        "tree_count_estimate": 1430,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.125942,
+              19.339658
+            ],
+            [
+              -102.125942,
+              19.367942
+            ],
+            [
+              -102.097658,
+              19.367942
+            ],
+            [
+              -102.097658,
+              19.339658
+            ],
+            [
+              -102.125942,
+              19.339658
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_001_1778887139",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 8,
+        "tree_count_estimate": 960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.068383,
+              19.337217
+            ],
+            [
+              -102.068383,
+              19.370383
+            ],
+            [
+              -102.035217,
+              19.370383
+            ],
+            [
+              -102.035217,
+              19.337217
+            ],
+            [
+              -102.068383,
+              19.337217
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_002_1778887139",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 11,
+        "tree_count_estimate": 1430,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.010508,
+              19.335092
+            ],
+            [
+              -102.010508,
+              19.372508
+            ],
+            [
+              -101.973092,
+              19.372508
+            ],
+            [
+              -101.973092,
+              19.335092
+            ],
+            [
+              -102.010508,
+              19.335092
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_003_1778887139",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 14,
+        "tree_count_estimate": 1960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.132416,
+              19.393184
+            ],
+            [
+              -102.132416,
+              19.434416
+            ],
+            [
+              -102.091184,
+              19.434416
+            ],
+            [
+              -102.091184,
+              19.393184
+            ],
+            [
+              -102.132416,
+              19.393184
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_004_1778887139",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 17,
+        "tree_count_estimate": 2040,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.074161,
+              19.391439
+            ],
+            [
+              -102.074161,
+              19.436161
+            ],
+            [
+              -102.029439,
+              19.436161
+            ],
+            [
+              -102.029439,
+              19.391439
+            ],
+            [
+              -102.074161,
+              19.391439
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_005_1778887139",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 20,
+        "tree_count_estimate": 2600,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.015779,
+              19.389821
+            ],
+            [
+              -102.015779,
+              19.437779
+            ],
+            [
+              -101.967821,
+              19.437779
+            ],
+            [
+              -101.967821,
+              19.389821
+            ],
+            [
+              -102.015779,
+              19.389821
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_006_1778887139",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 23,
+        "tree_count_estimate": 3220,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.125942,
+              19.459658
+            ],
+            [
+              -102.125942,
+              19.487942
+            ],
+            [
+              -102.097658,
+              19.487942
+            ],
+            [
+              -102.097658,
+              19.459658
+            ],
+            [
+              -102.125942,
+              19.459658
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_007_1778887139",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 8,
+        "tree_count_estimate": 960,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -102.068383,
+              19.457217
+            ],
+            [
+              -102.068383,
+              19.490383
+            ],
+            [
+              -102.035217,
+              19.490383
+            ],
+            [
+              -102.035217,
+              19.457217
+            ],
+            [
+              -102.068383,
+              19.457217
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "archive_id": "orchard_uruapan_008_1778887139",
+        "label_type": "orchard_block",
+        "crop_type": "avocado",
+        "municipality_id": "uruapan",
+        "estimated_hectares": 11,
+        "tree_count_estimate": 1430,
+        "boundary_source": "human_labeled",
+        "ml_training_label": true,
+        "review_status": "accepted"
+      }
+    }
+  ]
+}
