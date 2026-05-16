@@ -1,0 +1,1378 @@
+{
+  "orchard_uruapan_001_1778887131": {
+    "archive_id": "orchard_uruapan_001_1778887131",
+    "orchard_id": "uruapan_parcel_1",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.339658,
+        -102.125942
+      ],
+      [
+        19.367942,
+        -102.125942
+      ],
+      [
+        19.367942,
+        -102.097658
+      ],
+      [
+        19.339658,
+        -102.097658
+      ],
+      [
+        19.339658,
+        -102.125942
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887131.765571,
+    "updated_at": 1778887131.775769
+  },
+  "orchard_uruapan_002_1778887131": {
+    "archive_id": "orchard_uruapan_002_1778887131",
+    "orchard_id": "uruapan_parcel_2",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.337217,
+        -102.068383
+      ],
+      [
+        19.370383,
+        -102.068383
+      ],
+      [
+        19.370383,
+        -102.035217
+      ],
+      [
+        19.337217,
+        -102.035217
+      ],
+      [
+        19.337217,
+        -102.068383
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887131.765854,
+    "updated_at": 1778887131.776154
+  },
+  "orchard_uruapan_003_1778887131": {
+    "archive_id": "orchard_uruapan_003_1778887131",
+    "orchard_id": "uruapan_parcel_3",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -101.9918,
+    "boundary_coordinates": [
+      [
+        19.335092,
+        -102.010508
+      ],
+      [
+        19.372508,
+        -102.010508
+      ],
+      [
+        19.372508,
+        -101.973092
+      ],
+      [
+        19.335092,
+        -101.973092
+      ],
+      [
+        19.335092,
+        -102.010508
+      ]
+    ],
+    "estimated_hectares": 14,
+    "estimated_acres": 34.59,
+    "estimated_tree_count": 1960,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887131.766013,
+    "updated_at": 1778887131.776437
+  },
+  "orchard_uruapan_004_1778887131": {
+    "archive_id": "orchard_uruapan_004_1778887131",
+    "orchard_id": "uruapan_parcel_4",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.393184,
+        -102.132416
+      ],
+      [
+        19.434416,
+        -102.132416
+      ],
+      [
+        19.434416,
+        -102.091184
+      ],
+      [
+        19.393184,
+        -102.091184
+      ],
+      [
+        19.393184,
+        -102.132416
+      ]
+    ],
+    "estimated_hectares": 17,
+    "estimated_acres": 42.01,
+    "estimated_tree_count": 2040,
+    "ndvi_average": 0.74,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887131.766172,
+    "updated_at": 1778887131.7767
+  },
+  "orchard_uruapan_005_1778887131": {
+    "archive_id": "orchard_uruapan_005_1778887131",
+    "orchard_id": "uruapan_parcel_5",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.391439,
+        -102.074161
+      ],
+      [
+        19.436161,
+        -102.074161
+      ],
+      [
+        19.436161,
+        -102.029439
+      ],
+      [
+        19.391439,
+        -102.029439
+      ],
+      [
+        19.391439,
+        -102.074161
+      ]
+    ],
+    "estimated_hectares": 20,
+    "estimated_acres": 49.42,
+    "estimated_tree_count": 2600,
+    "ndvi_average": 0.77,
+    "stress_level": "low",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887131.766353,
+    "updated_at": 1778887131.776949
+  },
+  "orchard_uruapan_006_1778887131": {
+    "archive_id": "orchard_uruapan_006_1778887131",
+    "orchard_id": "uruapan_parcel_6",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -101.9918,
+    "boundary_coordinates": [
+      [
+        19.389821,
+        -102.015779
+      ],
+      [
+        19.437779,
+        -102.015779
+      ],
+      [
+        19.437779,
+        -101.967821
+      ],
+      [
+        19.389821,
+        -101.967821
+      ],
+      [
+        19.389821,
+        -102.015779
+      ]
+    ],
+    "estimated_hectares": 23,
+    "estimated_acres": 56.83,
+    "estimated_tree_count": 3220,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887131.7665868,
+    "updated_at": 1778887131.777196
+  },
+  "orchard_uruapan_007_1778887131": {
+    "archive_id": "orchard_uruapan_007_1778887131",
+    "orchard_id": "uruapan_parcel_7",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4738,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.459658,
+        -102.125942
+      ],
+      [
+        19.487942,
+        -102.125942
+      ],
+      [
+        19.487942,
+        -102.097658
+      ],
+      [
+        19.459658,
+        -102.097658
+      ],
+      [
+        19.459658,
+        -102.125942
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887131.766916,
+    "updated_at": 1778887131.7774432
+  },
+  "orchard_uruapan_008_1778887131": {
+    "archive_id": "orchard_uruapan_008_1778887131",
+    "orchard_id": "uruapan_parcel_8",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4738,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.457217,
+        -102.068383
+      ],
+      [
+        19.490383,
+        -102.068383
+      ],
+      [
+        19.490383,
+        -102.035217
+      ],
+      [
+        19.457217,
+        -102.035217
+      ],
+      [
+        19.457217,
+        -102.068383
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887131.767168,
+    "updated_at": 1778887131.777696
+  },
+  "orchard_uruapan_001_1778887137": {
+    "archive_id": "orchard_uruapan_001_1778887137",
+    "orchard_id": "uruapan_parcel_1",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.339658,
+        -102.125942
+      ],
+      [
+        19.367942,
+        -102.125942
+      ],
+      [
+        19.367942,
+        -102.097658
+      ],
+      [
+        19.339658,
+        -102.097658
+      ],
+      [
+        19.339658,
+        -102.125942
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887137.12065,
+    "updated_at": 1778887137.878342
+  },
+  "orchard_uruapan_002_1778887137": {
+    "archive_id": "orchard_uruapan_002_1778887137",
+    "orchard_id": "uruapan_parcel_2",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.337217,
+        -102.068383
+      ],
+      [
+        19.370383,
+        -102.068383
+      ],
+      [
+        19.370383,
+        -102.035217
+      ],
+      [
+        19.337217,
+        -102.035217
+      ],
+      [
+        19.337217,
+        -102.068383
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887137.122271,
+    "updated_at": 1778887137.880247
+  },
+  "orchard_uruapan_003_1778887137": {
+    "archive_id": "orchard_uruapan_003_1778887137",
+    "orchard_id": "uruapan_parcel_3",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -101.9918,
+    "boundary_coordinates": [
+      [
+        19.335092,
+        -102.010508
+      ],
+      [
+        19.372508,
+        -102.010508
+      ],
+      [
+        19.372508,
+        -101.973092
+      ],
+      [
+        19.335092,
+        -101.973092
+      ],
+      [
+        19.335092,
+        -102.010508
+      ]
+    ],
+    "estimated_hectares": 14,
+    "estimated_acres": 34.59,
+    "estimated_tree_count": 1960,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887137.123827,
+    "updated_at": 1778887137.8820422
+  },
+  "orchard_uruapan_004_1778887137": {
+    "archive_id": "orchard_uruapan_004_1778887137",
+    "orchard_id": "uruapan_parcel_4",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.393184,
+        -102.132416
+      ],
+      [
+        19.434416,
+        -102.132416
+      ],
+      [
+        19.434416,
+        -102.091184
+      ],
+      [
+        19.393184,
+        -102.091184
+      ],
+      [
+        19.393184,
+        -102.132416
+      ]
+    ],
+    "estimated_hectares": 17,
+    "estimated_acres": 42.01,
+    "estimated_tree_count": 2040,
+    "ndvi_average": 0.74,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887137.124659,
+    "updated_at": 1778887137.8830369
+  },
+  "orchard_uruapan_005_1778887137": {
+    "archive_id": "orchard_uruapan_005_1778887137",
+    "orchard_id": "uruapan_parcel_5",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.391439,
+        -102.074161
+      ],
+      [
+        19.436161,
+        -102.074161
+      ],
+      [
+        19.436161,
+        -102.029439
+      ],
+      [
+        19.391439,
+        -102.029439
+      ],
+      [
+        19.391439,
+        -102.074161
+      ]
+    ],
+    "estimated_hectares": 20,
+    "estimated_acres": 49.42,
+    "estimated_tree_count": 2600,
+    "ndvi_average": 0.77,
+    "stress_level": "low",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887137.125725,
+    "updated_at": 1778887137.884855
+  },
+  "orchard_uruapan_006_1778887137": {
+    "archive_id": "orchard_uruapan_006_1778887137",
+    "orchard_id": "uruapan_parcel_6",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -101.9918,
+    "boundary_coordinates": [
+      [
+        19.389821,
+        -102.015779
+      ],
+      [
+        19.437779,
+        -102.015779
+      ],
+      [
+        19.437779,
+        -101.967821
+      ],
+      [
+        19.389821,
+        -101.967821
+      ],
+      [
+        19.389821,
+        -102.015779
+      ]
+    ],
+    "estimated_hectares": 23,
+    "estimated_acres": 56.83,
+    "estimated_tree_count": 3220,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887137.126533,
+    "updated_at": 1778887137.8862238
+  },
+  "orchard_uruapan_007_1778887137": {
+    "archive_id": "orchard_uruapan_007_1778887137",
+    "orchard_id": "uruapan_parcel_7",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4738,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.459658,
+        -102.125942
+      ],
+      [
+        19.487942,
+        -102.125942
+      ],
+      [
+        19.487942,
+        -102.097658
+      ],
+      [
+        19.459658,
+        -102.097658
+      ],
+      [
+        19.459658,
+        -102.125942
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887137.128065,
+    "updated_at": 1778887137.887795
+  },
+  "orchard_uruapan_008_1778887137": {
+    "archive_id": "orchard_uruapan_008_1778887137",
+    "orchard_id": "uruapan_parcel_8",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4738,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.457217,
+        -102.068383
+      ],
+      [
+        19.490383,
+        -102.068383
+      ],
+      [
+        19.490383,
+        -102.035217
+      ],
+      [
+        19.457217,
+        -102.035217
+      ],
+      [
+        19.457217,
+        -102.068383
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887137.1299388,
+    "updated_at": 1778887137.89124
+  },
+  "orchard_uruapan_001_1778887138": {
+    "archive_id": "orchard_uruapan_001_1778887138",
+    "orchard_id": "uruapan_parcel_1",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.339658,
+        -102.125942
+      ],
+      [
+        19.367942,
+        -102.125942
+      ],
+      [
+        19.367942,
+        -102.097658
+      ],
+      [
+        19.339658,
+        -102.097658
+      ],
+      [
+        19.339658,
+        -102.125942
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887138.029731,
+    "updated_at": 1778887138.828345
+  },
+  "orchard_uruapan_002_1778887138": {
+    "archive_id": "orchard_uruapan_002_1778887138",
+    "orchard_id": "uruapan_parcel_2",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.337217,
+        -102.068383
+      ],
+      [
+        19.370383,
+        -102.068383
+      ],
+      [
+        19.370383,
+        -102.035217
+      ],
+      [
+        19.337217,
+        -102.035217
+      ],
+      [
+        19.337217,
+        -102.068383
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887138.0314171,
+    "updated_at": 1778887138.831085
+  },
+  "orchard_uruapan_003_1778887138": {
+    "archive_id": "orchard_uruapan_003_1778887138",
+    "orchard_id": "uruapan_parcel_3",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -101.9918,
+    "boundary_coordinates": [
+      [
+        19.335092,
+        -102.010508
+      ],
+      [
+        19.372508,
+        -102.010508
+      ],
+      [
+        19.372508,
+        -101.973092
+      ],
+      [
+        19.335092,
+        -101.973092
+      ],
+      [
+        19.335092,
+        -102.010508
+      ]
+    ],
+    "estimated_hectares": 14,
+    "estimated_acres": 34.59,
+    "estimated_tree_count": 1960,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887138.0331478,
+    "updated_at": 1778887138.833545
+  },
+  "orchard_uruapan_004_1778887138": {
+    "archive_id": "orchard_uruapan_004_1778887138",
+    "orchard_id": "uruapan_parcel_4",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.393184,
+        -102.132416
+      ],
+      [
+        19.434416,
+        -102.132416
+      ],
+      [
+        19.434416,
+        -102.091184
+      ],
+      [
+        19.393184,
+        -102.091184
+      ],
+      [
+        19.393184,
+        -102.132416
+      ]
+    ],
+    "estimated_hectares": 17,
+    "estimated_acres": 42.01,
+    "estimated_tree_count": 2040,
+    "ndvi_average": 0.74,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887138.034636,
+    "updated_at": 1778887138.835003
+  },
+  "orchard_uruapan_005_1778887138": {
+    "archive_id": "orchard_uruapan_005_1778887138",
+    "orchard_id": "uruapan_parcel_5",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.391439,
+        -102.074161
+      ],
+      [
+        19.436161,
+        -102.074161
+      ],
+      [
+        19.436161,
+        -102.029439
+      ],
+      [
+        19.391439,
+        -102.029439
+      ],
+      [
+        19.391439,
+        -102.074161
+      ]
+    ],
+    "estimated_hectares": 20,
+    "estimated_acres": 49.42,
+    "estimated_tree_count": 2600,
+    "ndvi_average": 0.77,
+    "stress_level": "low",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887138.036957,
+    "updated_at": 1778887138.837415
+  },
+  "orchard_uruapan_006_1778887138": {
+    "archive_id": "orchard_uruapan_006_1778887138",
+    "orchard_id": "uruapan_parcel_6",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -101.9918,
+    "boundary_coordinates": [
+      [
+        19.389821,
+        -102.015779
+      ],
+      [
+        19.437779,
+        -102.015779
+      ],
+      [
+        19.437779,
+        -101.967821
+      ],
+      [
+        19.389821,
+        -101.967821
+      ],
+      [
+        19.389821,
+        -102.015779
+      ]
+    ],
+    "estimated_hectares": 23,
+    "estimated_acres": 56.83,
+    "estimated_tree_count": 3220,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887138.039068,
+    "updated_at": 1778887138.840099
+  },
+  "orchard_uruapan_007_1778887138": {
+    "archive_id": "orchard_uruapan_007_1778887138",
+    "orchard_id": "uruapan_parcel_7",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4738,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.459658,
+        -102.125942
+      ],
+      [
+        19.487942,
+        -102.125942
+      ],
+      [
+        19.487942,
+        -102.097658
+      ],
+      [
+        19.459658,
+        -102.097658
+      ],
+      [
+        19.459658,
+        -102.125942
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887138.040631,
+    "updated_at": 1778887138.841846
+  },
+  "orchard_uruapan_008_1778887138": {
+    "archive_id": "orchard_uruapan_008_1778887138",
+    "orchard_id": "uruapan_parcel_8",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4738,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.457217,
+        -102.068383
+      ],
+      [
+        19.490383,
+        -102.068383
+      ],
+      [
+        19.490383,
+        -102.035217
+      ],
+      [
+        19.457217,
+        -102.035217
+      ],
+      [
+        19.457217,
+        -102.068383
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887138.04335,
+    "updated_at": 1778887138.843725
+  },
+  "orchard_uruapan_001_1778887139": {
+    "archive_id": "orchard_uruapan_001_1778887139",
+    "orchard_id": "uruapan_parcel_1",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.339658,
+        -102.125942
+      ],
+      [
+        19.367942,
+        -102.125942
+      ],
+      [
+        19.367942,
+        -102.097658
+      ],
+      [
+        19.339658,
+        -102.097658
+      ],
+      [
+        19.339658,
+        -102.125942
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887139.183459,
+    "updated_at": 1778887139.183459
+  },
+  "orchard_uruapan_002_1778887139": {
+    "archive_id": "orchard_uruapan_002_1778887139",
+    "orchard_id": "uruapan_parcel_2",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.337217,
+        -102.068383
+      ],
+      [
+        19.370383,
+        -102.068383
+      ],
+      [
+        19.370383,
+        -102.035217
+      ],
+      [
+        19.337217,
+        -102.035217
+      ],
+      [
+        19.337217,
+        -102.068383
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887139.185483,
+    "updated_at": 1778887139.185483
+  },
+  "orchard_uruapan_003_1778887139": {
+    "archive_id": "orchard_uruapan_003_1778887139",
+    "orchard_id": "uruapan_parcel_3",
+    "municipality_id": "uruapan",
+    "center_lat": 19.3538,
+    "center_lng": -101.9918,
+    "boundary_coordinates": [
+      [
+        19.335092,
+        -102.010508
+      ],
+      [
+        19.372508,
+        -102.010508
+      ],
+      [
+        19.372508,
+        -101.973092
+      ],
+      [
+        19.335092,
+        -101.973092
+      ],
+      [
+        19.335092,
+        -102.010508
+      ]
+    ],
+    "estimated_hectares": 14,
+    "estimated_acres": 34.59,
+    "estimated_tree_count": 1960,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887139.188066,
+    "updated_at": 1778887139.188066
+  },
+  "orchard_uruapan_004_1778887139": {
+    "archive_id": "orchard_uruapan_004_1778887139",
+    "orchard_id": "uruapan_parcel_4",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.393184,
+        -102.132416
+      ],
+      [
+        19.434416,
+        -102.132416
+      ],
+      [
+        19.434416,
+        -102.091184
+      ],
+      [
+        19.393184,
+        -102.091184
+      ],
+      [
+        19.393184,
+        -102.132416
+      ]
+    ],
+    "estimated_hectares": 17,
+    "estimated_acres": 42.01,
+    "estimated_tree_count": 2040,
+    "ndvi_average": 0.74,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887139.190135,
+    "updated_at": 1778887139.190135
+  },
+  "orchard_uruapan_005_1778887139": {
+    "archive_id": "orchard_uruapan_005_1778887139",
+    "orchard_id": "uruapan_parcel_5",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.391439,
+        -102.074161
+      ],
+      [
+        19.436161,
+        -102.074161
+      ],
+      [
+        19.436161,
+        -102.029439
+      ],
+      [
+        19.391439,
+        -102.029439
+      ],
+      [
+        19.391439,
+        -102.074161
+      ]
+    ],
+    "estimated_hectares": 20,
+    "estimated_acres": 49.42,
+    "estimated_tree_count": 2600,
+    "ndvi_average": 0.77,
+    "stress_level": "low",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887139.192087,
+    "updated_at": 1778887139.192087
+  },
+  "orchard_uruapan_006_1778887139": {
+    "archive_id": "orchard_uruapan_006_1778887139",
+    "orchard_id": "uruapan_parcel_6",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4138,
+    "center_lng": -101.9918,
+    "boundary_coordinates": [
+      [
+        19.389821,
+        -102.015779
+      ],
+      [
+        19.437779,
+        -102.015779
+      ],
+      [
+        19.437779,
+        -101.967821
+      ],
+      [
+        19.389821,
+        -101.967821
+      ],
+      [
+        19.389821,
+        -102.015779
+      ]
+    ],
+    "estimated_hectares": 23,
+    "estimated_acres": 56.83,
+    "estimated_tree_count": 3220,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887139.193912,
+    "updated_at": 1778887139.193912
+  },
+  "orchard_uruapan_007_1778887139": {
+    "archive_id": "orchard_uruapan_007_1778887139",
+    "orchard_id": "uruapan_parcel_7",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4738,
+    "center_lng": -102.1118,
+    "boundary_coordinates": [
+      [
+        19.459658,
+        -102.125942
+      ],
+      [
+        19.487942,
+        -102.125942
+      ],
+      [
+        19.487942,
+        -102.097658
+      ],
+      [
+        19.459658,
+        -102.097658
+      ],
+      [
+        19.459658,
+        -102.125942
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887139.198373,
+    "updated_at": 1778887139.198373
+  },
+  "orchard_uruapan_008_1778887139": {
+    "archive_id": "orchard_uruapan_008_1778887139",
+    "orchard_id": "uruapan_parcel_8",
+    "municipality_id": "uruapan",
+    "center_lat": 19.4738,
+    "center_lng": -102.0518,
+    "boundary_coordinates": [
+      [
+        19.457217,
+        -102.068383
+      ],
+      [
+        19.490383,
+        -102.068383
+      ],
+      [
+        19.490383,
+        -102.035217
+      ],
+      [
+        19.457217,
+        -102.035217
+      ],
+      [
+        19.457217,
+        -102.068383
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1778887139.200439,
+    "updated_at": 1778887139.200439
+  }
+}
