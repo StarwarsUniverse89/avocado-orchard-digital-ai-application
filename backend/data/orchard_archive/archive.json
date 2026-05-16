@@ -1374,5 +1374,332 @@
     "scan_source": "area_scan",
     "created_at": 1778887139.200439,
     "updated_at": 1778887139.200439
+  },
+  "manual_d1ee8ab8": {
+    "archive_id": "manual_d1ee8ab8",
+    "boundary_id": "manual_d1ee8ab8",
+    "orchard_id": "manual_d1ee8ab8",
+    "municipality_id": "tancitaro",
+    "label_type": "orchard_cluster",
+    "polygon": [
+      [
+        -102.302819,
+        19.331358
+      ],
+      [
+        -102.294865,
+        19.329622
+      ],
+      [
+        -102.29587,
+        19.338838
+      ],
+      [
+        -102.302171,
+        19.340095
+      ]
+    ],
+    "boundary_coordinates": [
+      [
+        19.331358,
+        -102.302819
+      ],
+      [
+        19.329622,
+        -102.294865
+      ],
+      [
+        19.338838,
+        -102.29587
+      ],
+      [
+        19.340095,
+        -102.302171
+      ]
+    ],
+    "manual_metadata": {
+      "crop_type": "avocado",
+      "notes": "",
+      "created_by": "operator"
+    },
+    "estimated_hectares": null,
+    "estimated_tree_count": null,
+    "confidence": 1.0,
+    "detection_method": "manual_operator_label",
+    "imagery_source": "operator_cesium_outline",
+    "scan_source": "manual_boundary_mode",
+    "boundary_source": "human_labeled",
+    "ml_training_label": true,
+    "status": "archived",
+    "created_at": 1778902692.0191622,
+    "updated_at": 1778902692.0191622
+  },
+  "manual_62adf87a": {
+    "archive_id": "manual_62adf87a",
+    "boundary_id": "manual_62adf87a",
+    "orchard_id": "manual_62adf87a",
+    "municipality_id": "tancitaro",
+    "label_type": "orchard_cluster",
+    "polygon": [
+      [
+        -102.338337,
+        19.311181
+      ],
+      [
+        -102.329753,
+        19.308154
+      ],
+      [
+        -102.332451,
+        19.301653
+      ],
+      [
+        -102.337074,
+        19.303079
+      ]
+    ],
+    "boundary_coordinates": [
+      [
+        19.311181,
+        -102.338337
+      ],
+      [
+        19.308154,
+        -102.329753
+      ],
+      [
+        19.301653,
+        -102.332451
+      ],
+      [
+        19.303079,
+        -102.337074
+      ]
+    ],
+    "manual_metadata": {
+      "crop_type": "avocado",
+      "notes": "",
+      "created_by": "operator"
+    },
+    "estimated_hectares": null,
+    "estimated_tree_count": null,
+    "confidence": 1.0,
+    "detection_method": "manual_operator_label",
+    "imagery_source": "operator_cesium_outline",
+    "scan_source": "manual_boundary_mode",
+    "boundary_source": "human_labeled",
+    "ml_training_label": true,
+    "status": "archived",
+    "created_at": 1778903006.365775,
+    "updated_at": 1778903006.365775
+  },
+  "manual_c0b93c09": {
+    "archive_id": "manual_c0b93c09",
+    "boundary_id": "manual_c0b93c09",
+    "orchard_id": "manual_c0b93c09",
+    "municipality_id": "tancitaro",
+    "label_type": "orchard_block",
+    "polygon": [
+      [
+        -102.339156,
+        19.337061
+      ],
+      [
+        -102.338354,
+        19.336148
+      ],
+      [
+        -102.339727,
+        19.334956
+      ],
+      [
+        -102.340829,
+        19.335601
+      ],
+      [
+        -102.340189,
+        19.336566
+      ]
+    ],
+    "boundary_coordinates": [
+      [
+        19.337061,
+        -102.339156
+      ],
+      [
+        19.336148,
+        -102.338354
+      ],
+      [
+        19.334956,
+        -102.339727
+      ],
+      [
+        19.335601,
+        -102.340829
+      ],
+      [
+        19.336566,
+        -102.340189
+      ]
+    ],
+    "manual_metadata": {
+      "crop_type": "avocado",
+      "notes": "",
+      "created_by": "operator"
+    },
+    "estimated_hectares": null,
+    "estimated_tree_count": null,
+    "confidence": 1.0,
+    "detection_method": "manual_operator_label",
+    "imagery_source": "operator_cesium_outline",
+    "scan_source": "manual_boundary_mode",
+    "boundary_source": "human_labeled",
+    "ml_training_label": true,
+    "status": "archived",
+    "created_at": 1778903068.88183,
+    "updated_at": 1778903068.88183
+  },
+  "manual_3b642964": {
+    "archive_id": "manual_3b642964",
+    "boundary_id": "manual_3b642964",
+    "orchard_id": "manual_3b642964",
+    "municipality_id": "tancitaro",
+    "label_type": "orchard_cluster",
+    "polygon": [
+      [
+        -102.318986,
+        19.341059
+      ],
+      [
+        -102.318889,
+        19.343049
+      ],
+      [
+        -102.316676,
+        19.343012
+      ],
+      [
+        -102.317971,
+        19.346942
+      ],
+      [
+        -102.320108,
+        19.347164
+      ],
+      [
+        -102.321807,
+        19.341197
+      ]
+    ],
+    "boundary_coordinates": [
+      [
+        19.341059,
+        -102.318986
+      ],
+      [
+        19.343049,
+        -102.318889
+      ],
+      [
+        19.343012,
+        -102.316676
+      ],
+      [
+        19.346942,
+        -102.317971
+      ],
+      [
+        19.347164,
+        -102.320108
+      ],
+      [
+        19.341197,
+        -102.321807
+      ]
+    ],
+    "manual_metadata": {
+      "crop_type": "avocado",
+      "notes": "",
+      "created_by": "operator"
+    },
+    "estimated_hectares": null,
+    "estimated_tree_count": null,
+    "confidence": 1.0,
+    "detection_method": "manual_operator_label",
+    "imagery_source": "operator_cesium_outline",
+    "scan_source": "manual_boundary_mode",
+    "boundary_source": "human_labeled",
+    "ml_training_label": true,
+    "status": "archived",
+    "created_at": 1778903108.372319,
+    "updated_at": 1778903108.372319
+  },
+  "manual_0c2f1f0c": {
+    "archive_id": "manual_0c2f1f0c",
+    "boundary_id": "manual_0c2f1f0c",
+    "orchard_id": "manual_0c2f1f0c",
+    "municipality_id": "tancitaro",
+    "label_type": "orchard_block",
+    "polygon": [
+      [
+        -102.331362,
+        19.349558
+      ],
+      [
+        -102.329356,
+        19.353619
+      ],
+      [
+        -102.327232,
+        19.3525
+      ],
+      [
+        -102.328443,
+        19.348166
+      ],
+      [
+        -102.32947,
+        19.347964
+      ]
+    ],
+    "boundary_coordinates": [
+      [
+        19.349558,
+        -102.331362
+      ],
+      [
+        19.353619,
+        -102.329356
+      ],
+      [
+        19.3525,
+        -102.327232
+      ],
+      [
+        19.348166,
+        -102.328443
+      ],
+      [
+        19.347964,
+        -102.32947
+      ]
+    ],
+    "manual_metadata": {
+      "crop_type": "avocado",
+      "notes": "",
+      "created_by": "operator"
+    },
+    "estimated_hectares": null,
+    "estimated_tree_count": null,
+    "confidence": 1.0,
+    "detection_method": "manual_operator_label",
+    "imagery_source": "operator_cesium_outline",
+    "scan_source": "manual_boundary_mode",
+    "boundary_source": "human_labeled",
+    "ml_training_label": true,
+    "status": "archived",
+    "created_at": 1778903180.497385,
+    "updated_at": 1778903180.497385
   }
 }
