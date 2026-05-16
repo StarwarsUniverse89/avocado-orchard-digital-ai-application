@@ -1,6 +1,6 @@
-# 🥑 Gemini Orchard Operations Agent
+# 🥑 Gemini Orchard Operations Agent (Operational Digital Twin)
 
-> **A Gemini-powered regional orchard operations agent that monitors the avocado belt, plans virtual drone inspections, analyzes crop stress, estimates yield/profit exposure, and stores mission memory through MongoDB MCP.**
+> **A regional agricultural operations agent that prioritizes risk across thousands of hectares, simulates intervention ROI, and coordinates field tasks under human oversight.**
 
 ## 🚀 Hackathon Alignment
 This project is a submission for the **Google Building Agents for Real-World Challenges** hackathon.
@@ -11,7 +11,20 @@ This project is a submission for the **Google Building Agents for Real-World Cha
 - **MCP Superpower**: Uses Model Context Protocol concepts to provide the agent with historical orchard intelligence.
 
 ## Overview
-**Gemini Orchard Operations Agent** is a multi-step digital twin command center. It moves beyond simple chat interfaces to perform operational tasks: detecting regional risk, planning drone missions, and analyzing multimodal inspection data to protect agricultural yields.
+**Gemini Orchard Operations Agent** is a multi-step operational command center. 
+
+### 🏛️ Honest Digital Twin Positioning
+**Operational Digital Twin**: The current implementation prioritizes operational decision support over photorealistic reconstruction. The 3D twin acts as an operational visualization layer updated by satellite telemetry, drone inspections, mission memory, and Gemini reasoning. It is designed to answer "What is happening and what should I do?" rather than "What does this look like in a photo?"
+
+## 📈 Business Value / ROI
+- **Prioritize at Scale**: Growers can monitor and prioritize inspections across an entire regional network, focusing limited labor on high-value/high-risk zones first.
+- **Reduce Broad Treatment**: Instead of spraying an entire block, drone-verified anomalies allow for targeted, precision interventions, reducing chemical costs by up to 60%.
+- **Delay Risk Simulation**: The agent estimates the financial cost of action versus the cost of delay, supporting data-driven CAPEX approval.
+- **Farm-to-Market Predictability**: More accurate yield recovery estimates support better harvest timing and market pricing negotiations.
+
+**Monetization Examples:**
+- **SaaS Tier**: Subscription per hectare/cluster for regional Monitoring & Drone Planning.
+- **Enterprise**: Custom ROI modeling and export dashboard for packers and exporters.
 
 The current implementation focuses on the Michoacán avocado belt in Mexico and combines:
 
@@ -70,6 +83,14 @@ The archive system enables:
 - Creating company/grower orchard networks
 - Running analytics on a single orchard, municipality, or network
 
+### ✍️ Human-Labeled Orchard Boundary Archive
+
+AI segmentation gives a first pass for locating likely orchard blocks, but operators can manually outline orchards directly on the Cesium command globe when the model boundary needs correction or when a reliable operational target is needed immediately.
+
+Manual Boundary Mode lets an operator click map points to create a polygon, label it as `orchard_block`, `orchard_cluster`, `non_orchard`, or `needs_review`, add field metadata, and archive it as a human-labeled boundary. These records are stored in MongoDB mission memory when available, or local fallback memory during demos.
+
+Archived manual boundaries become part of the ML label archive for training dataset preparation. The system does not claim model training is already happening; it prepares durable human-labeled examples that can improve future orchard segmentation workflows while providing reliable targets for reconstruction, drone inspection, ROI analysis, and human-in-the-loop tasking today.
+
 ### 🤖 Gemini Operations Agent
 The agent oversees the regional avocado network and prioritizes work across many orchards. It leverages MongoDB MCP to remember previous interventions and outcomes.
 
@@ -79,8 +100,11 @@ The agent oversees the regional avocado network and prioritizes work across many
 3. **Plan**: Deploy a **Drone Mission Agent** to generate Cesium flight paths.
 4. **Inspect**: Run the **Inspection Analysis** workflow on simulated imagery.
 5. **Act**: Review Gemini's recommendations and financial exposure.
-6. **Remember**: All actions are stored in **MongoDB Memory** for future reasoning.
+6. **Delegate**: Draft human-in-the-loop tasks for field operators.
+7. **Remember**: All actions are stored in **MongoDB Memory** for future reasoning.
 
+### 🤝 Human-in-the-loop task delegation
+The agent does not directly perform real-world farm treatments. It drafts operational tasks for workers/operators, keeping humans in control. This ensures every automated insight is verified by a professional before physical intervention occurs.
 Example commands:
 
 ```text

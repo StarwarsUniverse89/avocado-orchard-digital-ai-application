@@ -401,4 +401,179 @@ export async function getDroneHistory(orchardId: string): Promise<ApiResponse<an
   }
 }
 
+export async function getRegionalSummary(): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/operations/regional-summary`);
+    if (!response.ok) return { success: false, error: "Operations data unavailable" };
+    const result = await response.json();
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function delegateTask(payload: any): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/operations/delegate-task`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function simulateInterventionROI(payload: any): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/operations/intervention-roi`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function saveSegmentationCorrection(payload: {
+  block_id: string;
+  municipality_id: string;
+  corrected_hectares?: number;
+  corrected_tree_count?: number;
+  corrected_canopy_density?: string;
+  corrected_stress_level?: string;
+  notes?: string;
+}): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/orchards/segmentation-correction`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, boundary_source: "human_corrected" }),
+    });
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function segmentOrchards(
+  municipalityId?: string,
+  scope: "belt" | "municipality" = "municipality"
+): Promise<ApiResponse<any>> {
+  const url = `${API_BASE_URL}/api/v1/orchards/segment`;
+  const payload = {
+    source_type: "mock",
+    scope,
+    municipality_id: municipalityId,
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const responseBody = await response.text();
+    let result: any = {};
+
+    try {
+      result = responseBody ? JSON.parse(responseBody) : {};
+    } catch {
+      result = { raw: responseBody };
+    }
+
+    if (!response.ok) {
+      console.error("Segmentation API error", {
+        url,
+        payload,
+        status: response.status,
+        body: result,
+      });
+      return { success: false, error: `Segmentation failed with status ${response.status}` };
+    }
+
+    const data = result?.data ?? result;
+    const blocks = data?.detected_orchard_blocks ?? data?.blocks ?? [];
+
+    return {
+      success: true,
+      data: {
+        ...data,
+        blocks,
+        detected_orchard_blocks: blocks,
+      },
+    };
+  } catch (error) {
+    console.error("Segmentation API fetch failed", {
+      url,
+      payload,
+      error,
+    });
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function reconstructTwin(orchardId: string, orchardBlock: any): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/twin/reconstruct`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orchard_id: orchardId, orchard_block: orchardBlock }),
+    });
+    const result = await response.json();
+    return { success: true, data: result.data };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function archiveManualBoundary(payload: {
+  boundary_id?: string;
+  municipality_id: string;
+  label_type: "orchard_block" | "orchard_cluster" | "non_orchard" | "needs_review";
+  polygon: number[][];
+  manual_metadata: {
+    crop_type: string;
+    estimated_hectares?: number;
+    tree_count_estimate?: number;
+    notes?: string;
+    created_by: string;
+  };
+  ml_training_label: boolean;
+}): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/orchards/archive-manual-boundary`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: JSON.stringify(result) };
+    }
+    return { success: true, data: result.data ?? result };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function getManualBoundaries(municipalityId: string): Promise<ApiResponse<any[]>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/orchards/manual-boundaries/${municipalityId}`);
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: JSON.stringify(result) };
+    }
+    return { success: true, data: result.data?.boundaries ?? result.boundaries ?? [] };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
 // Made with Bob

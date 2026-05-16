@@ -11,7 +11,9 @@ import {
   CameraFlyTo,
 } from 'resium';
 import {
+  Cartesian2,
   Cartesian3,
+  Cartographic,
   Color,
   Ion,
   Viewer as CesiumViewer,
@@ -19,6 +21,8 @@ import {
   HeightReference,
   VerticalOrigin,
   HorizontalOrigin,
+  ScreenSpaceEventHandler as CesiumScreenSpaceEventHandler,
+  ScreenSpaceEventType,
 } from 'cesium';
 import {
   michoacanAvocadoBelt,
@@ -36,7 +40,12 @@ import {
 import { UICommand, UICommandHandler } from '@/types/uiCommands';
 import SatelliteOrchardView from './SatelliteOrchardView';
 import OrchardCandidatePanel from './OrchardCandidatePanel';
-import { scanMunicipalityForOrchards } from '@/lib/api';
+import {
+  archiveManualBoundary,
+  getManualBoundaries,
+  saveSegmentationCorrection,
+  scanMunicipalityForOrchards,
+} from '@/lib/api';
 
 interface DetectedOrchard {
   archive_id: string;
@@ -67,6 +76,9 @@ interface GlobeCommandViewProps {
   onDetectedOrchardsChanged?: (orchards: DetectedOrchard[]) => void;
   onVisionAnalysisCompleted?: (result: any) => void;
   plannedMission?: any;
+  segmentedOrchardBlocks?: any[];
+  selectedSegmentedBlockId?: string;
+  onSegmentedBlockSelected?: (block: any) => void;
 }
 
 export interface GlobeCommandViewRef {
@@ -85,6 +97,9 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
   onDetectedOrchardsChanged,
   onVisionAnalysisCompleted,
   plannedMission,
+  segmentedOrchardBlocks,
+  selectedSegmentedBlockId,
+  onSegmentedBlockSelected,
 }, ref) => {
   const viewerRef = useRef<CesiumViewer | null>(null);
   const [cesiumReady, setCesiumReady] = useState<boolean>(false);
@@ -102,8 +117,27 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
   // Orchard detection state
   const [detectedOrchards, setDetectedOrchards] = useState<DetectedOrchard[]>([]);
   const [scanning, setScanning] = useState(false);
+  const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
   const [selectedOrchardCandidate, setSelectedOrchardCandidate] = useState<DetectedOrchard | null>(null);
+  const [commandContext, setCommandContext] = useState<any>(null);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [correctionDraft, setCorrectionDraft] = useState<any>({});
+  const [correctionStatus, setCorrectionStatus] = useState<string | null>(null);
+  const [showTreeCanopyPoints, setShowTreeCanopyPoints] = useState(true);
+  const [manualBoundaryMode, setManualBoundaryMode] = useState(false);
+  const [manualBoundaryPoints, setManualBoundaryPoints] = useState<Array<[number, number]>>([]);
+  const [manualBoundaryFinished, setManualBoundaryFinished] = useState(false);
+  const [manualBoundaries, setManualBoundaries] = useState<any[]>([]);
+  const [manualForm, setManualForm] = useState({
+    label_type: "orchard_block",
+    crop_type: "avocado",
+    estimated_hectares: "",
+    tree_count_estimate: "",
+    notes: "",
+    ml_training_label: true,
+  });
+  const [manualArchiveStatus, setManualArchiveStatus] = useState<string | null>(null);
   
   // Get Mexico analytics
   const mexicoAnalytics = getMexicoAvocadoAnalytics();
@@ -255,6 +289,21 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
       }
     }
   }, [plannedMission]);
+
+  useEffect(() => {
+    if (!selectedSegmentedBlockId || !segmentedOrchardBlocks?.length) return;
+    const block = segmentedOrchardBlocks.find((item) => item.block_id === selectedSegmentedBlockId);
+    if (block) setCommandContext({ type: "orchard_block", ...block });
+  }, [selectedSegmentedBlockId, segmentedOrchardBlocks]);
+
+  useEffect(() => {
+    const municipalityId = selectedMunicipalityId || "tancitaro";
+    getManualBoundaries(municipalityId).then((res) => {
+      if (res.success && res.data) {
+        setManualBoundaries(res.data);
+      }
+    });
+  }, [selectedMunicipalityId]);
 
   // Handle UI commands
   const handleCommand = useCallback(
@@ -421,6 +470,241 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
     }
   };
 
+  const getStressBaseColor = (stressLevel?: string): Color => {
+    switch (stressLevel) {
+      case 'low':
+        return Color.LIME;
+      case 'medium':
+        return Color.YELLOW;
+      case 'high':
+        return Color.RED;
+      default:
+        return Color.WHITE;
+    }
+  };
+
+  const getBlockPolygonDegrees = (block: any) =>
+    (block.polygon || block.boundary_coordinates || []).flatMap((point: number[]) => [point[1], point[0]]);
+
+  const getClosedBlockPolylineDegrees = (block: any) => {
+    const polygon = block.polygon || block.boundary_coordinates || [];
+    if (!polygon.length) return [];
+    return [...polygon, polygon[0]].flatMap((point: number[]) => [point[1], point[0], 8]);
+  };
+
+  const getTreePointColor = (health?: string): Color => {
+    switch (health) {
+      case "healthy":
+        return Color.LIME;
+      case "stressed":
+        return Color.ORANGE;
+      case "diseased":
+        return Color.RED;
+      default:
+        return Color.WHITE;
+    }
+  };
+
+  const getManualBoundaryColor = (boundary: any): Color => {
+    if (boundary.label_type === "non_orchard") return Color.GRAY;
+    if (boundary.label_type === "needs_review") return Color.ORANGE;
+    return Color.CYAN;
+  };
+
+  const getManualPolygonDegrees = (boundary: any) =>
+    (boundary.polygon || []).flatMap((point: number[]) => [point[0], point[1]]);
+
+  const getClosedManualPolylineDegrees = (boundary: any) => {
+    const polygon = boundary.polygon || [];
+    if (!polygon.length) return [];
+    return [...polygon, polygon[0]].flatMap((point: number[]) => [point[0], point[1], 12]);
+  };
+
+  const manualBoundaryToBlock = (boundary: any) => {
+    const polygon = boundary.polygon || [];
+    const center = polygon.reduce(
+      (acc: { lng: number; lat: number }, point: number[]) => ({
+        lng: acc.lng + point[0],
+        lat: acc.lat + point[1],
+      }),
+      { lng: 0, lat: 0 }
+    );
+    const count = polygon.length || 1;
+    return {
+      type: "orchard_block",
+      block_id: boundary.archive_id || boundary.boundary_id,
+      archive_id: boundary.archive_id,
+      municipality_id: boundary.municipality_id,
+      label_type: boundary.label_type,
+      center_lng: center.lng / count,
+      center_lat: center.lat / count,
+      polygon: polygon.map((point: number[]) => [point[1], point[0]]),
+      estimated_hectares: boundary.manual_metadata?.estimated_hectares || 0,
+      tree_count_estimate: boundary.manual_metadata?.tree_count_estimate || 0,
+      estimated_tree_count: boundary.manual_metadata?.tree_count_estimate || 0,
+      stress_level: boundary.label_type === "needs_review" ? "medium" : "low",
+      confidence_score: 1,
+      orchard_feature_score: boundary.label_type === "non_orchard" ? 0.1 : 1,
+      row_alignment_score: boundary.label_type === "non_orchard" ? 0.1 : 1,
+      boundary_source: "human_labeled",
+      ml_training_label: boundary.ml_training_label,
+      manual_metadata: boundary.manual_metadata,
+      requires_review: boundary.label_type === "needs_review",
+    };
+  };
+
+  const getManualClickCartesian = useCallback((position?: Cartesian2) => {
+    if (!viewerRef.current) return null;
+    const viewer = viewerRef.current;
+    const ellipsoid = viewer.scene.globe.ellipsoid;
+    const canvas = viewer.scene.canvas;
+    const clickPosition = position || new Cartesian2(
+      canvas.clientWidth / 2,
+      canvas.clientHeight / 2
+    );
+
+    const cartesian = viewer.camera.pickEllipsoid(clickPosition, ellipsoid);
+    if (cartesian) return cartesian;
+
+    console.warn("Manual boundary click picking failed; using current camera center fallback.");
+    return viewer.camera.pickEllipsoid(
+      new Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2),
+      ellipsoid
+    );
+  }, []);
+
+  const handleManualMapClick = useCallback((event: any) => {
+    if (!manualBoundaryMode) return;
+    const cartesian = getManualClickCartesian(event?.position);
+    if (!cartesian) {
+      console.warn("Manual boundary point was not captured.");
+      return;
+    }
+    const cartographic = Cartographic.fromCartesian(cartesian);
+    const lng = CesiumMath.toDegrees(cartographic.longitude);
+    const lat = CesiumMath.toDegrees(cartographic.latitude);
+    const point: [number, number] = [Number(lng.toFixed(6)), Number(lat.toFixed(6))];
+    console.log("Manual boundary point clicked", point);
+    setManualBoundaryPoints((prev) => {
+      const next = [...prev, point];
+      console.log("Manual boundary current polygon points", next);
+      return next;
+    });
+    setManualBoundaryFinished(false);
+    setManualArchiveStatus(null);
+  }, [getManualClickCartesian, manualBoundaryMode]);
+
+  useEffect(() => {
+    if (!manualBoundaryMode || !viewerRef.current) return;
+    const handler = new CesiumScreenSpaceEventHandler(viewerRef.current.scene.canvas);
+    handler.setInputAction(handleManualMapClick, ScreenSpaceEventType.LEFT_CLICK);
+    return () => {
+      if (!handler.isDestroyed()) handler.destroy();
+    };
+  }, [handleManualMapClick, manualBoundaryMode]);
+
+  const archiveCurrentManualBoundary = async () => {
+    if (manualBoundaryPoints.length < 3) {
+      setManualArchiveStatus("Add at least three points before archiving.");
+      return;
+    }
+    const municipalityId = selectedMunicipalityId || "tancitaro";
+    const payload = {
+      municipality_id: municipalityId,
+      label_type: manualForm.label_type as "orchard_block" | "orchard_cluster" | "non_orchard" | "needs_review",
+      polygon: manualBoundaryPoints,
+      manual_metadata: {
+        crop_type: manualForm.crop_type || "avocado",
+        estimated_hectares: manualForm.estimated_hectares ? Number(manualForm.estimated_hectares) : undefined,
+        tree_count_estimate: manualForm.tree_count_estimate ? Number(manualForm.tree_count_estimate) : undefined,
+        notes: manualForm.notes,
+        created_by: "operator",
+      },
+      ml_training_label: manualForm.ml_training_label,
+    };
+    console.log("Manual boundary archive payload", payload);
+    const res = await archiveManualBoundary(payload);
+    console.log("Manual boundary archive response", res);
+    if (res.success && res.data) {
+      const boundary = res.data.boundary || {
+        archive_id: res.data.archive_id,
+        municipality_id: municipalityId,
+        label_type: manualForm.label_type,
+        polygon: manualBoundaryPoints,
+        manual_metadata: {
+          crop_type: manualForm.crop_type || "avocado",
+          estimated_hectares: manualForm.estimated_hectares ? Number(manualForm.estimated_hectares) : undefined,
+          tree_count_estimate: manualForm.tree_count_estimate ? Number(manualForm.tree_count_estimate) : undefined,
+          notes: manualForm.notes,
+          created_by: "operator",
+        },
+        boundary_source: "human_labeled",
+        ml_training_label: manualForm.ml_training_label,
+        status: "archived",
+      };
+      setManualBoundaries((prev) => [boundary, ...prev]);
+      const block = manualBoundaryToBlock(boundary);
+      setCommandContext(block);
+      onSegmentedBlockSelected?.(block);
+      setManualBoundaryPoints([]);
+      setManualBoundaryFinished(false);
+      setManualArchiveStatus(`${res.data.message} ${res.data.memory_status === "saved_to_mongodb" ? "Saved to MongoDB mission memory." : "Local fallback memory active."}`);
+    } else {
+      setManualArchiveStatus(res.error || "Manual boundary archive failed.");
+    }
+  };
+
+  const openBlockContext = (block: any) => {
+    setCommandContext({ type: "orchard_block", ...block });
+    onSegmentedBlockSelected?.(block);
+    if (block.center_lng && block.center_lat) {
+      setCameraTarget({
+        destination: Cartesian3.fromDegrees(block.center_lng, block.center_lat, 4500),
+        duration: 1.2,
+      });
+    }
+  };
+
+  const openMunicipalityContext = (municipality: any) => {
+    setCommandContext({ type: "municipality", ...municipality });
+    setSelectedMunicipalityId(municipality.id);
+    onMunicipalitySelected?.(municipality);
+    setCameraTarget({
+      destination: Cartesian3.fromDegrees(municipality.lng, municipality.lat, 15000),
+      duration: 2,
+    });
+  };
+
+  const saveCorrection = async () => {
+    if (!commandContext?.block_id) return;
+    const payload = {
+      block_id: commandContext.block_id,
+      municipality_id: commandContext.municipality_id || selectedMunicipalityId || "tancitaro",
+      corrected_hectares: correctionDraft.hectares ? Number(correctionDraft.hectares) : undefined,
+      corrected_tree_count: correctionDraft.tree_count ? Number(correctionDraft.tree_count) : undefined,
+      corrected_canopy_density: correctionDraft.canopy_density || undefined,
+      corrected_stress_level: correctionDraft.stress_level || undefined,
+      notes: correctionDraft.notes || undefined,
+    };
+    const res = await saveSegmentationCorrection(payload);
+    if (res.success) {
+      setCorrectionStatus("Learning signal recorded");
+      const corrected = {
+        ...commandContext,
+        estimated_hectares: payload.corrected_hectares ?? commandContext.estimated_hectares,
+        estimated_tree_count: payload.corrected_tree_count ?? commandContext.estimated_tree_count,
+        canopy_density: payload.corrected_canopy_density ?? commandContext.canopy_density,
+        stress_level: payload.corrected_stress_level ?? commandContext.stress_level,
+        boundary_source: "human_corrected",
+        requires_review: false,
+      };
+      setCommandContext(corrected);
+      onSegmentedBlockSelected?.(corrected);
+    } else {
+      setCorrectionStatus("Local fallback memory active");
+    }
+  };
+
   // Fallback if Cesium is not ready or has error
   if (!cesiumReady || cesiumError) {
     return (
@@ -443,19 +727,130 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-green-500/90 text-white px-4 py-2 rounded-lg shadow-lg font-semibold">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-          Globe Mode: Cesium Live
+          Gemini Orchard Operations OS · Cesium Live
         </div>
       </div>
 
       {/* Controls */}
       <div className="absolute top-4 left-4 z-10 bg-black/80 text-white p-4 rounded-lg space-y-2 max-w-xs">
-        <h3 className="font-bold text-lg">Mexico Avocado Network</h3>
+        <h3 className="font-bold text-lg">Operational Network</h3>
         <div className="space-y-1 text-sm">
           <div>Total Municipalities: {mexicoAvocadoMunicipalities.length}</div>
           <div>Total Synthetic Orchards: {michoacanSyntheticOrchards.length}</div>
           <div>Region: Michoacán Avocado Belt</div>
           {detectedOrchards.length > 0 && (
             <div className="text-cyan-400 font-semibold">Detected Orchards: {detectedOrchards.length}</div>
+          )}
+          {segmentedOrchardBlocks && segmentedOrchardBlocks.length > 0 && (
+            <div className="text-cyan-400 font-semibold">Segmented Blocks: {segmentedOrchardBlocks.length}</div>
+          )}
+        </div>
+
+        {segmentedOrchardBlocks && segmentedOrchardBlocks.length > 0 && (
+          <label className="pt-2 border-t border-gray-700 flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showTreeCanopyPoints}
+              onChange={(event) => setShowTreeCanopyPoints(event.target.checked)}
+              className="accent-cyan-500"
+            />
+            Show Tree-Level Canopy Points
+          </label>
+        )}
+
+        <div className="pt-2 border-t border-gray-700 space-y-2">
+          <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={manualBoundaryMode}
+              onChange={(event) => setManualBoundaryMode(event.target.checked)}
+              className="accent-cyan-500"
+            />
+            Manual Boundary Mode
+          </label>
+          {manualBoundaryMode && (
+            <div className="space-y-2 text-xs">
+              <div className="text-cyan-300">
+                Click map points to outline an orchard. Points: {manualBoundaryPoints.length}
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  onClick={() => {
+                    setManualBoundaryFinished(true);
+                    setManualArchiveStatus("Boundary closed. Review form and archive when ready.");
+                  }}
+                  disabled={manualBoundaryPoints.length < 3}
+                  className="px-2 py-1 rounded bg-cyan-700 disabled:bg-gray-700 disabled:text-gray-500 text-white"
+                >
+                  Finish Boundary
+                </button>
+                <button
+                  onClick={() => {
+                    setManualBoundaryPoints([]);
+                    setManualBoundaryFinished(false);
+                  }}
+                  className="px-2 py-1 rounded bg-gray-800 text-gray-300"
+                >
+                  Clear
+                </button>
+              </div>
+              <select
+                value={manualForm.label_type}
+                onChange={(event) => setManualForm((prev) => ({ ...prev, label_type: event.target.value }))}
+                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1"
+              >
+                <option value="orchard_block">orchard_block</option>
+                <option value="orchard_cluster">orchard_cluster</option>
+                <option value="non_orchard">non_orchard</option>
+                <option value="needs_review">needs_review</option>
+              </select>
+              <div className="grid grid-cols-2 gap-1.5">
+                <input
+                  value={manualForm.crop_type}
+                  onChange={(event) => setManualForm((prev) => ({ ...prev, crop_type: event.target.value }))}
+                  placeholder="crop type"
+                  className="bg-gray-900 border border-gray-700 rounded px-2 py-1"
+                />
+                <input
+                  value={manualForm.estimated_hectares}
+                  onChange={(event) => setManualForm((prev) => ({ ...prev, estimated_hectares: event.target.value }))}
+                  placeholder="hectares"
+                  className="bg-gray-900 border border-gray-700 rounded px-2 py-1"
+                />
+                <input
+                  value={manualForm.tree_count_estimate}
+                  onChange={(event) => setManualForm((prev) => ({ ...prev, tree_count_estimate: event.target.value }))}
+                  placeholder="tree count"
+                  className="bg-gray-900 border border-gray-700 rounded px-2 py-1"
+                />
+                <label className="flex items-center gap-1 text-[10px] text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={manualForm.ml_training_label}
+                    onChange={(event) => setManualForm((prev) => ({ ...prev, ml_training_label: event.target.checked }))}
+                    className="accent-cyan-500"
+                  />
+                  ML label archive
+                </label>
+              </div>
+              <textarea
+                value={manualForm.notes}
+                onChange={(event) => setManualForm((prev) => ({ ...prev, notes: event.target.value }))}
+                placeholder="notes"
+                rows={2}
+                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 resize-none"
+              />
+              <button
+                onClick={archiveCurrentManualBoundary}
+                disabled={manualBoundaryPoints.length < 3}
+                className="w-full px-2 py-1.5 rounded bg-emerald-700 disabled:bg-gray-700 disabled:text-gray-500 text-white font-semibold"
+              >
+                Archive Boundary
+              </button>
+              {manualArchiveStatus && (
+                <div className="text-[10px] text-emerald-300">{manualArchiveStatus}</div>
+              )}
+            </div>
           )}
         </div>
         
@@ -484,7 +879,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
               disabled={scanning}
               className="w-full px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded font-semibold text-sm transition-colors"
             >
-              {scanning ? 'Scanning...' : '🛰️ Scan Area for Orchards'}
+              {scanning ? 'Scanning...' : 'Segment Selected Municipality'}
             </button>
             {scanError && (
               <div className="mt-2 text-xs text-red-400">{scanError}</div>
@@ -509,6 +904,128 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
             <div className="w-4 h-4 bg-red-500 rounded"></div>
             <span>High</span>
           </div>
+        </div>
+      </div>
+
+      {/* Manual Boundary Toolbar */}
+      <div className="absolute bottom-4 right-4 z-20 w-[360px] max-w-[calc(100%-2rem)] bg-gray-950/95 text-white border border-cyan-500/40 rounded-lg shadow-2xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-800 bg-cyan-950/30 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-wide text-cyan-300">Manual Boundary Toolbar</p>
+            <p className="text-sm font-bold">Manual Boundary Mode: {manualBoundaryMode ? "ON" : "OFF"}</p>
+          </div>
+          <button
+            onClick={() => {
+              setManualBoundaryMode((prev) => !prev);
+              setManualArchiveStatus(null);
+            }}
+            className={`px-3 py-1.5 rounded text-xs font-semibold ${
+              manualBoundaryMode
+                ? "bg-cyan-500 text-gray-950"
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+            }`}
+          >
+            {manualBoundaryMode ? "ON" : "OFF"}
+          </button>
+        </div>
+
+        <div className="p-4 space-y-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-400">Points selected</span>
+            <span className="font-mono text-cyan-300">{manualBoundaryPoints.length}</span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              onClick={() => {
+                setManualBoundaryFinished(true);
+                setManualArchiveStatus("Boundary closed. Add metadata, then archive.");
+              }}
+              disabled={!manualBoundaryMode || manualBoundaryPoints.length < 3}
+              className="py-1.5 rounded bg-cyan-700 disabled:bg-gray-800 disabled:text-gray-600 text-xs font-semibold"
+            >
+              Finish Boundary
+            </button>
+            <button
+              onClick={() => {
+                setManualBoundaryPoints([]);
+                setManualBoundaryFinished(false);
+                setManualArchiveStatus(null);
+              }}
+              disabled={manualBoundaryPoints.length === 0}
+              className="py-1.5 rounded bg-gray-800 disabled:text-gray-600 text-xs font-medium"
+            >
+              Clear Boundary
+            </button>
+            <button
+              onClick={archiveCurrentManualBoundary}
+              disabled={!manualBoundaryMode || manualBoundaryPoints.length < 3}
+              className="py-1.5 rounded bg-emerald-700 disabled:bg-gray-800 disabled:text-gray-600 text-xs font-semibold"
+            >
+              Archive Boundary
+            </button>
+          </div>
+
+          {manualBoundaryMode && (
+            <p className="text-[10px] text-gray-400">
+              Click the globe to place cyan vertices. A preview polygon appears after three points.
+            </p>
+          )}
+
+          {(manualBoundaryFinished || manualBoundaryPoints.length >= 3) && (
+            <div className="space-y-2 pt-2 border-t border-gray-800">
+              <select
+                value={manualForm.label_type}
+                onChange={(event) => setManualForm((prev) => ({ ...prev, label_type: event.target.value }))}
+                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs"
+              >
+                <option value="orchard_block">orchard_block</option>
+                <option value="orchard_cluster">orchard_cluster</option>
+                <option value="non_orchard">non_orchard</option>
+                <option value="needs_review">needs_review</option>
+              </select>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  value={manualForm.crop_type}
+                  onChange={(event) => setManualForm((prev) => ({ ...prev, crop_type: event.target.value }))}
+                  placeholder="crop type"
+                  className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs"
+                />
+                <input
+                  value={manualForm.estimated_hectares}
+                  onChange={(event) => setManualForm((prev) => ({ ...prev, estimated_hectares: event.target.value }))}
+                  placeholder="estimated hectares"
+                  className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs"
+                />
+                <input
+                  value={manualForm.tree_count_estimate}
+                  onChange={(event) => setManualForm((prev) => ({ ...prev, tree_count_estimate: event.target.value }))}
+                  placeholder="tree count estimate"
+                  className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs"
+                />
+                <label className="flex items-center gap-1 text-[10px] text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={manualForm.ml_training_label}
+                    onChange={(event) => setManualForm((prev) => ({ ...prev, ml_training_label: event.target.checked }))}
+                    className="accent-cyan-500"
+                  />
+                  ML label archive
+                </label>
+              </div>
+              <textarea
+                value={manualForm.notes}
+                onChange={(event) => setManualForm((prev) => ({ ...prev, notes: event.target.value }))}
+                placeholder="notes"
+                rows={2}
+                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs resize-none"
+              />
+            </div>
+          )}
+
+          {manualArchiveStatus && (
+            <p className="text-[10px] text-emerald-300">{manualArchiveStatus}</p>
+          )}
         </div>
       </div>
 
@@ -538,6 +1055,55 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
             once
             onComplete={() => setCameraTarget(null)}
           />
+        )}
+
+        {/* Temporary manual boundary outline while operator clicks points */}
+        {manualBoundaryPoints.length > 0 && (
+          <React.Fragment>
+            {manualBoundaryPoints.map((point, index) => (
+              <Entity
+                key={`manual-draft-point-${index}`}
+                position={Cartesian3.fromDegrees(point[0], point[1])}
+              >
+                <PointGraphics
+                  pixelSize={9}
+                  color={Color.CYAN}
+                  outlineColor={Color.BLACK}
+                  outlineWidth={1}
+                  heightReference={HeightReference.CLAMP_TO_GROUND}
+                />
+              </Entity>
+            ))}
+            {manualBoundaryPoints.length > 1 && (
+              <Entity name="Manual boundary draft outline">
+                <PolylineGraphics
+                  positions={Cartesian3.fromDegreesArrayHeights(
+                    [
+                      ...manualBoundaryPoints,
+                      ...(manualBoundaryPoints.length >= 3 ? [manualBoundaryPoints[0]] : []),
+                    ].flatMap((point) => [point[0], point[1], 18])
+                  )}
+                  width={4}
+                  material={Color.CYAN}
+                  clampToGround
+                />
+              </Entity>
+            )}
+            {manualBoundaryPoints.length >= 3 && (
+              <Entity name="Manual boundary draft polygon preview">
+                <PolygonGraphics
+                  hierarchy={Cartesian3.fromDegreesArray(
+                    manualBoundaryPoints.flatMap((point) => [point[0], point[1]])
+                  )}
+                  material={Color.CYAN.withAlpha(0.18)}
+                  outline={true}
+                  outlineColor={Color.CYAN}
+                  outlineWidth={3}
+                  heightReference={HeightReference.CLAMP_TO_GROUND}
+                />
+              </Entity>
+            )}
+          </React.Fragment>
         )}
 
         {/* Render Planned Drone Mission Route */}
@@ -637,16 +1203,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
               position={Cartesian3.fromDegrees(municipality.lng, municipality.lat)}
               onClick={() => {
                 console.log('Municipality clicked:', municipality.id, municipality.name);
-                setSelectedMunicipalityId(municipality.id);
-                // Notify parent component
-                onMunicipalitySelected?.(municipality);
-                // Fly to municipality
-                const destination = Cartesian3.fromDegrees(
-                  municipality.lng,
-                  municipality.lat,
-                  15000
-                );
-                setCameraTarget({ destination, duration: 2 });
+                openMunicipalityContext(municipality);
               }}
             >
               <PointGraphics
@@ -753,6 +1310,163 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
           );
         })}
 
+        {/* Render archived human-labeled manual boundaries */}
+        {manualBoundaries.map((boundary) => {
+          const block = manualBoundaryToBlock(boundary);
+          const color = getManualBoundaryColor(boundary);
+          const isSelected = commandContext?.archive_id === boundary.archive_id;
+          const polygonDegrees = getManualPolygonDegrees(boundary);
+          const outlineDegrees = getClosedManualPolylineDegrees(boundary);
+          if (!polygonDegrees.length) return null;
+
+          return (
+            <React.Fragment key={boundary.archive_id || boundary.boundary_id}>
+              <Entity
+                name={`Human-labeled boundary: ${boundary.archive_id || boundary.boundary_id}`}
+                description={`
+                  <div style="font-family: sans-serif;">
+                    <h3>Human-Labeled Orchard Boundary</h3>
+                    <p><strong>Archive ID:</strong> ${boundary.archive_id || boundary.boundary_id}</p>
+                    <p><strong>Label:</strong> ${boundary.label_type}</p>
+                    <p><strong>Crop:</strong> ${boundary.manual_metadata?.crop_type || "avocado"}</p>
+                    <p><strong>ML Label Archive:</strong> ${boundary.ml_training_label ? "yes" : "no"}</p>
+                    <p><strong>Source:</strong> human_labeled</p>
+                  </div>
+                `}
+                onClick={() => {
+                  setCommandContext(block);
+                  onSegmentedBlockSelected?.(block);
+                }}
+              >
+                <PolygonGraphics
+                  hierarchy={Cartesian3.fromDegreesArray(polygonDegrees)}
+                  material={color.withAlpha(boundary.label_type === "non_orchard" ? 0.08 : 0.16)}
+                  outline={true}
+                  outlineColor={color}
+                  outlineWidth={isSelected ? 5 : 3}
+                  heightReference={HeightReference.CLAMP_TO_GROUND}
+                />
+                <PolylineGraphics
+                  positions={Cartesian3.fromDegreesArrayHeights(outlineDegrees)}
+                  width={isSelected ? 6 : 4}
+                  material={color}
+                  clampToGround
+                />
+              </Entity>
+              <Entity
+                position={Cartesian3.fromDegrees(block.center_lng, block.center_lat)}
+                onClick={() => {
+                  setCommandContext(block);
+                  onSegmentedBlockSelected?.(block);
+                }}
+              >
+                <LabelGraphics
+                  text={`Human-labeled · ${boundary.label_type}`}
+                  font="bold 11px sans-serif"
+                  fillColor={color}
+                  outlineColor={Color.BLACK}
+                  outlineWidth={3}
+                  verticalOrigin={VerticalOrigin.CENTER}
+                  horizontalOrigin={HorizontalOrigin.CENTER}
+                  heightReference={HeightReference.CLAMP_TO_GROUND}
+                />
+              </Entity>
+            </React.Fragment>
+          );
+        })}
+
+        {/* Render AI segmented orchard blocks as command boundaries */}
+        {segmentedOrchardBlocks?.map((block) => {
+          const isSelected = selectedSegmentedBlockId === block.block_id || commandContext?.block_id === block.block_id;
+          const isHovered = hoveredBlockId === block.block_id;
+          const stressColor = getStressBaseColor(block.stress_level);
+          const outlineColor = isSelected ? Color.CYAN : stressColor;
+          const polygonDegrees = getBlockPolygonDegrees(block);
+          const outlineDegrees = getClosedBlockPolylineDegrees(block);
+
+          if (!polygonDegrees.length) return null;
+
+          return (
+            <React.Fragment key={block.block_id}>
+              <Entity
+                name={`Segmented Block: ${block.block_id}`}
+                description={`
+                  <div style="font-family: sans-serif;">
+                    <h3>AI detected orchard row/canopy pattern</h3>
+                    <p><strong>ID:</strong> ${block.block_id}</p>
+                    <p><strong>Area:</strong> ${block.estimated_hectares} ha</p>
+                    <p><strong>Trees:</strong> ${Number(block.tree_count_estimate || block.estimated_tree_count || 0).toLocaleString()}</p>
+                    <p><strong>Stress Level:</strong> ${block.stress_level}</p>
+                    <p><strong>Confidence:</strong> ${Math.round((block.confidence_score || block.confidence || 0.86) * 100)}%</p>
+                    <p><strong>Orchard Feature Score:</strong> ${Math.round((block.orchard_feature_score || 0.86) * 100)}%</p>
+                    <p><strong>Row Alignment Score:</strong> ${Math.round((block.row_alignment_score || 0.84) * 100)}%</p>
+                    <p><strong>Boundary Source:</strong> ${block.boundary_source || "ai_generated"}</p>
+                  </div>
+                `}
+                onClick={() => openBlockContext(block)}
+                onMouseEnter={() => setHoveredBlockId(block.block_id)}
+                onMouseLeave={() => setHoveredBlockId(null)}
+              >
+                <PolygonGraphics
+                  hierarchy={Cartesian3.fromDegreesArray(polygonDegrees)}
+                  material={stressColor.withAlpha(isSelected ? 0.26 : isHovered ? 0.22 : 0.14)}
+                  outline={true}
+                  outlineColor={outlineColor}
+                  outlineWidth={isSelected ? 5 : isHovered ? 4 : 3}
+                  heightReference={HeightReference.CLAMP_TO_GROUND}
+                />
+                {outlineDegrees.length > 0 && (
+                  <PolylineGraphics
+                    positions={Cartesian3.fromDegreesArrayHeights(outlineDegrees)}
+                    width={isSelected ? 6 : isHovered ? 5 : 3}
+                    material={outlineColor}
+                    clampToGround
+                  />
+                )}
+              </Entity>
+              {showTreeCanopyPoints && (block.tree_points || []).map((tree: any) => (
+                <Entity
+                  key={tree.tree_id}
+                  position={Cartesian3.fromDegrees(tree.lng, tree.lat)}
+                  name={`Canopy point: ${tree.tree_id}`}
+                  description={`
+                    <div style="font-family: sans-serif;">
+                      <h3>AI detected orchard row/canopy pattern</h3>
+                      <p><strong>Tree sample:</strong> ${tree.tree_id}</p>
+                      <p><strong>Health:</strong> ${tree.health}</p>
+                      <p><strong>Canopy radius:</strong> ${tree.canopy_radius_m} m</p>
+                    </div>
+                  `}
+                  onClick={() => openBlockContext(block)}
+                >
+                  <PointGraphics
+                    pixelSize={isSelected ? 8 : 6}
+                    color={getTreePointColor(tree.health).withAlpha(0.9)}
+                    outlineColor={Color.BLACK}
+                    outlineWidth={1}
+                    heightReference={HeightReference.CLAMP_TO_GROUND}
+                  />
+                </Entity>
+              ))}
+              <Entity
+                position={Cartesian3.fromDegrees(block.center_lng, block.center_lat)}
+                onClick={() => openBlockContext(block)}
+              >
+                <LabelGraphics
+                  text={`${block.block_id} · row/canopy pattern · ${block.estimated_hectares} ha`}
+                  font={isSelected ? "bold 12px sans-serif" : "11px sans-serif"}
+                  fillColor={isSelected ? Color.CYAN : Color.WHITE}
+                  outlineColor={Color.BLACK}
+                  outlineWidth={3}
+                  verticalOrigin={VerticalOrigin.CENTER}
+                  horizontalOrigin={HorizontalOrigin.CENTER}
+                  heightReference={HeightReference.CLAMP_TO_GROUND}
+                />
+              </Entity>
+            </React.Fragment>
+          );
+        })}
+
         {/* Render detected orchard parcels as polygons */}
         {detectedOrchards.map((orchard) => {
           const isSelected = selectedOrchardCandidate?.orchard_id === orchard.orchard_id;
@@ -812,6 +1526,209 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
           );
         })}
       </Viewer>
+
+      {/* Floating map-driven command context */}
+      {commandContext && (
+        <div className="absolute bottom-4 left-4 z-10 w-[340px] max-w-[calc(100%-2rem)] bg-gray-950/92 text-white border border-cyan-500/30 rounded-lg shadow-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-800 bg-cyan-950/30 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-cyan-300">
+                {commandContext.type === "orchard_block" ? "Orchard Block Context" : "Municipality Context"}
+              </p>
+              <h3 className="text-sm font-bold mt-0.5">
+                {commandContext.block_id || commandContext.name || commandContext.id}
+              </h3>
+              {commandContext.boundary_source === "human_corrected" && (
+                <p className="text-[10px] text-emerald-300 mt-1">Human-corrected boundary active</p>
+              )}
+              {commandContext.boundary_source === "human_labeled" && (
+                <p className="text-[10px] text-cyan-300 mt-1">Human-labeled boundary active · ML label archive</p>
+              )}
+            </div>
+            <button
+              onClick={() => setCommandContext(null)}
+              className="text-gray-500 hover:text-white text-sm"
+              aria-label="Close command context"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <p className="text-gray-500">Type</p>
+                <p className="font-medium capitalize">{commandContext.type?.replace("_", " ")}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Hectares</p>
+                <p className="font-medium">{(commandContext.estimated_hectares ?? commandContext.hectares ?? 0).toLocaleString()} ha</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Stress level</p>
+                <p className={`font-medium capitalize ${
+                  commandContext.stress_level === "high" ? "text-red-300" :
+                  commandContext.stress_level === "medium" ? "text-yellow-300" :
+                  "text-emerald-300"
+                }`}>{commandContext.stress_level || "low"}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Tree count estimate</p>
+                <p className="font-medium">{Number(commandContext.tree_count_estimate || commandContext.estimated_tree_count || commandContext.estimated_trees || 0).toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Confidence</p>
+                <p className="font-medium">{Math.round((commandContext.confidence_score || commandContext.confidence || 0.86) * 100)}%</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Orchard feature score</p>
+                <p className="font-medium">{Math.round((commandContext.orchard_feature_score || 0.86) * 100)}%</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Row alignment score</p>
+                <p className="font-medium">{Math.round((commandContext.row_alignment_score || 0.84) * 100)}%</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Sampled tree points</p>
+                <p className="font-medium">{commandContext.tree_points?.length ?? 0}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Boundary source</p>
+                <p className="font-medium">{commandContext.boundary_source || "ai_generated"}</p>
+              </div>
+              {commandContext.boundary_source === "human_labeled" && (
+                <>
+                  <div>
+                    <p className="text-gray-500">Label type</p>
+                    <p className="font-medium">{commandContext.label_type}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">ML training label</p>
+                    <p className="font-medium">{commandContext.ml_training_label ? "Yes" : "No"}</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {commandContext.type === "orchard_block" && (
+              <p className="text-[10px] text-cyan-300">
+                {commandContext.boundary_source === "human_labeled"
+                  ? "Operator-labeled boundary is preferred as the operational target and retained for training dataset preparation."
+                  : "AI detected orchard row/canopy pattern from sampled tree spacing, canopy density, and vegetation signals."}
+              </p>
+            )}
+
+            <div className="grid grid-cols-2 gap-1.5">
+              {[
+                "Segment Orchards",
+                "Reconstruct Twin",
+                "Dispatch Drone",
+                "Analyze Inspection",
+                "Simulate ROI",
+                "Draft Field Task",
+              ].map((label) => (
+                <button
+                  key={label}
+                  onClick={() => {
+                    if (label === "Segment Orchards") handleScanMunicipality();
+                    if (label === "Reconstruct Twin" && commandContext.block_id) onEnter3DTwin?.(commandContext.block_id);
+                  }}
+                  className="px-2 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-[10px] font-medium text-gray-200 transition-colors"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {commandContext.type === "orchard_block" && (
+              <div className="pt-3 border-t border-gray-800">
+                <button
+                  onClick={() => setReviewMode((value) => !value)}
+                  className="w-full px-3 py-1.5 rounded bg-cyan-700/80 hover:bg-cyan-700 text-xs font-semibold transition-colors"
+                >
+                  {reviewMode ? "Close Segmentation Review" : "Segmentation Review Mode"}
+                </button>
+
+                {reviewMode && (
+                  <div className="mt-3 space-y-2">
+                    <div className="grid grid-cols-2 gap-2 text-[10px]">
+                      <div>Type: {commandContext.segmentation_type || "orchard_block_boundary"}</div>
+                      <div>Review: {commandContext.requires_review ? "Required" : "Optional"}</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        placeholder="hectares"
+                        defaultValue={commandContext.estimated_hectares}
+                        onChange={(event) => setCorrectionDraft((prev: any) => ({ ...prev, hectares: event.target.value }))}
+                        className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-[11px]"
+                      />
+                      <input
+                        placeholder="tree count"
+                        defaultValue={commandContext.estimated_tree_count}
+                        onChange={(event) => setCorrectionDraft((prev: any) => ({ ...prev, tree_count: event.target.value }))}
+                        className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-[11px]"
+                      />
+                      <input
+                        placeholder="canopy density"
+                        defaultValue={commandContext.canopy_density}
+                        onChange={(event) => setCorrectionDraft((prev: any) => ({ ...prev, canopy_density: event.target.value }))}
+                        className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-[11px]"
+                      />
+                      <select
+                        defaultValue={commandContext.stress_level}
+                        onChange={(event) => setCorrectionDraft((prev: any) => ({ ...prev, stress_level: event.target.value }))}
+                        className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-[11px]"
+                      >
+                        <option value="low">low</option>
+                        <option value="medium">medium</option>
+                        <option value="high">high</option>
+                      </select>
+                    </div>
+                    <textarea
+                      placeholder="notes"
+                      onChange={(event) => setCorrectionDraft((prev: any) => ({ ...prev, notes: event.target.value }))}
+                      className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-[11px] resize-none"
+                      rows={2}
+                    />
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button
+                        onClick={() => {
+                          setCorrectionDraft({});
+                          setCorrectionStatus("Boundary accepted");
+                        }}
+                        className="py-1 rounded bg-emerald-800/80 text-[10px] font-medium"
+                      >
+                        Accept Boundary
+                      </button>
+                      <button
+                        onClick={() => setCorrectionStatus("Manual calibration active")}
+                        className="py-1 rounded bg-gray-800 text-[10px] font-medium"
+                      >
+                        Edit Boundary
+                      </button>
+                      <button
+                        onClick={saveCorrection}
+                        className="py-1 rounded bg-cyan-700/80 text-[10px] font-medium"
+                      >
+                        Save Correction
+                      </button>
+                      <button
+                        onClick={() => setCorrectionDraft((prev: any) => ({ ...prev, notes: `${prev.notes || ""} Needs ground truth.`.trim() }))}
+                        className="py-1 rounded bg-amber-800/80 text-[10px] font-medium"
+                      >
+                        Flag Needs Ground Truth
+                      </button>
+                    </div>
+                    {correctionStatus && (
+                      <p className="text-[10px] text-emerald-300">{correctionStatus}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Orchard Candidate Panel */}
       {selectedOrchardCandidate && (

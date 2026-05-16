@@ -30,6 +30,7 @@ class MissionMemoryService:
         self.client = None
         self.db = None
         self.enabled = False
+        self.local_memory: List[Dict[str, Any]] = []
         
         if MONGO_AVAILABLE and config.MONGODB_URI:
             try:
@@ -44,14 +45,78 @@ class MissionMemoryService:
 
     def save_mission(self, mission_data: Dict[str, Any]):
         """Store a planned drone mission."""
-        if not self.enabled: return
+        if not self.enabled:
+            self.local_memory.append({
+                **mission_data,
+                "type": mission_data.get("type", "mission_plan"),
+                "created_at": datetime.datetime.utcnow().isoformat(),
+                "memory_status": "local_fallback",
+            })
+            return
         
         record = {
             **mission_data,
-            "type": "mission_plan",
+            "type": mission_data.get("type", "mission_plan"),
             "created_at": datetime.datetime.utcnow()
         }
         self.db.missions.insert_one(record)
+
+    def save_segmentation_correction(self, correction_data: Dict[str, Any]) -> str:
+        """Store human segmentation correction in MongoDB or local fallback memory."""
+        record = {
+            **correction_data,
+            "type": "segmentation_correction",
+            "created_at": datetime.datetime.utcnow()
+        }
+
+        if not self.enabled:
+            self.local_memory.append({
+                **record,
+                "created_at": record["created_at"].isoformat(),
+                "memory_status": "local_fallback",
+            })
+            return "local_fallback"
+
+        self.db.segmentation_corrections.insert_one(record)
+        return "saved_to_mongodb"
+
+    def save_manual_boundary(self, boundary_data: Dict[str, Any]) -> str:
+        """Store a human-labeled orchard boundary for operational use and ML label archive prep."""
+        record = {
+            **boundary_data,
+            "type": "manual_orchard_boundary",
+            "created_at": datetime.datetime.utcnow()
+        }
+
+        if not self.enabled:
+            self.local_memory.append({
+                **record,
+                "created_at": record["created_at"].isoformat(),
+                "memory_status": "local_fallback",
+            })
+            return "local_fallback"
+
+        self.db.manual_boundaries.insert_one(record)
+        return "saved_to_mongodb"
+
+    def get_manual_boundaries(self, municipality_id: str) -> List[Dict[str, Any]]:
+        """Retrieve human-labeled boundaries for a municipality."""
+        if not self.enabled:
+            return [
+                item for item in self.local_memory
+                if item.get("type") == "manual_orchard_boundary"
+                and item.get("municipality_id") == municipality_id
+            ]
+
+        cursor = self.db.manual_boundaries.find(
+            {"municipality_id": municipality_id},
+            {"_id": 0}
+        ).sort("created_at", DESCENDING)
+        boundaries = list(cursor)
+        for boundary in boundaries:
+            if isinstance(boundary.get("created_at"), datetime.datetime):
+                boundary["created_at"] = boundary["created_at"].isoformat()
+        return boundaries
 
     def save_inspection_analysis(self, analysis_data: Dict[str, Any]):
         """Store the results of a high-res drone scan analysis."""
