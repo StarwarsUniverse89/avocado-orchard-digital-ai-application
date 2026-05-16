@@ -15,7 +15,9 @@ import AIAdvisorPanel from "@/components/AIAdvisorPanel";
 import SimulationControls from "@/components/SimulationControls";
 import AMDStatusPanel from "@/components/AMDStatusPanel";
 import MetricCard from "@/components/MetricCard";
+import RegionalOperationsPanel from "@/components/RegionalOperationsPanel";
 import DroneMissionPanel from "@/components/DroneMissionPanel";
+import OperatorWorkflowPanel from "@/components/OperatorWorkflowPanel";
 import AnalyticsSummaryPanel from "@/components/AnalyticsSummaryPanel";
 import FinancialPredictionPanel from "@/components/FinancialPredictionPanel";
 import {
@@ -30,6 +32,7 @@ import {
 } from "@/lib/mockData";
 import { UICommand, UICommandHandler } from "@/types/uiCommands";
 import { resolveSelectionContext, SelectionContext, getContextDisplayName } from "@/lib/selectionContext";
+import { getMLTrainingDatasetSummary, getOrchardBoundaryGeoJSONUrl } from "@/lib/api";
 import gsap from "gsap";
 
 export default function CommandCenter() {
@@ -42,6 +45,8 @@ export default function CommandCenter() {
   const [viewMode, setViewMode] = useState<'globe' | '3d'>('globe');
   const [showAnalyticsSummary, setShowAnalyticsSummary] = useState(false);
   const [showFinancialPanel, setShowFinancialPanel] = useState(false);
+  const [operatorRole, setOperatorRole] = useState<"regional" | "municipality" | "owner">("regional");
+  const [networkSetupComplete, setNetworkSetupComplete] = useState(false);
   const viewContainerRef = useRef<HTMLDivElement>(null);
   const globeCommandRef = useRef<GlobeCommandViewRef>(null);
 
@@ -52,16 +57,37 @@ export default function CommandCenter() {
   const [archivedOrchards, setArchivedOrchards] = useState<any[]>([]);
   const [visionAnalysisResult, setVisionAnalysisResult] = useState<any>(null);
   const [activeDroneMission, setActiveDroneMission] = useState<any>(null);
+  const [segmentedOrchardBlocks, setSegmentedOrchardBlocks] = useState<any[]>([]);
+  const [selectedSegmentedBlock, setSelectedSegmentedBlock] = useState<any>(null);
+  const [mlTrainingSummary, setMlTrainingSummary] = useState<any>(null);
+
+  const visibleSegmentedBlocks = segmentedOrchardBlocks.filter((block, index) => {
+    if (operatorRole === "regional") return true;
+    if (operatorRole === "municipality") {
+      return !selectedMunicipality?.id || block.municipality_id === selectedMunicipality.id;
+    }
+    return index < 2;
+  });
+
+  const handleSegmentedBlockSelected = (block: any) => {
+    setSelectedSegmentedBlock(block);
+    if (block?.block_id) {
+      setSegmentedOrchardBlocks((prev) =>
+        prev.map((item) => (item.block_id === block.block_id ? { ...item, ...block } : item))
+      );
+    }
+  };
 
   // Resolve selection context for panels
   const selectionContext: SelectionContext = resolveSelectionContext({
-    selectedOrchardCandidate,
+    selectedOrchardCandidate: selectedSegmentedBlock || selectedOrchardCandidate,
     selectedArchivedOrchard: null, // TODO: implement archive selection
     selectedMunicipality,
   });
 
   // Determine drone mission target using explicit hierarchy priority
   const droneMissionTargetId = 
+    selectedSegmentedBlock?.block_id ||
     selectedOrchardCandidate?.id || 
     selectedOrchardCandidate?.orchard_id || 
     selectedOrchardCandidate?.name || 
@@ -70,6 +96,7 @@ export default function CommandCenter() {
     "tancitaro";
 
   const droneMissionTargetType = 
+    selectedSegmentedBlock ? "orchard_block" :
     selectedOrchardCandidate ? "orchard" : 
     selectedMunicipality ? "municipality" : 
     "demo";
@@ -99,6 +126,17 @@ export default function CommandCenter() {
   useEffect(() => {
     setRecommendations(generateRecommendations(orchardData));
   }, [orchardData]);
+
+  useEffect(() => {
+    const loadSummary = () => {
+      getMLTrainingDatasetSummary().then((res) => {
+        if (res.success) setMlTrainingSummary(res.data);
+      });
+    };
+    loadSummary();
+    const interval = setInterval(loadSummary, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleOrchardSelect = (orchardId: string) => {
     setSelectedOrchardId(orchardId);
@@ -378,14 +416,14 @@ export default function CommandCenter() {
           <div className="max-w-4xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-sm font-medium mb-4 animate-fade-in">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              Live System Active • {trees.length} Trees Monitored
+              Operational Network Active • Gemini Mission Memory
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-50 mb-4 animate-fade-in">
-              Orchard Command Center
+              Gemini Orchard Operations OS
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 max-w-2xl animate-fade-in">
-              Real-time digital twin monitoring, AI-driven recommendations, and
-              GPU-accelerated simulation powered by AMD MI300X infrastructure.
+              Map-driven mission planning, operational digital twin calibration,
+              field execution, and human-in-the-loop approval for avocado agriculture.
             </p>
           </div>
         </div>
@@ -393,6 +431,40 @@ export default function CommandCenter() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
+        {/* Regional Operations Overview */}
+        <RegionalOperationsPanel />
+
+        {/* SaaS Role Simulation */}
+        <section className="mb-6">
+          <div className="glass-elevated rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">View Mode</h3>
+              <p className="text-xs text-gray-600 dark:text-gray-500 mt-1">
+                Demo role simulation for operational network visibility.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                ["regional", "Regional Operator"],
+                ["municipality", "Municipality Manager"],
+                ["owner", "Orchard Owner"],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  onClick={() => setOperatorRole(value as typeof operatorRole)}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                    operatorRole === value
+                      ? "bg-primary text-gray-950"
+                      : "bg-gray-800/50 text-gray-400 hover:bg-gray-700/50"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Debug: Current Context */}
         {process.env.NODE_ENV === 'development' && (
           <section className="mb-4">
@@ -461,7 +533,7 @@ export default function CommandCenter() {
             <div className="glass-elevated rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                  Visualization Mode
+                  Primary Command Surface
                 </h3>
                 <div className="flex gap-2">
                   <button
@@ -472,7 +544,7 @@ export default function CommandCenter() {
                         : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
                     }`}
                   >
-                    🌍 Globe View
+                    Globe Command
                   </button>
                   <button
                     onClick={() => handleViewToggle('3d')}
@@ -482,7 +554,7 @@ export default function CommandCenter() {
                         : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
                     }`}
                   >
-                    🎮 3D Twin
+                    Operational Digital Twin
                   </button>
                 </div>
               </div>
@@ -504,6 +576,9 @@ export default function CommandCenter() {
                   onDetectedOrchardsChanged={setDetectedOrchards}
                   onVisionAnalysisCompleted={setVisionAnalysisResult}
                   plannedMission={activeDroneMission}
+                  segmentedOrchardBlocks={visibleSegmentedBlocks}
+                  selectedSegmentedBlockId={selectedSegmentedBlock?.block_id}
+                  onSegmentedBlockSelected={handleSegmentedBlockSelected}
                 />
               ) : (
                 <OrchardScene3D trees={trees} />
@@ -511,9 +586,77 @@ export default function CommandCenter() {
             </div>
           </div>
 
-          {/* Right Column - AMD Status and Selected Orchard Details */}
+          {/* Right Column - Operator Workflow + AMD Status */}
           <div className="lg:col-span-1 space-y-6">
+            <OperatorWorkflowPanel
+              onMissionPlanned={handleMissionPlanned}
+              defaultMunicipalityId={selectedMunicipality?.id || "tancitaro"}
+              selectedBlock={selectedSegmentedBlock}
+              segmentedBlocks={visibleSegmentedBlocks}
+              onSegmentedBlocksChanged={setSegmentedOrchardBlocks}
+              onBlockSelected={handleSegmentedBlockSelected}
+              networkSetupComplete={networkSetupComplete}
+              onNetworkSetupComplete={() => setNetworkSetupComplete(true)}
+            />
+
             <AMDStatusPanel />
+
+            {/* ML Training Data Feedback Loop */}
+            <div className="glass-elevated rounded-xl p-4 animate-fade-in">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                    ML Training Data
+                  </h3>
+                  <p className="text-[10px] text-gray-600 dark:text-gray-500 mt-1">
+                    Human-labeled boundary archive · Training dataset preparation
+                  </p>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                  mlTrainingSummary?.ready_for_training
+                    ? "bg-emerald-900/40 text-emerald-400 border border-emerald-700/40"
+                    : "bg-amber-900/40 text-amber-400 border border-amber-700/40"
+                }`}>
+                  {mlTrainingSummary?.ready_for_training ? "Ready" : "Preparing"}
+                </span>
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Total labels:</span>
+                  <span className="text-gray-900 dark:text-gray-50 font-medium">
+                    {mlTrainingSummary?.total_human_labeled_boundaries ?? 0}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Accepted:</span>
+                  <span className="text-success font-medium">{mlTrainingSummary?.accepted_labels ?? 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Needs review:</span>
+                  <span className="text-warning font-medium">{mlTrainingSummary?.needs_review_labels ?? 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Non-orchard:</span>
+                  <span className="text-gray-400 font-medium">{mlTrainingSummary?.non_orchard_labels ?? 0}</span>
+                </div>
+                <div className="pt-2 border-t border-gray-800/60">
+                  <a
+                    href={getOrchardBoundaryGeoJSONUrl()}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block w-full text-center py-1.5 rounded-lg text-xs font-semibold bg-cyan-700/80 text-white hover:bg-cyan-700 transition-colors"
+                  >
+                    Export GeoJSON
+                  </a>
+                </div>
+                {mlTrainingSummary?.recommended_next_step && (
+                  <p className="text-[10px] text-gray-500 leading-relaxed">
+                    {mlTrainingSummary.recommended_next_step}
+                  </p>
+                )}
+              </div>
+            </div>
 
             {/* Drone Mission Control Panel */}
             <DroneMissionPanel 
@@ -523,7 +666,7 @@ export default function CommandCenter() {
             />
             
             {/* Current Selection Info */}
-            {(selectedOrchardCandidate || selectedMunicipality) && (
+            {(selectedSegmentedBlock || selectedOrchardCandidate || selectedMunicipality) && (
               <div className="glass-elevated rounded-xl p-4 animate-fade-in">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50 mb-3">
                   Current Selection
@@ -541,11 +684,11 @@ export default function CommandCenter() {
                       {getContextDisplayName(selectionContext)}
                     </span>
                   </div>
-                  {selectionContext.estimated_tree_count && (
+                  {(selectedSegmentedBlock?.estimated_tree_count || selectionContext.estimated_tree_count) && (
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Trees:</span>
                       <span className="text-gray-900 dark:text-gray-50 font-medium">
-                        {selectionContext.estimated_tree_count.toLocaleString()}
+                        {(selectedSegmentedBlock?.estimated_tree_count || selectionContext.estimated_tree_count).toLocaleString()}
                       </span>
                     </div>
                   )}
@@ -557,15 +700,15 @@ export default function CommandCenter() {
                       </span>
                     </div>
                   )}
-                  {selectionContext.stress_level && (
+                  {(selectedSegmentedBlock?.stress_level || selectionContext.stress_level) && (
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Stress:</span>
                       <span className={`font-medium ${
-                        selectionContext.stress_level === 'high' ? 'text-error' :
-                        selectionContext.stress_level === 'medium' ? 'text-warning' :
+                        (selectedSegmentedBlock?.stress_level || selectionContext.stress_level) === 'high' ? 'text-error' :
+                        (selectedSegmentedBlock?.stress_level || selectionContext.stress_level) === 'medium' ? 'text-warning' :
                         'text-success'
                       }`}>
-                        {selectionContext.stress_level}
+                        {selectedSegmentedBlock?.stress_level || selectionContext.stress_level}
                       </span>
                     </div>
                   )}

@@ -576,4 +576,34 @@ export async function getManualBoundaries(municipalityId: string): Promise<ApiRe
   }
 }
 
+export function getOrchardBoundaryGeoJSONUrl(): string {
+  return `${API_BASE_URL}/api/v1/ml/training-dataset/orchard-boundaries.geojson`;
+}
+
+export async function getMLTrainingDatasetSummary(): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/ml/training-dataset/summary`);
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: JSON.stringify(result) };
+    }
+    return { success: true, data: result.data ?? result };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function getOrchardBoundaryTrainingDataset(): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/ml/training-dataset/orchard-boundaries`);
+    const result = await response.json();
+    if (!response.ok) {
+      return { success: false, error: JSON.stringify(result) };
+    }
+    return { success: true, data: result.data ?? result };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
 // Made with Bob

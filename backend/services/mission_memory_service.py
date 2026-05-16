@@ -118,6 +118,24 @@ class MissionMemoryService:
                 boundary["created_at"] = boundary["created_at"].isoformat()
         return boundaries
 
+    def get_all_manual_boundaries(self) -> List[Dict[str, Any]]:
+        """Retrieve all human-labeled manual boundaries for ML label archive export."""
+        if not self.enabled:
+            return [
+                item for item in self.local_memory
+                if item.get("type") == "manual_orchard_boundary"
+            ]
+
+        cursor = self.db.manual_boundaries.find(
+            {},
+            {"_id": 0}
+        ).sort("created_at", DESCENDING)
+        boundaries = list(cursor)
+        for boundary in boundaries:
+            if isinstance(boundary.get("created_at"), datetime.datetime):
+                boundary["created_at"] = boundary["created_at"].isoformat()
+        return boundaries
+
     def save_inspection_analysis(self, analysis_data: Dict[str, Any]):
         """Store the results of a high-res drone scan analysis."""
         if not self.enabled: return

@@ -91,6 +91,18 @@ Manual Boundary Mode lets an operator click map points to create a polygon, labe
 
 Archived manual boundaries become part of the ML label archive for training dataset preparation. The system does not claim model training is already happening; it prepares durable human-labeled examples that can improve future orchard segmentation workflows while providing reliable targets for reconstruction, drone inspection, ROI analysis, and human-in-the-loop tasking today.
 
+### 🧠 Operational ML Layer
+
+The operational ML feedback loop is:
+
+```text
+AI prediction → human correction → archived label → training dataset → improved future model
+```
+
+AI segmentation creates first-pass orchard boundaries. Operators can correct those predictions or outline real orchards manually when the system needs more reliable ground truth. These human-corrected boundaries are saved as ML training labels in the manual boundary archive.
+
+The dataset can be exported as GeoJSON through the training dataset endpoints for future model training or fine-tuning. The current system does not train a model automatically; it prepares an ML label archive and uses human-corrected labels immediately as operational truth for mission planning, reconstruction, inspection, ROI analysis, and human-in-the-loop tasking.
+
 ### 🤖 Gemini Operations Agent
 The agent oversees the regional avocado network and prioritizes work across many orchards. It leverages MongoDB MCP to remember previous interventions and outcomes.
 
