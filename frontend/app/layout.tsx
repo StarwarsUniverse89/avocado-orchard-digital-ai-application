@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Avocado Orchard Digital AI | Enterprise Agricultural Intelligence",
-  description: "High-performance AI agent system for avocado orchard digital twin modeling, real-time analysis, simulation, and decision-making powered by AMD GPU infrastructure.",
-  keywords: ["avocado", "orchard", "digital twin", "AI", "agriculture", "AMD", "GPU", "simulation"],
+  title: "Gemini Orchard Operations OS",
+  description: "Operational intelligence command system for avocado agriculture, mission planning, human-in-the-loop field execution, operational memory, and ML label archive preparation.",
+  keywords: ["avocado", "orchard operations", "Gemini", "operational digital twin", "agriculture", "mission control", "ML label archive"],
 };
 
 export default function RootLayout({

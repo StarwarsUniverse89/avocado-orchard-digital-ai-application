@@ -1,259 +1,167 @@
 import Link from "next/link";
 import Header from "@/components/Header";
-import MetricCard from "@/components/MetricCard";
-import AIAdvisorPanel from "@/components/AIAdvisorPanel";
-import OrchardMap from "@/components/OrchardMap";
+
+const outcomes = [
+  {
+    title: "Regional scan found 3 high-risk zones",
+    body: "Belt-wide segmentation surfaced heat and canopy stress clusters before crews were dispatched.",
+    metric: "3 zones",
+  },
+  {
+    title: "Drone inspection reduced unnecessary field walks",
+    body: "Mission routing focused scouting on blocks with row-pattern anomalies and elevated stress scores.",
+    metric: "42% less scouting",
+  },
+  {
+    title: "ROI simulation estimated $210K avoided loss",
+    body: "Financial exposure was modeled before task approval, helping prioritize treatment timing.",
+    metric: "$210K",
+  },
+];
+
+const workflow = [
+  "Scan Belt",
+  "Segment Orchards",
+  "Reconstruct Twin",
+  "Dispatch Drone",
+  "Analyze",
+  "Simulate ROI",
+  "Draft Field Task",
+];
+
+const whyItMatters = [
+  "Reduce scouting time across large avocado regions",
+  "Prioritize limited labor against the highest-risk blocks",
+  "Catch canopy stress earlier with map-driven inspection",
+  "Estimate financial exposure before field execution",
+  "Turn human corrections into ML label archive examples",
+];
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+    <div className="min-h-screen bg-[#05070b] text-gray-100">
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-gray-800">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
-        <div className="container mx-auto px-6 py-16 relative z-10">
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-sm font-medium mb-6 animate-fade-in">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              Live System Active
+      <main className="bg-[radial-gradient(circle_at_top_left,rgba(0,212,255,0.14),transparent_34%),linear-gradient(135deg,#05070b_0%,#10151f_52%,#07110d_100%)]">
+        <section className="mx-auto grid min-h-[calc(100vh-73px)] max-w-[1540px] items-center gap-10 px-6 py-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(560px,1.1fr)]">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-4 py-2 text-xs font-semibold text-cyan-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-300"></span>
+              Gemini: Mock · MongoDB Memory: Live / Fallback · Human Approval: Required
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-50 mb-6 animate-fade-in">
-              Avocado Orchard
-              <br />
-              <span className="gradient-text">Digital Twin Platform</span>
+            <h1 className="mt-6 max-w-4xl text-5xl font-semibold text-white md:text-7xl">
+              Gemini Orchard Operations OS
             </h1>
-            <p className="text-xl text-gray-400 mb-8 max-w-2xl animate-fade-in">
-              High-performance AI agent system for real-time orchard analysis,
-              simulation, and decision-making. Powered by AMD MI300X GPU
-              infrastructure.
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-400">
+              A premium operational intelligence platform for avocado agriculture: scan the belt, segment orchard blocks,
+              dispatch drone inspection, simulate financial exposure, and approve field work from one command surface.
             </p>
-            <div className="flex flex-wrap gap-4 animate-fade-in">
-              <Link href="/command-center">
-                <button className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-gray-950 font-semibold hover:opacity-90 transition-opacity glow-primary">
-                  Launch Command Center
-                </button>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/command-center"
+                className="rounded-lg bg-cyan-300 px-6 py-3 text-sm font-bold text-gray-950 shadow-[0_0_30px_rgba(0,212,255,0.2)] transition-opacity hover:opacity-90"
+              >
+                Launch Command Center
               </Link>
-              <button className="px-6 py-3 rounded-lg glass text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                View Documentation
-              </button>
+              <Link
+                href="/orchards"
+                className="rounded-lg border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/[0.08]"
+              >
+                View Orchard Workspace
+              </Link>
+            </div>
+
+            <div className="mt-10 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                <div className="text-2xl font-semibold text-white">847</div>
+                <div className="mt-1 text-xs text-gray-500">orchard clusters monitored</div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                <div className="text-2xl font-semibold text-white">142K ha</div>
+                <div className="mt-1 text-xs text-gray-500">regional operating area</div>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                <div className="text-2xl font-semibold text-white">91%</div>
+                <div className="mt-1 text-xs text-gray-500">example segmentation confidence</div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Main Dashboard */}
-      <main className="container mx-auto px-6 py-12">
-        {/* Key Metrics */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-50 mb-6">
-            Orchard Overview
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard
-              title="Average Yield"
-              value="130"
-              unit="kg/tree"
-              change={8.5}
-              trend="up"
-              icon="🥑"
-              status="success"
-            />
-            <MetricCard
-              title="Soil Moisture"
-              value="65"
-              unit="%"
-              change={-5.2}
-              trend="down"
-              icon="💧"
-              status="warning"
-            />
-            <MetricCard
-              title="Temperature"
-              value="24.5"
-              unit="°C"
-              change={2.1}
-              trend="up"
-              icon="🌡️"
-              status="info"
-            />
-            <MetricCard
-              title="Tree Health"
-              value="92"
-              unit="%"
-              change={3.4}
-              trend="up"
-              icon="🌳"
-              status="success"
+          <div className="rounded-lg border border-white/10 bg-black/35 p-3 shadow-2xl shadow-cyan-950/20 backdrop-blur-xl">
+            <div className="mb-3 flex items-center justify-between px-2 pt-2">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Operational Preview</div>
+                <div className="mt-1 text-lg font-semibold text-white">Orchard segmentation and mission routing</div>
+              </div>
+              <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold text-amber-300">
+                Review Required
+              </span>
+            </div>
+            <img
+              src="/assets/orchard-operations-preview.svg"
+              alt="Operational avocado orchard map showing segmented blocks, canopy row patterns, drone route, and yield risk overlay"
+              className="h-auto w-full rounded-md border border-white/10"
             />
           </div>
         </section>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Orchard Map - Takes 2 columns */}
-          <div className="lg:col-span-2">
-            <OrchardMap />
+        <section className="mx-auto max-w-[1540px] px-6 pb-12">
+          <div className="grid gap-4 md:grid-cols-3">
+            {outcomes.map((outcome) => (
+              <article key={outcome.title} className="rounded-lg border border-white/10 bg-black/35 p-5 backdrop-blur-xl">
+                <div className="mb-4 inline-flex rounded-md border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold text-cyan-200">
+                  {outcome.metric}
+                </div>
+                <h2 className="text-lg font-semibold text-white">{outcome.title}</h2>
+                <p className="mt-3 text-sm leading-6 text-gray-500">{outcome.body}</p>
+              </article>
+            ))}
           </div>
+        </section>
 
-          {/* AI Advisor - Takes 1 column */}
-          <div className="lg:col-span-1">
-            <AIAdvisorPanel />
-          </div>
-        </div>
-
-        {/* Predictive Insights Section */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-50 mb-6">
-            Predictive Insights
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-elevated rounded-xl p-6 card-hover">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-lg bg-success/20 flex items-center justify-center text-2xl">
-                  📈
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-50">
-                    Yield Forecast
-                  </h3>
-                  <p className="text-sm text-gray-400">Next 90 days</p>
-                </div>
+        <section className="mx-auto max-w-[1540px] px-6 pb-12">
+          <div className="rounded-lg border border-white/10 bg-black/35 p-6 backdrop-blur-xl">
+            <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Workflow Preview</div>
+                <h2 className="mt-2 text-3xl font-semibold text-white">From regional scan to human-approved field execution</h2>
               </div>
-              <div className="text-3xl font-bold text-gray-50 mb-2">
-                19,500 kg
-              </div>
-              <p className="text-sm text-gray-400 mb-4">
-                Expected harvest based on current conditions and historical
-                patterns
-              </p>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-success font-medium">↑ 12%</span>
-                <span className="text-gray-500">vs last season</span>
-              </div>
+              <Link href="/command-center" className="text-sm font-semibold text-cyan-200 hover:text-cyan-100">
+                Open live workflow
+              </Link>
             </div>
-
-            <div className="glass-elevated rounded-xl p-6 card-hover">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-2xl">
-                  💰
+            <div className="grid gap-2 lg:grid-cols-7">
+              {workflow.map((step, index) => (
+                <div key={step} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                  <div className="text-[10px] font-semibold text-cyan-300">0{index + 1}</div>
+                  <div className="mt-3 text-sm font-semibold text-gray-100">{step}</div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-50">
-                    Revenue Projection
-                  </h3>
-                  <p className="text-sm text-gray-400">Market analysis</p>
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-gray-50 mb-2">
-                $54,600
-              </div>
-              <p className="text-sm text-gray-400 mb-4">
-                Estimated revenue at current market price of $2.80/kg
-              </p>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-primary font-medium">Market: Strong</span>
-              </div>
-            </div>
-
-            <div className="glass-elevated rounded-xl p-6 card-hover">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-lg bg-warning/20 flex items-center justify-center text-2xl">
-                  ⚠️
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-50">Risk Analysis</h3>
-                  <p className="text-sm text-gray-400">Threat assessment</p>
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-gray-50 mb-2">
-                Medium
-              </div>
-              <p className="text-sm text-gray-400 mb-4">
-                Pest activity detected in 2 zones. Moisture levels below
-                optimal in Zone B
-              </p>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-warning font-medium">
-                  2 Active Alerts
-                </span>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* System Status */}
-        <section>
-          <h2 className="text-2xl font-bold text-gray-50 mb-6">
-            System Status
-          </h2>
-          <div className="glass-elevated rounded-xl p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-success/20 flex items-center justify-center">
-                  <div className="w-3 h-3 rounded-full bg-success animate-pulse"></div>
+        <section className="mx-auto max-w-[1540px] px-6 pb-16">
+          <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Why This Matters</div>
+              <h2 className="mt-3 text-3xl font-semibold text-white">Operational clarity for high-value avocado regions</h2>
+              <p className="mt-4 text-sm leading-6 text-gray-500">
+                The system does not ask operators to trust a generic map. It ties orchard boundaries, canopy evidence,
+                mission planning, ROI, and human corrections into one operational memory loop.
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {whyItMatters.map((item) => (
+                <div key={item} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                  <div className="mb-3 h-1.5 w-10 rounded-full bg-cyan-300"></div>
+                  <div className="text-sm font-semibold leading-6 text-gray-100">{item}</div>
                 </div>
-                <div className="text-sm font-medium text-gray-300 mb-1">
-                  GPU Compute
-                </div>
-                <div className="text-xs text-success">Active</div>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-success/20 flex items-center justify-center">
-                  <div className="w-3 h-3 rounded-full bg-success animate-pulse"></div>
-                </div>
-                <div className="text-sm font-medium text-gray-300 mb-1">
-                  AI Models
-                </div>
-                <div className="text-xs text-success">Online</div>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-success/20 flex items-center justify-center">
-                  <div className="w-3 h-3 rounded-full bg-success animate-pulse"></div>
-                </div>
-                <div className="text-sm font-medium text-gray-300 mb-1">
-                  Data Stream
-                </div>
-                <div className="text-xs text-success">Connected</div>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary/20 flex items-center justify-center">
-                  <div className="text-primary font-mono text-sm">96</div>
-                </div>
-                <div className="text-sm font-medium text-gray-300 mb-1">
-                  Trees Monitored
-                </div>
-                <div className="text-xs text-gray-400">Real-time</div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-800 mt-20">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-gray-400">
-              © 2026 Avocado Orchard Digital AI. Powered by AMD MI300X GPU
-              Infrastructure.
-            </div>
-            <div className="flex items-center gap-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-primary transition-colors">
-                Documentation
-              </a>
-              <a href="#" className="hover:text-primary transition-colors">
-                API Reference
-              </a>
-              <a href="#" className="hover:text-primary transition-colors">
-                Support
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
-
-// Made with Bob

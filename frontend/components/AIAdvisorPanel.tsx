@@ -65,8 +65,8 @@ export default function AIAdvisorPanel({ onCommand }: AIAdvisorPanelProps) {
       id: "welcome",
       type: "system",
       content:
-        "👋 AI Command Chat active. Try: 'Show me the highest stress orchard' or 'Enter 3D twin'",
-      timestamp: new Date().toLocaleTimeString(),
+        "Gemini command chat active. Try: 'Show me the highest stress orchard' or 'Enter 3D twin'",
+      timestamp: "Ready",
     },
   ]);
   const [inputValue, setInputValue] = useState("");
@@ -359,7 +359,7 @@ export default function AIAdvisorPanel({ onCommand }: AIAdvisorPanelProps) {
                 : "bg-gray-800 text-gray-300 hover:bg-gray-700"
             }`}
           >
-            {showChat ? "💬 Chat" : "📋 Cards"}
+            {showChat ? "Chat" : "Cards"}
           </button>
         </div>
       </div>

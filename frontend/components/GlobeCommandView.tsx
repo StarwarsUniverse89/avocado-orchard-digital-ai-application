@@ -79,6 +79,7 @@ interface GlobeCommandViewProps {
   segmentedOrchardBlocks?: any[];
   selectedSegmentedBlockId?: string;
   onSegmentedBlockSelected?: (block: any) => void;
+  className?: string;
 }
 
 export interface GlobeCommandViewRef {
@@ -100,6 +101,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
   segmentedOrchardBlocks,
   selectedSegmentedBlockId,
   onSegmentedBlockSelected,
+  className,
 }, ref) => {
   const viewerRef = useRef<CesiumViewer | null>(null);
   const [cesiumReady, setCesiumReady] = useState<boolean>(false);
@@ -722,7 +724,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
   }
 
   return (
-    <div className="relative h-[500px] min-h-[500px] w-full overflow-hidden rounded-xl border border-cyan-500/30 bg-black">
+    <div className={`relative h-[500px] min-h-[500px] w-full overflow-hidden rounded-xl border border-cyan-500/30 bg-black ${className || ""}`}>
       {/* Status Badge */}
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-green-500/90 text-white px-4 py-2 rounded-lg shadow-lg font-semibold">
         <div className="flex items-center gap-2">
