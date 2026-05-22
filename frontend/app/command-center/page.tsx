@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, type ReactNode } from "react";
+import { Component, useState, useEffect, useRef, type ErrorInfo, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import type { GlobeCommandViewRef } from "@/components/GlobeCommandView";
 import AIAdvisorPanel from "@/components/AIAdvisorPanel";
@@ -44,6 +44,62 @@ type ActiveModule =
   | "analytics"
   | "integrations"
   | "settings";
+
+function ImageDigitalTwinFallback() {
+  return (
+    <div className="relative h-full min-h-0 overflow-hidden bg-[#020507]">
+      <img
+        src="/assets/orchard-real/aerial_orchard_overview_01.png"
+        alt="Aerial avocado orchard digital twin fallback"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,transparent_42%,rgba(0,0,0,0.50)_100%),linear-gradient(180deg,rgba(0,0,0,0.12),rgba(0,0,0,0.42))]" />
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 640" preserveAspectRatio="none">
+        <polygon
+          points="82,372 164,186 392,94 692,126 910,270 856,512 596,584 268,548"
+          fill="rgba(16,185,129,0.045)"
+          stroke="rgba(225,250,255,0.88)"
+          strokeWidth="2"
+        />
+        <polygon points="312,336 486,266 658,318 608,454 390,480" fill="rgba(250,204,21,0.14)" stroke="rgba(250,204,21,0.70)" strokeWidth="1.3" />
+        <polygon points="600,354 812,360 760,496 552,472" fill="rgba(239,68,68,0.16)" stroke="rgba(248,113,113,0.76)" strokeWidth="1.4" />
+        <path d="M190 210 C 312 266, 386 302, 510 344 S 734 420, 832 516" fill="none" stroke="rgba(255,255,255,0.86)" strokeWidth="2" strokeDasharray="10 10" />
+      </svg>
+      <div className="absolute left-4 top-4 rounded-lg border border-white/10 bg-black/70 px-4 py-3 backdrop-blur-md">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">Operational Digital Twin</div>
+        <div className="mt-1 text-sm font-semibold text-white">Image fallback active</div>
+      </div>
+    </div>
+  );
+}
+
+class DigitalTwinErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("DigitalTwin3DView crashed; showing image fallback", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ImageDigitalTwinFallback />;
+    }
+
+    return this.props.children;
+  }
+}
+
+function GlobeCommandViewMountLogger() {
+  useEffect(() => {
+    console.log("mounting GlobeCommandView");
+  }, []);
+
+  return null;
+}
 
 const operationsModules: Array<{
   id: ActiveModule;
@@ -472,8 +528,8 @@ export default function CommandCenter() {
 
   const contextName = getContextDisplayName(selectionContext);
   const memoryTone = mlTrainingSummary?.latest_export ? "green" : "amber";
-  const activeOverlay = modeOverlays[activeTwinTab];
-  const activeAnalysisSections = analysisSectionsByMode[activeTwinTab];
+  const activeOverlay = modeOverlays[activeTwinTab] ?? modeOverlays["3D View"];
+  const activeAnalysisSections = analysisSectionsByMode[activeTwinTab] ?? analysisSectionsByMode["3D View"];
   const selectedContextObject = selectedSegmentedBlock || selectedOrchardCandidate || selectedMunicipality;
   const selectedContextType = selectedSegmentedBlock ? "orchard_block" : selectedOrchardCandidate ? "orchard" : selectedMunicipality ? "municipality" : "network";
 
@@ -481,6 +537,10 @@ export default function CommandCenter() {
     console.log("Command Center view tab changed", tab);
     setActiveTwinTab(tab);
   };
+
+  useEffect(() => {
+    console.log("active view changed", activeTwinTab);
+  }, [activeTwinTab]);
 
   return (
     <div className="h-screen overflow-hidden bg-[#03080d] text-gray-100">
@@ -644,9 +704,12 @@ export default function CommandCenter() {
 
             <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-white/10 bg-black">
               {activeTwinTab === "3D View" ? (
-                <DigitalTwin3DView />
+                <DigitalTwinErrorBoundary key="digital-twin-3d">
+                  <DigitalTwin3DView />
+                </DigitalTwinErrorBoundary>
               ) : (
                 <>
+                  <GlobeCommandViewMountLogger />
                   <div className="pointer-events-none absolute left-3 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-2">
                     {["Select", "Target", "Route", "Draw", "Layers", "Focus"].map((item) => (
                       <div key={item} className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-black/65 text-[10px] font-semibold text-gray-300 backdrop-blur-md">
@@ -674,6 +737,7 @@ export default function CommandCenter() {
                     </div>
                   </div>
                   <GlobeCommandView
+                    key="globe-command-view"
                     ref={globeCommandRef}
                     onOrchardSelect={handleOrchardSelect}
                     onSectionSelect={handleSectionSelect}

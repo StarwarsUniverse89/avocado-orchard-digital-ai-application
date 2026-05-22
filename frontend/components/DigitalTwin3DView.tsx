@@ -245,6 +245,7 @@ function DroneMarker() {
 
 function WebGLRendererLifecycle({ onContextLost }: { onContextLost: () => void }) {
   const gl = useThree((state) => state.gl);
+  const scene = useThree((state) => state.scene);
 
   useEffect(() => {
     gl.setPixelRatio(1);
@@ -260,9 +261,23 @@ function WebGLRendererLifecycle({ onContextLost }: { onContextLost: () => void }
 
     return () => {
       canvas.removeEventListener("webglcontextlost", handleContextLost, false);
+      scene.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        if (mesh.geometry) {
+          mesh.geometry.dispose();
+        }
+
+        const material = mesh.material;
+        if (Array.isArray(material)) {
+          material.forEach((item) => item.dispose());
+        } else if (material) {
+          material.dispose();
+        }
+      });
+      gl.renderLists.dispose();
       gl.dispose();
     };
-  }, [gl, onContextLost]);
+  }, [gl, onContextLost, scene]);
 
   return null;
 }
@@ -625,9 +640,11 @@ export default function DigitalTwin3DView() {
   const [viewMode, setViewMode] = useState<"hybrid" | "synthetic">("hybrid");
 
   useEffect(() => {
+    console.log("mounting DigitalTwin3DView");
     console.log("3D View mounted");
 
     return () => {
+      console.log("unmounting DigitalTwin3DView");
       console.log("3D View unmounted");
     };
   }, []);
