@@ -1,23 +1,32 @@
-# Frontend Dockerfile for Avocado Orchard Digital AI
+FROM node:20-alpine AS deps
 
-FROM node:20-alpine
-
-# Set working directory
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy application code
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Expose port
-EXPOSE 3000
+RUN npm run build
 
-# Run the application
-CMD ["npm", "run", "dev"]
+FROM node:20-alpine AS runner
 
-# Made with Bob
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=8080
+
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+EXPOSE 8080
+
+CMD ["node", "server.js"]

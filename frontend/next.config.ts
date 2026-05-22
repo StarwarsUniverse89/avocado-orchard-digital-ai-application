@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
+import path from "path";
 import webpack from "webpack";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  outputFileTracingRoot: path.join(__dirname),
   transpilePackages: ["cesium", "resium"],
 
   typescript: {

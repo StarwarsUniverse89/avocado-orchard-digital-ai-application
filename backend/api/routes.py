@@ -333,8 +333,8 @@ async def get_system_status():
         "services": {
             "api": "online",
             "websocket": "online",
-            "gpu_compute": "ready",
-            "ai_models": "loaded",
+            "primary_ai_platform": "Gemini / Google Cloud Ready",
+            "legacy_optional_fallback": "AMD/vLLM support disabled by default",
             "database": "connected",
         },
         "metrics": {
@@ -557,7 +557,7 @@ Keep response under 150 words."""
                             "orchard_name": orchard_data.get("name"),
                             "recommendation": amd_response.get("text", ""),
                             "model": amd_response.get("model", config.MODEL_NAME),
-                            "provider": amd_response.get("provider", "AMD MI300X vLLM"),
+                            "provider": amd_response.get("provider", "Legacy optional AMD/vLLM fallback"),
                             "context": context,
                             "mode": "live",
                             "fallback_used": False,
@@ -596,10 +596,10 @@ Keep response under 150 words."""
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# AMD Cloud API Status endpoint
+# Legacy AMD/vLLM fallback status endpoint
 @router.get("/amd/status", tags=["System"])
 async def get_amd_status():
-    """Get AMD Cloud API configuration and status"""
+    """Get legacy optional AMD/vLLM fallback configuration and status."""
     try:
         from core.config import config
         
@@ -624,24 +624,27 @@ async def get_amd_status():
         elif config.is_amd_cloud_configured():
             mode = "configured_stub"
         
-        # Set note based on mode
+        # Set note based on mode. This endpoint is retained for compatibility,
+        # but Gemini / Google Cloud is the primary competition path.
         if mode == "live":
-            note = "Live AMD MI300X vLLM endpoint configured and reachable; fallback enabled if endpoint fails."
+            note = "Legacy optional fallback: AMD/vLLM endpoint configured. Gemini / Google Cloud remains the primary path."
         elif mode == "configured_stub":
-            note = "AMD Cloud configured; inference running in safe stub mode until AMD_MODEL_ENDPOINT is set."
+            note = "Legacy optional fallback: AMD credentials configured, but endpoint is not active. Disabled by default."
         else:
-            note = "Using deterministic stub responses"
+            note = "Legacy optional fallback: disabled by default. Using deterministic stub responses when needed."
         
         return {
             "success": True,
             "data": {
+                "primary_ai_platform": "Gemini / Google Cloud Ready",
+                "fallback_role": "Legacy optional fallback: disabled by default",
                 "amd_configured": config.is_amd_cloud_configured(),
                 "mode": mode,
                 "model_name": config.MODEL_NAME,
                 "endpoint_configured": bool(config.AMD_MODEL_ENDPOINT),
-                "gpu_target": "AMD MI300X",
+                "gpu_target": "Legacy optional AMD MI300X",
                 "api_key_masked": config.get_masked_api_key(config.AMD_API_KEY),
-                "fallback_enabled": True,
+                "fallback_enabled": bool(config.AMD_GPU_ENABLED and config.AMD_MODEL_ENDPOINT),
                 "api_url": config.AMD_API_URL,
                 "connection_status": connection_status.get("status", "unknown"),
                 "ready_for_testing": connection_status.get("ready_for_testing", False),

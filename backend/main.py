@@ -19,17 +19,18 @@ from core.config import config
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    print("🚀 Starting Avocado Orchard Digital AI Application")
+    print("🚀 Starting Gemini Orchard Operations OS")
     print("🥑 Backend server initializing...")
-    print("🔧 AMD GPU compute ready")
+    print("🔧 Gemini / Google Cloud primary path ready")
+    print("🧩 Legacy AMD/vLLM optional fallback: disabled by default")
     yield
     # Shutdown
     print("👋 Shutting down gracefully...")
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Avocado Orchard Digital AI API",
-    description="High-performance AI agent system for avocado orchard digital twin modeling",
+    title="Gemini Orchard Operations OS API",
+    description="Gemini and Google Cloud oriented operations agent API for orchard digital twin workflows",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -54,10 +55,11 @@ app.include_router(api_router, prefix="/api/v1")
 @app.get("/")
 async def root():
     return {
-        "message": "Avocado Orchard Digital AI API",
+        "message": "Gemini Orchard Operations OS API",
         "version": "1.0.0",
         "status": "operational",
-        "gpu_compute": "AMD MI300X Ready",
+        "primary_ai_platform": "Gemini / Google Cloud Ready",
+        "legacy_optional_fallback": "AMD/vLLM support disabled by default",
         "endpoints": {
             "api": "/api/v1",
             "docs": "/docs",
@@ -73,8 +75,8 @@ async def health_check():
         "services": {
             "api": "operational",
             "websocket": "operational",
-            "gpu_compute": "ready",
-            "ai_models": "loaded",
+            "primary_ai_platform": "Gemini / Google Cloud Ready",
+            "legacy_optional_fallback": "AMD/vLLM support disabled by default",
         },
     }
 
@@ -87,7 +89,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         await manager.send_personal_message(
             {
                 "type": "connection",
-                "message": "Connected to Avocado Orchard AI",
+                "message": "Connected to Gemini Orchard Operations OS",
                 "client_id": client_id,
             },
             websocket,

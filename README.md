@@ -30,8 +30,8 @@ The current implementation focuses on the Michoacán avocado belt in Mexico and 
 
 - Cesium-based geospatial visualization
 - FastAPI backend services
-- AMD MI300X vLLM inference
-- Qwen3-32B AI advisor support
+- Gemini / Google Cloud agent reasoning
+- Optional legacy AMD/vLLM fallback support, disabled by default
 - Orchard detection and archive workflows
 - PostgreSQL-ready orchard persistence
 - Financial and analytics summaries
@@ -130,7 +130,7 @@ run vision pipeline
 generate 3D twin from selected orchard
 ```
 
-The AI Advisor is powered by a live AMD MI300X vLLM endpoint running **Qwen3-32B** for reasoning, command interpretation, and grower recommendations.
+The AI Advisor is positioned around **Gemini / Google Cloud** for reasoning, command interpretation, and grower recommendations. AMD/vLLM support remains available only as a legacy optional fallback and is disabled by default.
 
 ### 🎮 3D Digital Twin Workflow
 
@@ -180,9 +180,9 @@ Frontend: Next.js + Cesium + React/Three.js
         v
 Backend: FastAPI on port 8001
         |
-        | OpenAI-compatible API
+        | Gemini / Google Cloud agent services
         v
-vLLM: Qwen3-32B on AMD MI300X, port 8000
+Gemini Operations Agent
         |
         v
 AI Advisor + Orchard Reasoning
@@ -219,14 +219,13 @@ Persistence:
 - **FastAPI** - Python API server
 - **SQLAlchemy** - PostgreSQL ORM layer
 - **PostgreSQL** - Orchard archive and network persistence
-- **vLLM** - OpenAI-compatible LLM serving
-- **AMD MI300X** - GPU inference infrastructure
-- **ROCm** - AMD GPU compute platform
+- **Gemini / Google Cloud** - Primary agent reasoning and deployment path
+- **vLLM / AMD MI300X** - Legacy optional fallback, disabled by default
 
 ### AI / ML
 
-- **Qwen/Qwen3-32B** - Primary AI Advisor model
-- **Qwen/Qwen2.5-32B-Instruct** - Fallback model
+- **Gemini** - Primary AI Advisor and operations reasoning model
+- **Qwen/vLLM** - Legacy optional fallback model path, disabled by default
 - **Orchard detection service** - Parcel detection and fallback logic
 - **Vision/3D analysis service** - Tree-level simulation and digital twin parameters
 - **NDVI/stress estimation** - Crop health and risk indicators
@@ -247,7 +246,7 @@ MONGODB_DATABASE=avocado_ops
 | Service | Port |
 |---|---:|
 | Frontend | 3000 |
-| vLLM model server | 8000 |
+| Optional legacy vLLM fallback | 8000 |
 | FastAPI backend | 8001 |
 | PostgreSQL | 5432 |
 
@@ -275,13 +274,13 @@ AMD_API_KEY=your_amd_api_key_here
 AMD_API_URL=https://api.amd.cloud/v1
 AMD_MODEL_ENDPOINT=http://localhost:8000/v1/chat/completions
 AMD_MODEL_NAME=Qwen/Qwen3-32B
-AMD_GPU_TARGET=AMD MI300X
+AMD_GPU_TARGET=Legacy optional AMD MI300X
 
 VLLM_API_URL=http://localhost:8000
 VLLM_MODEL_NAME=Qwen/Qwen3-32B
-VLLM_ENABLED=true
+VLLM_ENABLED=false
 
-AMD_GPU_ENABLED=true
+AMD_GPU_ENABLED=false
 MODEL_NAME=Qwen/Qwen3-32B
 
 DATABASE_URL=postgresql://avocado_user:<password>@localhost:5432/avocado_ai
@@ -294,19 +293,25 @@ Do not commit `.env` or `.env.local` files.
 
 ## Running the Application
 
-### 1. Start vLLM on the AMD MI300X droplet
+### 1. Configure Gemini / Google Cloud
 
-Primary model:
+Set the Gemini and Google Cloud environment variables for the primary competition path:
 
-```bash
-python -m vllm.entrypoints.openai.api_server \
-  --model Qwen/Qwen3-32B \
-  --host 0.0.0.0 \
-  --port 8000 \
-  --max-model-len 32768
+```env
+GOOGLE_API_KEY=your_key_here
+GEMINI_MODE=live
+GOOGLE_GENAI_MODEL=gemini-1.5-pro
 ```
 
-Fallback model:
+Legacy optional fallback: AMD/vLLM can still be configured for compatibility, but it is disabled by default and is not the primary competition path.
+
+```env
+AMD_GPU_ENABLED=false
+VLLM_ENABLED=false
+AMD_MODEL_ENDPOINT=
+```
+
+If you intentionally enable the legacy fallback, run a vLLM-compatible model server separately:
 
 ```bash
 python -m vllm.entrypoints.openai.api_server \
@@ -332,19 +337,21 @@ ssh -i ~/.ssh/amd_cloud_key \
   root@<droplet-ip>
 ```
 
-### 4. Verify AMD backend status
+### 4. Verify backend status
 
 ```bash
+curl http://localhost:8001/
+curl http://localhost:8001/health
 curl http://localhost:8001/api/v1/amd/status
 ```
 
-Expected response includes:
+Expected public status includes:
 
 ```json
 {
-  "mode": "live",
-  "model_name": "Qwen/Qwen3-32B",
-  "gpu_target": "AMD MI300X"
+  "message": "Gemini Orchard Operations OS API",
+  "primary_ai_platform": "Gemini / Google Cloud Ready",
+  "legacy_optional_fallback": "AMD/vLLM support disabled by default"
 }
 ```
 
@@ -407,7 +414,7 @@ psql "postgresql://avocado_user:<password>@localhost:5432/avocado_ai" -c "\dt"
 ## Main Demo Workflow
 
 1. Open the command center.
-2. Confirm AMD status shows live MI300X inference.
+2. Confirm public status shows Gemini / Google Cloud as ready.
 3. Type:
 
 ```text
@@ -457,10 +464,10 @@ generate 3D twin from selected orchard
 
 ## API Endpoints
 
-### AMD / AI
+### AI / Legacy Fallback
 
 ```text
-GET  /api/v1/amd/status
+GET  /api/v1/amd/status   # legacy optional fallback status
 POST /api/v1/agent
 POST /api/v1/agent/command
 ```
@@ -512,7 +519,7 @@ POST /api/v1/vision-3d/analyze
 
 ## Testing
 
-### Test AMD live inference
+### Test legacy optional AMD/vLLM fallback
 
 ```bash
 API_BASE_URL=http://localhost:8001 bash TEST_LIVE_AMD_INFERENCE.sh
@@ -575,8 +582,8 @@ Implemented:
 - Financial impact analysis
 - Analytics summaries
 - Vision/3D analysis workflow
-- AMD MI300X vLLM backend integration
-- Qwen3-32B model configuration
+- Gemini / Google Cloud primary agent path
+- Legacy optional AMD/vLLM fallback, disabled by default
 - 3D digital twin workflow
 
 Future enhancements:
