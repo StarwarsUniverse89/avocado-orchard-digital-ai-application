@@ -30,7 +30,7 @@ export default function Header() {
               Command Center
             </Link>
             <Link
-              href="/dashboard"
+              href="/regional-command"
               className="text-sm font-medium text-gray-300 transition-colors hover:text-cyan-200"
             >
               Regional Command
@@ -42,13 +42,13 @@ export default function Header() {
               Orchards
             </Link>
             <Link
-              href="/analytics"
+              href="/financial-exposure"
               className="text-sm font-medium text-gray-300 transition-colors hover:text-cyan-200"
             >
               Financial Exposure
             </Link>
             <Link
-              href="/settings"
+              href="/integrations"
               className="text-sm font-medium text-gray-300 transition-colors hover:text-cyan-200"
             >
               Integrations

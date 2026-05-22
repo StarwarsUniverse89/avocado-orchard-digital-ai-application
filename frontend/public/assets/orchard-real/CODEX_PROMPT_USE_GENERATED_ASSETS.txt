@@ -1,0 +1,44 @@
+Use the local generated asset pack in:
+
+frontend/public/assets/orchard-real/
+
+Replace current screenshot-derived or synthetic visuals with these generated assets:
+
+Main digital twin / orchard background:
+- /assets/orchard-real/aerial_orchard_overview_01.png
+- /assets/orchard-real/aerial_orchard_overview_02.png
+- /assets/orchard-real/aerial_orchard_topdown_01.png
+
+Drone capture:
+- /assets/orchard-real/drone_capture_card.png
+or:
+- /assets/orchard-real/aerial_orchard_overview_02.png
+
+Canopy analysis:
+- /assets/orchard-real/leaf_canopy_closeup_01.png
+- /assets/orchard-real/leaf_canopy_closeup_02.png
+- /assets/orchard-real/canopy_texture_topdown.png
+
+Soil & root zone:
+- /assets/orchard-real/soil_root_zone_01.png
+- /assets/orchard-real/root_system_closeup.png
+- /assets/orchard-real/soil_moisture_irrigation.png
+
+Fruit estimation:
+- /assets/orchard-real/avocado_fruit_cluster.png
+
+Overlays:
+- /assets/orchard-real/boundary_outer_overlay.png
+- /assets/orchard-real/zone_high_risk_overlay.png
+- /assets/orchard-real/zone_medium_risk_overlay.png
+- /assets/orchard-real/drone_route_overlay.png
+- /assets/orchard-real/drone_icon_overlay.png
+
+Requirements:
+1. Do not use my screenshots as UI images.
+2. Use these generated local assets as the product visuals.
+3. Keep Cesium Globe mode functional.
+4. Keep 3D/Digital Twin mode functional.
+5. Preserve all overlays, manual boundary workflow, drone routes, ROI, tasking, and ML export.
+6. Keep right panel data cards but swap image thumbnails to generated assets.
+7. Run npx tsc --noEmit and npm run build.

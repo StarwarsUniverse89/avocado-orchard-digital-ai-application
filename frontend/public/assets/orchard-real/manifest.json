@@ -1,0 +1,12 @@
+{
+  "install_path": "frontend/public/assets/orchard-real/",
+  "usage_examples": {
+    "main_orchard_scene": "/assets/orchard-real/aerial_orchard_overview_01.png",
+    "drone_capture": "/assets/orchard-real/drone_capture_card.png",
+    "canopy_analysis": "/assets/orchard-real/leaf_canopy_closeup_01.png",
+    "soil_root_zone": "/assets/orchard-real/root_system_closeup.png",
+    "fruit_estimation": "/assets/orchard-real/avocado_fruit_cluster.png",
+    "terrain_texture": "/assets/orchard-real/terrain_texture_01.png"
+  },
+  "notes": "These are generated replacement assets, not your screenshots. Use them as local static assets in Next.js."
+}

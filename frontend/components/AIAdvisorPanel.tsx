@@ -518,7 +518,7 @@ export default function AIAdvisorPanel({ onCommand }: AIAdvisorPanelProps) {
       <div className="mt-6 pt-6 border-t border-gray-800">
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-400">
-            Powered by AMD MI300X GPU • Qwen/Llama Models
+            Gemini operations reasoning • Human-in-the-loop approval
           </span>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>

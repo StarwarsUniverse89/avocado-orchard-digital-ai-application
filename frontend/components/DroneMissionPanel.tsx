@@ -296,7 +296,7 @@ export default function DroneMissionPanel({ orchardId, targetType = "demo", onMi
           {roiData && (
             <div className="space-y-4 pt-4 border-t border-gray-800 animate-slide-in">
                <div className="flex items-center gap-2">
-                 <span className="text-xs">💰</span>
+                 <span className="h-2 w-2 rounded-full bg-warning"></span>
                  <h4 className="text-[10px] font-bold text-warning uppercase">Operational ROI Analysis</h4>
                </div>
 
@@ -352,7 +352,7 @@ export default function DroneMissionPanel({ orchardId, targetType = "demo", onMi
           {taskData && (
             <div className="space-y-4 pt-4 border-t border-gray-800 animate-slide-in">
                <div className="flex items-center gap-2">
-                 <span className="text-xs">📋</span>
+                 <span className="h-2 w-2 rounded-full bg-primary"></span>
                  <h4 className="text-[10px] font-bold text-primary uppercase">Field Task Delegation</h4>
                </div>
 

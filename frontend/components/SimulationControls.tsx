@@ -130,28 +130,28 @@ export default function SimulationControls({
             disabled={isSimulating}
             className="px-4 py-3 rounded-lg bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/50 hover:border-orange-500 text-orange-300 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            🌡️ Heat Stress
+            Heat Stress
           </button>
           <button
             onClick={() => handleQuickScenario('water_stress')}
             disabled={isSimulating}
             className="px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/50 hover:border-blue-500 text-blue-300 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            💧 Water Stress
+            Water Stress
           </button>
           <button
             onClick={() => handleQuickScenario('pest_risk')}
             disabled={isSimulating}
             className="px-4 py-3 rounded-lg bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/50 hover:border-red-500 text-red-300 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            🐛 Pest Risk
+            Pest Risk
           </button>
           <button
             onClick={() => handleQuickScenario('optimal')}
             disabled={isSimulating}
             className="px-4 py-3 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/50 hover:border-green-500 text-green-300 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ✨ Optimal
+            Optimal
           </button>
         </div>
       </div>

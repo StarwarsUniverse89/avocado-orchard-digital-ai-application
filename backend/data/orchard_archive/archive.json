@@ -1701,5 +1701,1536 @@
     "status": "archived",
     "created_at": 1778903180.497385,
     "updated_at": 1778903180.497385
+  },
+  "orchard_tancitaro_001_1779405672": {
+    "archive_id": "orchard_tancitaro_001_1779405672",
+    "orchard_id": "tancitaro_parcel_1",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.255858,
+        -102.434142
+      ],
+      [
+        19.284142,
+        -102.434142
+      ],
+      [
+        19.284142,
+        -102.405858
+      ],
+      [
+        19.255858,
+        -102.405858
+      ],
+      [
+        19.255858,
+        -102.434142
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405672.42725,
+    "updated_at": 1779405672.42725
+  },
+  "orchard_tancitaro_002_1779405672": {
+    "archive_id": "orchard_tancitaro_002_1779405672",
+    "orchard_id": "tancitaro_parcel_2",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.253417,
+        -102.376583
+      ],
+      [
+        19.286583,
+        -102.376583
+      ],
+      [
+        19.286583,
+        -102.343417
+      ],
+      [
+        19.253417,
+        -102.343417
+      ],
+      [
+        19.253417,
+        -102.376583
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405672.4286258,
+    "updated_at": 1779405672.4286258
+  },
+  "orchard_tancitaro_003_1779405672": {
+    "archive_id": "orchard_tancitaro_003_1779405672",
+    "orchard_id": "tancitaro_parcel_3",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.3,
+    "boundary_coordinates": [
+      [
+        19.251292,
+        -102.318708
+      ],
+      [
+        19.288708,
+        -102.318708
+      ],
+      [
+        19.288708,
+        -102.281292
+      ],
+      [
+        19.251292,
+        -102.281292
+      ],
+      [
+        19.251292,
+        -102.318708
+      ]
+    ],
+    "estimated_hectares": 14,
+    "estimated_acres": 34.59,
+    "estimated_tree_count": 1960,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405672.429485,
+    "updated_at": 1779405672.429485
+  },
+  "orchard_tancitaro_004_1779405672": {
+    "archive_id": "orchard_tancitaro_004_1779405672",
+    "orchard_id": "tancitaro_parcel_4",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.309384,
+        -102.440616
+      ],
+      [
+        19.350616,
+        -102.440616
+      ],
+      [
+        19.350616,
+        -102.399384
+      ],
+      [
+        19.309384,
+        -102.399384
+      ],
+      [
+        19.309384,
+        -102.440616
+      ]
+    ],
+    "estimated_hectares": 17,
+    "estimated_acres": 42.01,
+    "estimated_tree_count": 2040,
+    "ndvi_average": 0.74,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405672.430367,
+    "updated_at": 1779405672.430367
+  },
+  "orchard_tancitaro_005_1779405672": {
+    "archive_id": "orchard_tancitaro_005_1779405672",
+    "orchard_id": "tancitaro_parcel_5",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.307639,
+        -102.382361
+      ],
+      [
+        19.352361,
+        -102.382361
+      ],
+      [
+        19.352361,
+        -102.337639
+      ],
+      [
+        19.307639,
+        -102.337639
+      ],
+      [
+        19.307639,
+        -102.382361
+      ]
+    ],
+    "estimated_hectares": 20,
+    "estimated_acres": 49.42,
+    "estimated_tree_count": 2600,
+    "ndvi_average": 0.77,
+    "stress_level": "low",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405672.4312372,
+    "updated_at": 1779405672.4312372
+  },
+  "orchard_tancitaro_006_1779405672": {
+    "archive_id": "orchard_tancitaro_006_1779405672",
+    "orchard_id": "tancitaro_parcel_6",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.3,
+    "boundary_coordinates": [
+      [
+        19.306021,
+        -102.323979
+      ],
+      [
+        19.353979,
+        -102.323979
+      ],
+      [
+        19.353979,
+        -102.276021
+      ],
+      [
+        19.306021,
+        -102.276021
+      ],
+      [
+        19.306021,
+        -102.323979
+      ]
+    ],
+    "estimated_hectares": 23,
+    "estimated_acres": 56.83,
+    "estimated_tree_count": 3220,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405672.43212,
+    "updated_at": 1779405672.43212
+  },
+  "orchard_tancitaro_007_1779405672": {
+    "archive_id": "orchard_tancitaro_007_1779405672",
+    "orchard_id": "tancitaro_parcel_7",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.39,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.375858,
+        -102.434142
+      ],
+      [
+        19.404142,
+        -102.434142
+      ],
+      [
+        19.404142,
+        -102.405858
+      ],
+      [
+        19.375858,
+        -102.405858
+      ],
+      [
+        19.375858,
+        -102.434142
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405672.433022,
+    "updated_at": 1779405672.433022
+  },
+  "orchard_tancitaro_008_1779405672": {
+    "archive_id": "orchard_tancitaro_008_1779405672",
+    "orchard_id": "tancitaro_parcel_8",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.39,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.373417,
+        -102.376583
+      ],
+      [
+        19.406583,
+        -102.376583
+      ],
+      [
+        19.406583,
+        -102.343417
+      ],
+      [
+        19.373417,
+        -102.343417
+      ],
+      [
+        19.373417,
+        -102.376583
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405672.434145,
+    "updated_at": 1779405672.434145
+  },
+  "orchard_tancitaro_001_1779405717": {
+    "archive_id": "orchard_tancitaro_001_1779405717",
+    "orchard_id": "tancitaro_parcel_1",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.255858,
+        -102.434142
+      ],
+      [
+        19.284142,
+        -102.434142
+      ],
+      [
+        19.284142,
+        -102.405858
+      ],
+      [
+        19.255858,
+        -102.405858
+      ],
+      [
+        19.255858,
+        -102.434142
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405717.640917,
+    "updated_at": 1779405717.640917
+  },
+  "orchard_tancitaro_002_1779405717": {
+    "archive_id": "orchard_tancitaro_002_1779405717",
+    "orchard_id": "tancitaro_parcel_2",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.253417,
+        -102.376583
+      ],
+      [
+        19.286583,
+        -102.376583
+      ],
+      [
+        19.286583,
+        -102.343417
+      ],
+      [
+        19.253417,
+        -102.343417
+      ],
+      [
+        19.253417,
+        -102.376583
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405717.64466,
+    "updated_at": 1779405717.64466
+  },
+  "orchard_tancitaro_003_1779405717": {
+    "archive_id": "orchard_tancitaro_003_1779405717",
+    "orchard_id": "tancitaro_parcel_3",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.3,
+    "boundary_coordinates": [
+      [
+        19.251292,
+        -102.318708
+      ],
+      [
+        19.288708,
+        -102.318708
+      ],
+      [
+        19.288708,
+        -102.281292
+      ],
+      [
+        19.251292,
+        -102.281292
+      ],
+      [
+        19.251292,
+        -102.318708
+      ]
+    ],
+    "estimated_hectares": 14,
+    "estimated_acres": 34.59,
+    "estimated_tree_count": 1960,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405717.648397,
+    "updated_at": 1779405717.648397
+  },
+  "orchard_tancitaro_004_1779405717": {
+    "archive_id": "orchard_tancitaro_004_1779405717",
+    "orchard_id": "tancitaro_parcel_4",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.309384,
+        -102.440616
+      ],
+      [
+        19.350616,
+        -102.440616
+      ],
+      [
+        19.350616,
+        -102.399384
+      ],
+      [
+        19.309384,
+        -102.399384
+      ],
+      [
+        19.309384,
+        -102.440616
+      ]
+    ],
+    "estimated_hectares": 17,
+    "estimated_acres": 42.01,
+    "estimated_tree_count": 2040,
+    "ndvi_average": 0.74,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405717.651875,
+    "updated_at": 1779405717.651875
+  },
+  "orchard_tancitaro_005_1779405717": {
+    "archive_id": "orchard_tancitaro_005_1779405717",
+    "orchard_id": "tancitaro_parcel_5",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.307639,
+        -102.382361
+      ],
+      [
+        19.352361,
+        -102.382361
+      ],
+      [
+        19.352361,
+        -102.337639
+      ],
+      [
+        19.307639,
+        -102.337639
+      ],
+      [
+        19.307639,
+        -102.382361
+      ]
+    ],
+    "estimated_hectares": 20,
+    "estimated_acres": 49.42,
+    "estimated_tree_count": 2600,
+    "ndvi_average": 0.77,
+    "stress_level": "low",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405717.654932,
+    "updated_at": 1779405717.654932
+  },
+  "orchard_tancitaro_006_1779405717": {
+    "archive_id": "orchard_tancitaro_006_1779405717",
+    "orchard_id": "tancitaro_parcel_6",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.3,
+    "boundary_coordinates": [
+      [
+        19.306021,
+        -102.323979
+      ],
+      [
+        19.353979,
+        -102.323979
+      ],
+      [
+        19.353979,
+        -102.276021
+      ],
+      [
+        19.306021,
+        -102.276021
+      ],
+      [
+        19.306021,
+        -102.323979
+      ]
+    ],
+    "estimated_hectares": 23,
+    "estimated_acres": 56.83,
+    "estimated_tree_count": 3220,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405717.656578,
+    "updated_at": 1779405717.656578
+  },
+  "orchard_tancitaro_007_1779405717": {
+    "archive_id": "orchard_tancitaro_007_1779405717",
+    "orchard_id": "tancitaro_parcel_7",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.39,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.375858,
+        -102.434142
+      ],
+      [
+        19.404142,
+        -102.434142
+      ],
+      [
+        19.404142,
+        -102.405858
+      ],
+      [
+        19.375858,
+        -102.405858
+      ],
+      [
+        19.375858,
+        -102.434142
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405717.659745,
+    "updated_at": 1779405717.659745
+  },
+  "orchard_tancitaro_008_1779405717": {
+    "archive_id": "orchard_tancitaro_008_1779405717",
+    "orchard_id": "tancitaro_parcel_8",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.39,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.373417,
+        -102.376583
+      ],
+      [
+        19.406583,
+        -102.376583
+      ],
+      [
+        19.406583,
+        -102.343417
+      ],
+      [
+        19.373417,
+        -102.343417
+      ],
+      [
+        19.373417,
+        -102.376583
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405717.661129,
+    "updated_at": 1779405717.661129
+  },
+  "orchard_tancitaro_001_1779405718": {
+    "archive_id": "orchard_tancitaro_001_1779405718",
+    "orchard_id": "tancitaro_parcel_1",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.255858,
+        -102.434142
+      ],
+      [
+        19.284142,
+        -102.434142
+      ],
+      [
+        19.284142,
+        -102.405858
+      ],
+      [
+        19.255858,
+        -102.405858
+      ],
+      [
+        19.255858,
+        -102.434142
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405718.5429828,
+    "updated_at": 1779405718.8392708
+  },
+  "orchard_tancitaro_002_1779405718": {
+    "archive_id": "orchard_tancitaro_002_1779405718",
+    "orchard_id": "tancitaro_parcel_2",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.253417,
+        -102.376583
+      ],
+      [
+        19.286583,
+        -102.376583
+      ],
+      [
+        19.286583,
+        -102.343417
+      ],
+      [
+        19.253417,
+        -102.343417
+      ],
+      [
+        19.253417,
+        -102.376583
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405718.5478091,
+    "updated_at": 1779405718.844706
+  },
+  "orchard_tancitaro_003_1779405718": {
+    "archive_id": "orchard_tancitaro_003_1779405718",
+    "orchard_id": "tancitaro_parcel_3",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.3,
+    "boundary_coordinates": [
+      [
+        19.251292,
+        -102.318708
+      ],
+      [
+        19.288708,
+        -102.318708
+      ],
+      [
+        19.288708,
+        -102.281292
+      ],
+      [
+        19.251292,
+        -102.281292
+      ],
+      [
+        19.251292,
+        -102.318708
+      ]
+    ],
+    "estimated_hectares": 14,
+    "estimated_acres": 34.59,
+    "estimated_tree_count": 1960,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405718.5527658,
+    "updated_at": 1779405718.848707
+  },
+  "orchard_tancitaro_004_1779405718": {
+    "archive_id": "orchard_tancitaro_004_1779405718",
+    "orchard_id": "tancitaro_parcel_4",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.309384,
+        -102.440616
+      ],
+      [
+        19.350616,
+        -102.440616
+      ],
+      [
+        19.350616,
+        -102.399384
+      ],
+      [
+        19.309384,
+        -102.399384
+      ],
+      [
+        19.309384,
+        -102.440616
+      ]
+    ],
+    "estimated_hectares": 17,
+    "estimated_acres": 42.01,
+    "estimated_tree_count": 2040,
+    "ndvi_average": 0.74,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405718.556057,
+    "updated_at": 1779405718.852732
+  },
+  "orchard_tancitaro_005_1779405718": {
+    "archive_id": "orchard_tancitaro_005_1779405718",
+    "orchard_id": "tancitaro_parcel_5",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.307639,
+        -102.382361
+      ],
+      [
+        19.352361,
+        -102.382361
+      ],
+      [
+        19.352361,
+        -102.337639
+      ],
+      [
+        19.307639,
+        -102.337639
+      ],
+      [
+        19.307639,
+        -102.382361
+      ]
+    ],
+    "estimated_hectares": 20,
+    "estimated_acres": 49.42,
+    "estimated_tree_count": 2600,
+    "ndvi_average": 0.77,
+    "stress_level": "low",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405718.560096,
+    "updated_at": 1779405718.856103
+  },
+  "orchard_tancitaro_006_1779405718": {
+    "archive_id": "orchard_tancitaro_006_1779405718",
+    "orchard_id": "tancitaro_parcel_6",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.3,
+    "boundary_coordinates": [
+      [
+        19.306021,
+        -102.323979
+      ],
+      [
+        19.353979,
+        -102.323979
+      ],
+      [
+        19.353979,
+        -102.276021
+      ],
+      [
+        19.306021,
+        -102.276021
+      ],
+      [
+        19.306021,
+        -102.323979
+      ]
+    ],
+    "estimated_hectares": 23,
+    "estimated_acres": 56.83,
+    "estimated_tree_count": 3220,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405718.562291,
+    "updated_at": 1779405718.859668
+  },
+  "orchard_tancitaro_007_1779405718": {
+    "archive_id": "orchard_tancitaro_007_1779405718",
+    "orchard_id": "tancitaro_parcel_7",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.39,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.375858,
+        -102.434142
+      ],
+      [
+        19.404142,
+        -102.434142
+      ],
+      [
+        19.404142,
+        -102.405858
+      ],
+      [
+        19.375858,
+        -102.405858
+      ],
+      [
+        19.375858,
+        -102.434142
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405718.5640519,
+    "updated_at": 1779405718.861195
+  },
+  "orchard_tancitaro_008_1779405718": {
+    "archive_id": "orchard_tancitaro_008_1779405718",
+    "orchard_id": "tancitaro_parcel_8",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.39,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.373417,
+        -102.376583
+      ],
+      [
+        19.406583,
+        -102.376583
+      ],
+      [
+        19.406583,
+        -102.343417
+      ],
+      [
+        19.373417,
+        -102.343417
+      ],
+      [
+        19.373417,
+        -102.376583
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405718.565408,
+    "updated_at": 1779405718.862605
+  },
+  "orchard_tancitaro_001_1779405719": {
+    "archive_id": "orchard_tancitaro_001_1779405719",
+    "orchard_id": "tancitaro_parcel_1",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.255858,
+        -102.434142
+      ],
+      [
+        19.284142,
+        -102.434142
+      ],
+      [
+        19.284142,
+        -102.405858
+      ],
+      [
+        19.255858,
+        -102.405858
+      ],
+      [
+        19.255858,
+        -102.434142
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405719.0466921,
+    "updated_at": 1779405719.247769
+  },
+  "orchard_tancitaro_002_1779405719": {
+    "archive_id": "orchard_tancitaro_002_1779405719",
+    "orchard_id": "tancitaro_parcel_2",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.253417,
+        -102.376583
+      ],
+      [
+        19.286583,
+        -102.376583
+      ],
+      [
+        19.286583,
+        -102.343417
+      ],
+      [
+        19.253417,
+        -102.343417
+      ],
+      [
+        19.253417,
+        -102.376583
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405719.048173,
+    "updated_at": 1779405719.25355
+  },
+  "orchard_tancitaro_003_1779405719": {
+    "archive_id": "orchard_tancitaro_003_1779405719",
+    "orchard_id": "tancitaro_parcel_3",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.27,
+    "center_lng": -102.3,
+    "boundary_coordinates": [
+      [
+        19.251292,
+        -102.318708
+      ],
+      [
+        19.288708,
+        -102.318708
+      ],
+      [
+        19.288708,
+        -102.281292
+      ],
+      [
+        19.251292,
+        -102.281292
+      ],
+      [
+        19.251292,
+        -102.318708
+      ]
+    ],
+    "estimated_hectares": 14,
+    "estimated_acres": 34.59,
+    "estimated_tree_count": 1960,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405719.0497432,
+    "updated_at": 1779405719.258804
+  },
+  "orchard_tancitaro_004_1779405719": {
+    "archive_id": "orchard_tancitaro_004_1779405719",
+    "orchard_id": "tancitaro_parcel_4",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.309384,
+        -102.440616
+      ],
+      [
+        19.350616,
+        -102.440616
+      ],
+      [
+        19.350616,
+        -102.399384
+      ],
+      [
+        19.309384,
+        -102.399384
+      ],
+      [
+        19.309384,
+        -102.440616
+      ]
+    ],
+    "estimated_hectares": 17,
+    "estimated_acres": 42.01,
+    "estimated_tree_count": 2040,
+    "ndvi_average": 0.74,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405719.0513558,
+    "updated_at": 1779405719.26435
+  },
+  "orchard_tancitaro_005_1779405719": {
+    "archive_id": "orchard_tancitaro_005_1779405719",
+    "orchard_id": "tancitaro_parcel_5",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.307639,
+        -102.382361
+      ],
+      [
+        19.352361,
+        -102.382361
+      ],
+      [
+        19.352361,
+        -102.337639
+      ],
+      [
+        19.307639,
+        -102.337639
+      ],
+      [
+        19.307639,
+        -102.382361
+      ]
+    ],
+    "estimated_hectares": 20,
+    "estimated_acres": 49.42,
+    "estimated_tree_count": 2600,
+    "ndvi_average": 0.77,
+    "stress_level": "low",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405719.052778,
+    "updated_at": 1779405719.268178
+  },
+  "orchard_tancitaro_006_1779405719": {
+    "archive_id": "orchard_tancitaro_006_1779405719",
+    "orchard_id": "tancitaro_parcel_6",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.33,
+    "center_lng": -102.3,
+    "boundary_coordinates": [
+      [
+        19.306021,
+        -102.323979
+      ],
+      [
+        19.353979,
+        -102.323979
+      ],
+      [
+        19.353979,
+        -102.276021
+      ],
+      [
+        19.306021,
+        -102.276021
+      ],
+      [
+        19.306021,
+        -102.323979
+      ]
+    ],
+    "estimated_hectares": 23,
+    "estimated_acres": 56.83,
+    "estimated_tree_count": 3220,
+    "ndvi_average": 0.65,
+    "stress_level": "high",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405719.054115,
+    "updated_at": 1779405719.26977
+  },
+  "orchard_tancitaro_007_1779405719": {
+    "archive_id": "orchard_tancitaro_007_1779405719",
+    "orchard_id": "tancitaro_parcel_7",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.39,
+    "center_lng": -102.42,
+    "boundary_coordinates": [
+      [
+        19.375858,
+        -102.434142
+      ],
+      [
+        19.404142,
+        -102.434142
+      ],
+      [
+        19.404142,
+        -102.405858
+      ],
+      [
+        19.375858,
+        -102.405858
+      ],
+      [
+        19.375858,
+        -102.434142
+      ]
+    ],
+    "estimated_hectares": 8,
+    "estimated_acres": 19.77,
+    "estimated_tree_count": 960,
+    "ndvi_average": 0.68,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405719.055444,
+    "updated_at": 1779405719.2712672
+  },
+  "orchard_tancitaro_008_1779405719": {
+    "archive_id": "orchard_tancitaro_008_1779405719",
+    "orchard_id": "tancitaro_parcel_8",
+    "municipality_id": "tancitaro",
+    "center_lat": 19.39,
+    "center_lng": -102.36,
+    "boundary_coordinates": [
+      [
+        19.373417,
+        -102.376583
+      ],
+      [
+        19.406583,
+        -102.376583
+      ],
+      [
+        19.406583,
+        -102.343417
+      ],
+      [
+        19.373417,
+        -102.343417
+      ],
+      [
+        19.373417,
+        -102.376583
+      ]
+    ],
+    "estimated_hectares": 11,
+    "estimated_acres": 27.18,
+    "estimated_tree_count": 1430,
+    "ndvi_average": 0.71,
+    "stress_level": "medium",
+    "confidence": 0.75,
+    "detection_method": "grid_fallback",
+    "imagery_source": "none",
+    "row_pattern_detected": false,
+    "row_spacing_m": 6.0,
+    "crown_density": 0.7,
+    "scan_source": "area_scan",
+    "created_at": 1779405719.056788,
+    "updated_at": 1779405719.2727392
+  },
+  "manual_ae13b2d2": {
+    "archive_id": "manual_ae13b2d2",
+    "boundary_id": "manual_ae13b2d2",
+    "orchard_id": "manual_ae13b2d2",
+    "municipality_id": "tancitaro",
+    "label_type": "orchard_block",
+    "polygon": [
+      [
+        -102.371554,
+        19.45491
+      ],
+      [
+        -102.37017,
+        19.454418
+      ],
+      [
+        -102.370095,
+        19.45564
+      ],
+      [
+        -102.370528,
+        19.455869
+      ],
+      [
+        -102.37029,
+        19.456459
+      ],
+      [
+        -102.370194,
+        19.456877
+      ],
+      [
+        -102.370597,
+        19.457116
+      ],
+      [
+        -102.37148,
+        19.457735
+      ],
+      [
+        -102.372086,
+        19.457783
+      ],
+      [
+        -102.372247,
+        19.457863
+      ],
+      [
+        -102.372351,
+        19.457589
+      ],
+      [
+        -102.372546,
+        19.4573
+      ],
+      [
+        -102.372573,
+        19.457076
+      ],
+      [
+        -102.372421,
+        19.456343
+      ],
+      [
+        -102.372434,
+        19.456083
+      ],
+      [
+        -102.372145,
+        19.455597
+      ]
+    ],
+    "boundary_coordinates": [
+      [
+        19.45491,
+        -102.371554
+      ],
+      [
+        19.454418,
+        -102.37017
+      ],
+      [
+        19.45564,
+        -102.370095
+      ],
+      [
+        19.455869,
+        -102.370528
+      ],
+      [
+        19.456459,
+        -102.37029
+      ],
+      [
+        19.456877,
+        -102.370194
+      ],
+      [
+        19.457116,
+        -102.370597
+      ],
+      [
+        19.457735,
+        -102.37148
+      ],
+      [
+        19.457783,
+        -102.372086
+      ],
+      [
+        19.457863,
+        -102.372247
+      ],
+      [
+        19.457589,
+        -102.372351
+      ],
+      [
+        19.4573,
+        -102.372546
+      ],
+      [
+        19.457076,
+        -102.372573
+      ],
+      [
+        19.456343,
+        -102.372421
+      ],
+      [
+        19.456083,
+        -102.372434
+      ],
+      [
+        19.455597,
+        -102.372145
+      ]
+    ],
+    "manual_metadata": {
+      "crop_type": "avocado",
+      "notes": "",
+      "created_by": "operator"
+    },
+    "estimated_hectares": null,
+    "estimated_tree_count": null,
+    "confidence": 1.0,
+    "detection_method": "manual_operator_label",
+    "imagery_source": "operator_cesium_outline",
+    "scan_source": "manual_boundary_mode",
+    "boundary_source": "human_labeled",
+    "ml_training_label": true,
+    "status": "archived",
+    "created_at": 1779418354.250528,
+    "updated_at": 1779418354.250528
   }
 }

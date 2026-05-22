@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Header from "@/components/Header";
+import DigitalTwinPreviewPanel from "@/components/DigitalTwinPreviewPanel";
 
 const outcomes = [
   {
@@ -19,14 +20,32 @@ const outcomes = [
   },
 ];
 
+const trustSignals = [
+  ["Gemini", "Live / Mock"],
+  ["MongoDB Memory", "Live / Fallback"],
+  ["Human Approval", "Required"],
+  ["ML Label Archive", "Ready"],
+  ["Segmentation Review", "Required"],
+];
+
+const heroKpis = [
+  ["142K ha", "monitored"],
+  ["847", "orchard blocks"],
+  ["91%", "segmentation confidence"],
+  ["$210K", "exposure modeled"],
+  ["12", "missions this month"],
+];
+
 const workflow = [
   "Scan Belt",
   "Segment Orchards",
+  "Select Block",
   "Reconstruct Twin",
   "Dispatch Drone",
   "Analyze",
   "Simulate ROI",
   "Draft Field Task",
+  "Human Approval",
 ];
 
 const whyItMatters = [
@@ -42,19 +61,20 @@ export default function Home() {
     <div className="min-h-screen bg-[#05070b] text-gray-100">
       <Header />
 
-      <main className="bg-[radial-gradient(circle_at_top_left,rgba(0,212,255,0.14),transparent_34%),linear-gradient(135deg,#05070b_0%,#10151f_52%,#07110d_100%)]">
-        <section className="mx-auto grid min-h-[calc(100vh-73px)] max-w-[1540px] items-center gap-10 px-6 py-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(560px,1.1fr)]">
+      <main className="bg-[radial-gradient(circle_at_top_left,rgba(0,212,255,0.14),transparent_34%),radial-gradient(circle_at_80%_20%,rgba(34,197,94,0.12),transparent_30%),linear-gradient(135deg,#05070b_0%,#10151f_52%,#07110d_100%)]">
+        <section className="mx-auto grid min-h-[calc(100vh-73px)] max-w-[1540px] items-center gap-10 px-6 py-12 lg:grid-cols-[minmax(0,0.88fr)_minmax(560px,1.12fr)]">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-4 py-2 text-xs font-semibold text-cyan-200">
               <span className="h-1.5 w-1.5 rounded-full bg-cyan-300"></span>
-              Gemini: Mock · MongoDB Memory: Live / Fallback · Human Approval: Required
+              Enterprise orchard intelligence · Human-in-the-loop field execution
             </div>
-            <h1 className="mt-6 max-w-4xl text-5xl font-semibold text-white md:text-7xl">
-              Gemini Orchard Operations OS
+            <h1 className="mt-6 max-w-4xl text-5xl font-semibold leading-[0.95] text-white md:text-7xl">
+              Operational command for avocado agriculture.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-400">
-              A premium operational intelligence platform for avocado agriculture: scan the belt, segment orchard blocks,
-              dispatch drone inspection, simulate financial exposure, and approve field work from one command surface.
+              Gemini Orchard Operations OS gives regional operators, municipality managers, and orchard owners a single
+              map-first system for segmentation review, Operational Digital Twin calibration, drone missions, financial
+              exposure, field tasking, and ML Label Archive preparation.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -71,38 +91,26 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="mt-10 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
-                <div className="text-2xl font-semibold text-white">847</div>
-                <div className="mt-1 text-xs text-gray-500">orchard clusters monitored</div>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
-                <div className="text-2xl font-semibold text-white">142K ha</div>
-                <div className="mt-1 text-xs text-gray-500">regional operating area</div>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
-                <div className="text-2xl font-semibold text-white">91%</div>
-                <div className="mt-1 text-xs text-gray-500">example segmentation confidence</div>
-              </div>
+            <div className="mt-8 flex flex-wrap gap-2">
+              {trustSignals.map(([label, value]) => (
+                <div key={label} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2">
+                  <span className="text-[10px] uppercase tracking-[0.16em] text-gray-500">{label}: </span>
+                  <span className="text-xs font-semibold text-gray-200">{value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-5">
+              {heroKpis.map(([value, label]) => (
+                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                  <div className="text-2xl font-semibold text-white">{value}</div>
+                  <div className="mt-1 text-xs text-gray-500">{label}</div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="rounded-lg border border-white/10 bg-black/35 p-3 shadow-2xl shadow-cyan-950/20 backdrop-blur-xl">
-            <div className="mb-3 flex items-center justify-between px-2 pt-2">
-              <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Operational Preview</div>
-                <div className="mt-1 text-lg font-semibold text-white">Orchard segmentation and mission routing</div>
-              </div>
-              <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold text-amber-300">
-                Review Required
-              </span>
-            </div>
-            <img
-              src="/assets/orchard-operations-preview.svg"
-              alt="Operational avocado orchard map showing segmented blocks, canopy row patterns, drone route, and yield risk overlay"
-              className="h-auto w-full rounded-md border border-white/10"
-            />
-          </div>
+          <DigitalTwinPreviewPanel />
         </section>
 
         <section className="mx-auto max-w-[1540px] px-6 pb-12">
@@ -130,10 +138,10 @@ export default function Home() {
                 Open live workflow
               </Link>
             </div>
-            <div className="grid gap-2 lg:grid-cols-7">
+            <div className="grid gap-2 lg:grid-cols-9">
               {workflow.map((step, index) => (
                 <div key={step} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
-                  <div className="text-[10px] font-semibold text-cyan-300">0{index + 1}</div>
+                  <div className="text-[10px] font-semibold text-cyan-300">{String(index + 1).padStart(2, "0")}</div>
                   <div className="mt-3 text-sm font-semibold text-gray-100">{step}</div>
                 </div>
               ))}

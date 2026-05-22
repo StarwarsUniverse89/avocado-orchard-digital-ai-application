@@ -140,6 +140,10 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
     ml_training_label: true,
   });
   const [manualArchiveStatus, setManualArchiveStatus] = useState<string | null>(null);
+  const programmaticCameraMoveRef = useRef(false);
+  const [userHasInteractedWithCamera, setUserHasInteractedWithCamera] = useState(false);
+  const [hasPerformedInitialFlyTo, setHasPerformedInitialFlyTo] = useState(false);
+  const [hasAutoFocusedSegmentation, setHasAutoFocusedSegmentation] = useState(false);
   
   // Get Mexico analytics
   const mexicoAnalytics = getMexicoAvocadoAnalytics();
@@ -260,20 +264,107 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
     }
   }, [viewerRef.current]);
 
-  // Set initial camera position to Michoacán, Mexico
   useEffect(() => {
-    if (viewerRef.current && cesiumReady) {
-      const destination = Cartesian3.fromDegrees(
-        -102.0, // lng: center of Michoacán
-        19.35,  // lat: center of Michoacán
-        350000  // height: 350km
-      );
-      viewerRef.current.camera.flyTo({
-        destination,
-        duration: 2,
+    if (!cameraTarget) return;
+    programmaticCameraMoveRef.current = true;
+    const timer = window.setTimeout(() => {
+      programmaticCameraMoveRef.current = false;
+    }, cameraTarget.duration * 1000 + 800);
+    return () => window.clearTimeout(timer);
+  }, [cameraTarget]);
+
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || !cesiumReady) return;
+
+    const markManualCameraControl = () => {
+      if (!programmaticCameraMoveRef.current) {
+        setUserHasInteractedWithCamera(true);
+      }
+    };
+
+    viewer.camera.moveStart.addEventListener(markManualCameraControl);
+    return () => {
+      viewer.camera.moveStart.removeEventListener(markManualCameraControl);
+    };
+  }, [cesiumReady, viewerRef.current]);
+
+  const orchardCameraOrientation = {
+    heading: CesiumMath.toRadians(18),
+    pitch: CesiumMath.toRadians(-47),
+    roll: 0,
+  };
+
+  const flyToMichoacanRegion = useCallback((duration = 1.6) => {
+    setCameraTarget({
+      destination: Cartesian3.fromDegrees(-102.22, 19.39, 52000),
+      duration,
+    });
+    setShowAvocadoBelt(true);
+    setShowProductionClusters(true);
+    setShowMexicoOrchards(true);
+  }, []);
+
+  const flyToTancitaroMunicipality = useCallback((duration = 1.4) => {
+    const municipality = mexicoAvocadoMunicipalities.find((item) => item.id === "tancitaro");
+    if (!municipality) return;
+    setCameraTarget({
+      destination: Cartesian3.fromDegrees(municipality.lng, municipality.lat, 13500),
+      duration,
+    });
+    setSelectedMunicipalityId(municipality.id);
+    onMunicipalitySelected?.(municipality);
+    setShowAvocadoBelt(true);
+    setShowProductionClusters(true);
+    setShowMexicoOrchards(true);
+  }, [onMunicipalitySelected]);
+
+  const flyToOrchardCluster = useCallback((duration = 1.2) => {
+    const cluster =
+      michoacanAvocadoClusters.find((item) => item.id === "cluster_tancitaro_periban") ||
+      michoacanAvocadoClusters[0];
+    setCameraTarget({
+      destination: Cartesian3.fromDegrees(cluster.center_lng, cluster.center_lat, 6200),
+      duration,
+    });
+    setShowAvocadoBelt(true);
+    setShowProductionClusters(true);
+    setShowMexicoOrchards(true);
+  }, []);
+
+  const focusSelectedOrFirstBlock = useCallback((duration = 1.1) => {
+    const block =
+      segmentedOrchardBlocks?.find((item) => item.block_id === selectedSegmentedBlockId) ||
+      segmentedOrchardBlocks?.[0];
+
+    if (block?.center_lng && block?.center_lat) {
+      setCameraTarget({
+        destination: Cartesian3.fromDegrees(block.center_lng, block.center_lat, 5600),
+        duration,
       });
+      setCommandContext({ type: "orchard_block", ...block });
+      return;
     }
-  }, [cesiumReady]);
+
+    flyToOrchardCluster(duration);
+  }, [flyToOrchardCluster, segmentedOrchardBlocks, selectedSegmentedBlockId]);
+
+  // Set initial camera position to the operating region instead of global Earth.
+  useEffect(() => {
+    if (!viewerRef.current || !cesiumReady || hasPerformedInitialFlyTo) return;
+
+    setHasPerformedInitialFlyTo(true);
+    flyToMichoacanRegion(1.2);
+    window.setTimeout(() => flyToTancitaroMunicipality(1.3), 1250);
+    window.setTimeout(() => flyToOrchardCluster(1.2), 2600);
+  }, [cesiumReady, flyToMichoacanRegion, flyToOrchardCluster, flyToTancitaroMunicipality, hasPerformedInitialFlyTo]);
+
+  useEffect(() => {
+    if (!segmentedOrchardBlocks?.length || hasAutoFocusedSegmentation || userHasInteractedWithCamera) return;
+    setHasAutoFocusedSegmentation(true);
+    const timer = window.setTimeout(() => focusSelectedOrFirstBlock(1.2), 450);
+    return () => window.clearTimeout(timer);
+  }, [focusSelectedOrFirstBlock, hasAutoFocusedSegmentation, segmentedOrchardBlocks?.length, userHasInteractedWithCamera]);
 
   // Fly to drone mission when planned
   useEffect(() => {
@@ -283,9 +374,17 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
       if (plannedMission.waypoints && plannedMission.waypoints.length > 0) {
         const first = plannedMission.waypoints[0];
         if (viewerRef.current) {
+          programmaticCameraMoveRef.current = true;
           viewerRef.current.camera.flyTo({
             destination: Cartesian3.fromDegrees(first.lng, first.lat, 8000),
+            orientation: orchardCameraOrientation,
             duration: 1.5,
+            complete: () => {
+              programmaticCameraMoveRef.current = false;
+            },
+            cancel: () => {
+              programmaticCameraMoveRef.current = false;
+            },
           });
         }
       }
@@ -295,8 +394,16 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
   useEffect(() => {
     if (!selectedSegmentedBlockId || !segmentedOrchardBlocks?.length) return;
     const block = segmentedOrchardBlocks.find((item) => item.block_id === selectedSegmentedBlockId);
-    if (block) setCommandContext({ type: "orchard_block", ...block });
-  }, [selectedSegmentedBlockId, segmentedOrchardBlocks]);
+    if (block) {
+      setCommandContext({ type: "orchard_block", ...block });
+      if (!userHasInteractedWithCamera && block.center_lng && block.center_lat) {
+        setCameraTarget({
+          destination: Cartesian3.fromDegrees(block.center_lng, block.center_lat, 6200),
+          duration: 0.9,
+        });
+      }
+    }
+  }, [selectedSegmentedBlockId, segmentedOrchardBlocks, userHasInteractedWithCamera]);
 
   useEffect(() => {
     const municipalityId = selectedMunicipalityId || "tancitaro";
@@ -321,7 +428,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
           if (viewerRef.current) {
             const centerLat = (michoacanAvocadoBelt.lat_min + michoacanAvocadoBelt.lat_max) / 2;
             const centerLng = (michoacanAvocadoBelt.lng_min + michoacanAvocadoBelt.lng_max) / 2;
-            const destination = Cartesian3.fromDegrees(centerLng, centerLat, 150000);
+            const destination = Cartesian3.fromDegrees(centerLng, centerLat, 52000);
             setCameraTarget({ destination, duration: 2 });
           }
           break;
@@ -425,7 +532,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
         case 'show_network':
           // Reset to Mexico view
           if (viewerRef.current) {
-            const destination = Cartesian3.fromDegrees(-102.0, 19.35, 350000);
+            const destination = Cartesian3.fromDegrees(-102.22, 19.39, 52000);
             setCameraTarget({ destination, duration: 2 });
           }
           break;
@@ -434,7 +541,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
           break;
         case 'reset_view':
           if (viewerRef.current) {
-            const destination = Cartesian3.fromDegrees(-102.0, 19.35, 350000);
+            const destination = Cartesian3.fromDegrees(-102.22, 19.39, 52000);
             setCameraTarget({ destination, duration: 2 });
           }
           setShowAvocadoBelt(true);
@@ -733,23 +840,65 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
         </div>
       </div>
 
+      {/* Operational focus actions */}
+      <div className="absolute top-16 left-1/2 z-20 flex -translate-x-1/2 gap-2 rounded-lg border border-cyan-400/20 bg-black/75 p-1.5 text-xs shadow-2xl backdrop-blur-md">
+        <button
+          onClick={() => {
+            setUserHasInteractedWithCamera(false);
+            flyToMichoacanRegion(1);
+          }}
+          className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 font-semibold text-gray-200 hover:border-cyan-300/40 hover:text-cyan-200"
+        >
+          Jump to Region
+        </button>
+        <button
+          onClick={() => {
+            setUserHasInteractedWithCamera(false);
+            flyToTancitaroMunicipality(1);
+          }}
+          className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 font-semibold text-gray-200 hover:border-cyan-300/40 hover:text-cyan-200"
+        >
+          Focus Municipality
+        </button>
+        <button
+          onClick={() => {
+            setUserHasInteractedWithCamera(false);
+            focusSelectedOrFirstBlock(1);
+          }}
+          className="rounded-md bg-cyan-300 px-3 py-1.5 font-bold text-gray-950 hover:bg-cyan-200"
+        >
+          Focus Orchard
+        </button>
+        <button
+          onClick={() => {
+            setUserHasInteractedWithCamera(false);
+            focusSelectedOrFirstBlock(0.9);
+          }}
+          className="rounded-md border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 font-semibold text-cyan-200 hover:bg-cyan-300/15"
+        >
+          Recenter on Selected Orchard
+        </button>
+      </div>
+
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_center,transparent_46%,rgba(0,0,0,0.42)_100%),linear-gradient(180deg,rgba(0,0,0,0.10),rgba(0,0,0,0.28))]" />
+
       {/* Controls */}
-      <div className="absolute top-4 left-4 z-10 bg-black/80 text-white p-4 rounded-lg space-y-2 max-w-xs">
-        <h3 className="font-bold text-lg">Operational Network</h3>
-        <div className="space-y-1 text-sm">
-          <div>Total Municipalities: {mexicoAvocadoMunicipalities.length}</div>
-          <div>Total Synthetic Orchards: {michoacanSyntheticOrchards.length}</div>
-          <div>Region: Michoacán Avocado Belt</div>
+      <div className="absolute top-4 left-4 z-10 max-w-[230px] rounded-lg border border-white/10 bg-black/70 p-3 text-white shadow-xl backdrop-blur-md">
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">Map Toolbar</h3>
+        <div className="mt-2 space-y-1 text-[11px] text-gray-300">
+          <div>Municipalities: {mexicoAvocadoMunicipalities.length}</div>
+          <div>Synthetic Orchards: {michoacanSyntheticOrchards.length}</div>
+          <div>Region: Michoacan Belt</div>
           {detectedOrchards.length > 0 && (
-            <div className="text-cyan-400 font-semibold">Detected Orchards: {detectedOrchards.length}</div>
+            <div className="font-semibold text-cyan-300">Detected Orchards: {detectedOrchards.length}</div>
           )}
           {segmentedOrchardBlocks && segmentedOrchardBlocks.length > 0 && (
-            <div className="text-cyan-400 font-semibold">Segmented Blocks: {segmentedOrchardBlocks.length}</div>
+            <div className="font-semibold text-cyan-300">Segmented Blocks: {segmentedOrchardBlocks.length}</div>
           )}
         </div>
 
         {segmentedOrchardBlocks && segmentedOrchardBlocks.length > 0 && (
-          <label className="pt-2 border-t border-gray-700 flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+          <label className="mt-2 flex cursor-pointer items-center gap-2 border-t border-white/10 pt-2 text-[11px] text-gray-300">
             <input
               type="checkbox"
               checked={showTreeCanopyPoints}
@@ -759,110 +908,14 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
             Show Tree-Level Canopy Points
           </label>
         )}
-
-        <div className="pt-2 border-t border-gray-700 space-y-2">
-          <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={manualBoundaryMode}
-              onChange={(event) => setManualBoundaryMode(event.target.checked)}
-              className="accent-cyan-500"
-            />
-            Manual Boundary Mode
-          </label>
-          {manualBoundaryMode && (
-            <div className="space-y-2 text-xs">
-              <div className="text-cyan-300">
-                Click map points to outline an orchard. Points: {manualBoundaryPoints.length}
-              </div>
-              <div className="grid grid-cols-2 gap-1.5">
-                <button
-                  onClick={() => {
-                    setManualBoundaryFinished(true);
-                    setManualArchiveStatus("Boundary closed. Review form and archive when ready.");
-                  }}
-                  disabled={manualBoundaryPoints.length < 3}
-                  className="px-2 py-1 rounded bg-cyan-700 disabled:bg-gray-700 disabled:text-gray-500 text-white"
-                >
-                  Finish Boundary
-                </button>
-                <button
-                  onClick={() => {
-                    setManualBoundaryPoints([]);
-                    setManualBoundaryFinished(false);
-                  }}
-                  className="px-2 py-1 rounded bg-gray-800 text-gray-300"
-                >
-                  Clear
-                </button>
-              </div>
-              <select
-                value={manualForm.label_type}
-                onChange={(event) => setManualForm((prev) => ({ ...prev, label_type: event.target.value }))}
-                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1"
-              >
-                <option value="orchard_block">orchard_block</option>
-                <option value="orchard_cluster">orchard_cluster</option>
-                <option value="non_orchard">non_orchard</option>
-                <option value="needs_review">needs_review</option>
-              </select>
-              <div className="grid grid-cols-2 gap-1.5">
-                <input
-                  value={manualForm.crop_type}
-                  onChange={(event) => setManualForm((prev) => ({ ...prev, crop_type: event.target.value }))}
-                  placeholder="crop type"
-                  className="bg-gray-900 border border-gray-700 rounded px-2 py-1"
-                />
-                <input
-                  value={manualForm.estimated_hectares}
-                  onChange={(event) => setManualForm((prev) => ({ ...prev, estimated_hectares: event.target.value }))}
-                  placeholder="hectares"
-                  className="bg-gray-900 border border-gray-700 rounded px-2 py-1"
-                />
-                <input
-                  value={manualForm.tree_count_estimate}
-                  onChange={(event) => setManualForm((prev) => ({ ...prev, tree_count_estimate: event.target.value }))}
-                  placeholder="tree count"
-                  className="bg-gray-900 border border-gray-700 rounded px-2 py-1"
-                />
-                <label className="flex items-center gap-1 text-[10px] text-gray-300">
-                  <input
-                    type="checkbox"
-                    checked={manualForm.ml_training_label}
-                    onChange={(event) => setManualForm((prev) => ({ ...prev, ml_training_label: event.target.checked }))}
-                    className="accent-cyan-500"
-                  />
-                  ML label archive
-                </label>
-              </div>
-              <textarea
-                value={manualForm.notes}
-                onChange={(event) => setManualForm((prev) => ({ ...prev, notes: event.target.value }))}
-                placeholder="notes"
-                rows={2}
-                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 resize-none"
-              />
-              <button
-                onClick={archiveCurrentManualBoundary}
-                disabled={manualBoundaryPoints.length < 3}
-                className="w-full px-2 py-1.5 rounded bg-emerald-700 disabled:bg-gray-700 disabled:text-gray-500 text-white font-semibold"
-              >
-                Archive Boundary
-              </button>
-              {manualArchiveStatus && (
-                <div className="text-[10px] text-emerald-300">{manualArchiveStatus}</div>
-              )}
-            </div>
-          )}
-        </div>
         
         {/* Debug Info */}
-        <div className="pt-2 border-t border-gray-700 text-xs space-y-1">
-          <div className="text-yellow-400">
+        <div className="mt-2 space-y-1 border-t border-white/10 pt-2 text-[10px]">
+          <div className="text-amber-300">
             Selected Municipality: {selectedMunicipalityId || 'None'}
           </div>
           {selectedOrchardCandidate && (
-            <div className="text-green-400">
+            <div className="text-emerald-300">
               Selected Orchard: {selectedOrchardCandidate.orchard_id}
             </div>
           )}
@@ -875,11 +928,11 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
         
         {/* Scan Button - shown when municipality is selected */}
         {selectedMunicipalityId && (
-          <div className="pt-2 border-t border-gray-700">
+          <div className="mt-2 border-t border-white/10 pt-2">
             <button
               onClick={handleScanMunicipality}
               disabled={scanning}
-              className="w-full px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded font-semibold text-sm transition-colors"
+              className="w-full rounded bg-cyan-600 px-2 py-1.5 text-[11px] font-semibold transition-colors hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-gray-600"
             >
               {scanning ? 'Scanning...' : 'Segment Selected Municipality'}
             </button>
@@ -910,7 +963,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
       </div>
 
       {/* Manual Boundary Toolbar */}
-      <div className="absolute bottom-4 right-4 z-20 w-[360px] max-w-[calc(100%-2rem)] bg-gray-950/95 text-white border border-cyan-500/40 rounded-lg shadow-2xl overflow-hidden">
+      <div className="absolute bottom-4 left-4 z-20 w-[320px] max-w-[calc(100%-2rem)] overflow-hidden rounded-lg border border-cyan-500/40 bg-gray-950/95 text-white shadow-2xl">
         <div className="px-4 py-3 border-b border-gray-800 bg-cyan-950/30 flex items-center justify-between">
           <div>
             <p className="text-[10px] uppercase tracking-wide text-cyan-300">Manual Boundary Toolbar</p>
@@ -1053,6 +1106,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
         {cameraTarget && (
           <CameraFlyTo
             destination={cameraTarget.destination}
+            orientation={orchardCameraOrientation}
             duration={cameraTarget.duration}
             once
             onComplete={() => setCameraTarget(null)}
@@ -1529,8 +1583,8 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
         })}
       </Viewer>
 
-      {/* Floating map-driven command context */}
-      {commandContext && (
+      {/* Context details are rendered in the right intelligence panel in /command-center. */}
+      {false && commandContext && (
         <div className="absolute bottom-4 left-4 z-10 w-[340px] max-w-[calc(100%-2rem)] bg-gray-950/92 text-white border border-cyan-500/30 rounded-lg shadow-2xl overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-800 bg-cyan-950/30 flex items-start justify-between gap-3">
             <div>
@@ -1732,8 +1786,8 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
         </div>
       )}
 
-      {/* Orchard Candidate Panel */}
-      {selectedOrchardCandidate && (
+      {/* Candidate details are rendered by the command-center intelligence panel. */}
+      {false && selectedOrchardCandidate && (
         <OrchardCandidatePanel
           candidate={selectedOrchardCandidate}
           onClose={() => setSelectedOrchardCandidate(null)}

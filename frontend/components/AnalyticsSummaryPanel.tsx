@@ -250,7 +250,7 @@ export default function AnalyticsSummaryPanel({
         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-lg">⚠️</span>
+              <span className="h-2.5 w-2.5 rounded-full bg-red-400"></span>
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-red-400 mb-1">
@@ -266,7 +266,7 @@ export default function AnalyticsSummaryPanel({
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-lg">📊</span>
+              <span className="h-2.5 w-2.5 rounded-full bg-yellow-400"></span>
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-yellow-400 mb-1">
@@ -282,7 +282,7 @@ export default function AnalyticsSummaryPanel({
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-lg">💡</span>
+              <span className="h-2.5 w-2.5 rounded-full bg-blue-400"></span>
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-blue-400 mb-1">
@@ -302,11 +302,11 @@ export default function AnalyticsSummaryPanel({
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-gray-400">AMD MI300X Active</span>
+              <span className="text-gray-400">Gemini Operations Active</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-              <span className="text-gray-400">Synthetic Data Mode</span>
+              <span className="text-gray-400">Operational Memory Mode</span>
             </div>
           </div>
           <span className="text-gray-500 text-xs">
