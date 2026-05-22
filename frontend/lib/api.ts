@@ -86,7 +86,14 @@ export async function runSimulation(scenario: any): Promise<ApiResponse<any>> {
 export async function getSimulationStatus(id: string): Promise<ApiResponse<any>> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/v1/simulation/${id}/status`);
+    
+    if (!response.ok) {
+      throw new Error(`Simulation status failed: ${response.statusText}`);
+    }
+    
     const result = await response.json();
+    // Ensure we have a valid state before returning
+    if (result && !result.state) result.state = 'unknown';
     return { success: true, data: result };
   } catch (error) {
     return { success: false, error: String(error) };

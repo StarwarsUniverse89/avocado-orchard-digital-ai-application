@@ -274,8 +274,8 @@ function WebGLRendererLifecycle({ onContextLost }: { onContextLost: () => void }
           material.dispose();
         }
       });
-      gl.renderLists.dispose();
-      gl.dispose();
+      // Do NOT call gl.dispose() or gl.renderLists.dispose() — disposing the
+      // renderer kills the shared WebGL context and breaks Cesium on remount.
     };
   }, [gl, onContextLost, scene]);
 

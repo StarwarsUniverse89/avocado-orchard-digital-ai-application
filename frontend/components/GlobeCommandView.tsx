@@ -106,6 +106,7 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
   const viewerRef = useRef<CesiumViewer | null>(null);
   const [cesiumReady, setCesiumReady] = useState<boolean>(false);
   const [cesiumError, setCesiumError] = useState<boolean>(false);
+  const [cesiumErrorMessage, setCesiumErrorMessage] = useState<string | null>(null);
   const [showAvocadoBelt, setShowAvocadoBelt] = useState(true);
   const [showProductionClusters, setShowProductionClusters] = useState(true);
   const [showMexicoOrchards, setShowMexicoOrchards] = useState(true);
@@ -228,20 +229,43 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
     }
   };
 
+  useEffect(() => {
+    console.log('[GlobeCommandView] mounted');
+    return () => {
+      console.log('[GlobeCommandView] unmounted');
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('[GlobeCommandView] render props', {
+      selectedOrchardId,
+      selectedSectionId,
+      plannedMissionId: plannedMission?.mission_id || plannedMission?.id || null,
+      segmentedBlockCount: segmentedOrchardBlocks?.length ?? 0,
+      selectedSegmentedBlockId,
+      className,
+    });
+  }, [selectedOrchardId, selectedSectionId, plannedMission, segmentedOrchardBlocks, selectedSegmentedBlockId, className]);
+
   // Initialize Cesium token before rendering
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const token = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN;
     if (token && token.trim() !== '') {
       try {
         Ion.defaultAccessToken = token;
-        console.log('Cesium Ion token set successfully');
+        console.log('[GlobeCommandView] Cesium Ion token set successfully');
         setCesiumReady(true);
       } catch (error) {
-        console.error('Failed to set Cesium Ion token:', error);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.error('[GlobeCommandView] Failed to set Cesium Ion token:', msg);
+        setCesiumErrorMessage(msg);
         setCesiumError(true);
       }
     } else {
-      console.warn('Cesium Ion token not found in environment variables, using fallback view');
+      const msg = 'NEXT_PUBLIC_CESIUM_ION_TOKEN is not set in environment';
+      console.warn('[GlobeCommandView]', msg);
+      setCesiumErrorMessage(msg);
       setCesiumError(true);
     }
   }, []);
@@ -251,7 +275,9 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
     if (viewerRef.current) {
       const viewer = viewerRef.current;
       const errorHandler = (error: any) => {
+        const msg = error instanceof Error ? error.message : String(error?.message || error);
         console.error('Cesium error:', error);
+        setCesiumErrorMessage(msg);
         setCesiumError(true);
       };
       
@@ -818,13 +844,47 @@ export const GlobeCommandView = forwardRef<GlobeCommandViewRef, GlobeCommandView
   if (!cesiumReady || cesiumError) {
     return (
       <div className="relative w-full h-full bg-black flex items-center justify-center">
-        <div className="text-center text-white p-8">
+        <div className="text-center text-white p-8 max-w-md">
           <div className="text-xl font-bold mb-2">
             {cesiumError ? '⚠️ Cesium Not Available' : '⏳ Loading Cesium...'}
           </div>
-          <div className="text-sm opacity-75">
-            {cesiumError ? 'Check NEXT_PUBLIC_CESIUM_ION_TOKEN in .env.local' : 'Initializing globe view...'}
+          <div className="text-sm opacity-75 mb-3 font-mono break-all">
+            {cesiumError
+              ? (cesiumErrorMessage ?? 'Check NEXT_PUBLIC_CESIUM_ION_TOKEN in .env.local')
+              : 'Initializing globe view...'}
           </div>
+          {cesiumError && (
+            <pre className="mb-4 max-h-40 overflow-auto rounded-md border border-red-400/20 bg-red-950/30 p-3 text-left text-xs text-red-100">
+              {cesiumErrorMessage ?? 'Unknown Cesium error'}
+            </pre>
+          )}
+          {cesiumError && (
+            <button
+              type="button"
+              onClick={() => {
+                setCesiumError(false);
+                setCesiumErrorMessage(null);
+                if (typeof window === 'undefined') return;
+                const token = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN;
+                if (token && token.trim() !== '') {
+                  try {
+                    Ion.defaultAccessToken = token;
+                    setCesiumReady(true);
+                  } catch (err) {
+                    const msg = err instanceof Error ? err.message : String(err);
+                    setCesiumErrorMessage(msg);
+                    setCesiumError(true);
+                  }
+                } else {
+                  setCesiumErrorMessage('NEXT_PUBLIC_CESIUM_ION_TOKEN is not set in environment');
+                  setCesiumError(true);
+                }
+              }}
+              className="rounded-md border border-cyan-300/25 bg-cyan-300/10 px-4 py-2 text-sm font-semibold text-cyan-200 hover:bg-cyan-300/15"
+            >
+              Retry Cesium Init
+            </button>
+          )}
         </div>
       </div>
     );

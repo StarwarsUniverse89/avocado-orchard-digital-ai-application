@@ -1,7 +1,8 @@
 "use client";
 
-import { Component, useState, useEffect, useRef, type ErrorInfo, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import type { GlobeCommandViewRef } from "@/components/GlobeCommandView";
 import AIAdvisorPanel from "@/components/AIAdvisorPanel";
 import SimulationControls from "@/components/SimulationControls";
@@ -26,10 +27,7 @@ const GlobeCommandView = dynamic(
   { ssr: false }
 );
 
-const DigitalTwin3DView = dynamic(() => import("@/components/DigitalTwin3DView"), { ssr: false });
-
 type OperatorRole = "regional" | "municipality" | "owner";
-type TwinTab = "3D View" | "NDVI" | "Canopy Health" | "Soil Moisture" | "Thermal" | "Elevation";
 type ActiveModule =
   | "command"
   | "regional"
@@ -45,57 +43,10 @@ type ActiveModule =
   | "integrations"
   | "settings";
 
-function ImageDigitalTwinFallback() {
-  return (
-    <div className="relative h-full min-h-0 overflow-hidden bg-[#020507]">
-      <img
-        src="/assets/orchard-real/aerial_orchard_overview_01.png"
-        alt="Aerial avocado orchard digital twin fallback"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,transparent_42%,rgba(0,0,0,0.50)_100%),linear-gradient(180deg,rgba(0,0,0,0.12),rgba(0,0,0,0.42))]" />
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 640" preserveAspectRatio="none">
-        <polygon
-          points="82,372 164,186 392,94 692,126 910,270 856,512 596,584 268,548"
-          fill="rgba(16,185,129,0.045)"
-          stroke="rgba(225,250,255,0.88)"
-          strokeWidth="2"
-        />
-        <polygon points="312,336 486,266 658,318 608,454 390,480" fill="rgba(250,204,21,0.14)" stroke="rgba(250,204,21,0.70)" strokeWidth="1.3" />
-        <polygon points="600,354 812,360 760,496 552,472" fill="rgba(239,68,68,0.16)" stroke="rgba(248,113,113,0.76)" strokeWidth="1.4" />
-        <path d="M190 210 C 312 266, 386 302, 510 344 S 734 420, 832 516" fill="none" stroke="rgba(255,255,255,0.86)" strokeWidth="2" strokeDasharray="10 10" />
-      </svg>
-      <div className="absolute left-4 top-4 rounded-lg border border-white/10 bg-black/70 px-4 py-3 backdrop-blur-md">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">Operational Digital Twin</div>
-        <div className="mt-1 text-sm font-semibold text-white">Image fallback active</div>
-      </div>
-    </div>
-  );
-}
-
-class DigitalTwinErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  state = { hasError: false };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("DigitalTwin3DView crashed; showing image fallback", error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <ImageDigitalTwinFallback />;
-    }
-
-    return this.props.children;
-  }
-}
-
-function GlobeCommandViewMountLogger() {
+function GlobeCommandViewMountLogger({ props }: { props: Record<string, unknown> }) {
   useEffect(() => {
     console.log("mounting GlobeCommandView");
+    console.log("GlobeCommandView render props", props);
   }, []);
 
   return null;
@@ -218,8 +169,6 @@ const bottomKpis = [
   ["12", "Missions This Month", "Drone Operations"],
 ];
 
-const twinTabs: TwinTab[] = ["3D View", "NDVI", "Canopy Health", "Soil Moisture", "Thermal", "Elevation"];
-
 const insightCards = [
   ["Overall Health", "Good", "text-emerald-300", "Block condition"],
   ["Block Area", "2.14 ha", "text-gray-100", "12% of block"],
@@ -231,112 +180,21 @@ const insightCards = [
   ["Estimated Yield", "3.2 t/ha", "text-gray-100", "+8% vs last scan"],
 ];
 
-const modeOverlays: Record<TwinTab, {
-  label: string;
-  summary: string;
-  overlayClass: string;
-  legend: Array<[string, string, string]>;
-}> = {
-  "3D View": {
-    label: "Operational Digital Twin",
-    summary: "Live Cesium command surface with segmentation, manual labels, drone routes, and priority zones.",
-    overlayClass: "",
-    legend: [["Boundary", "Live overlays", "bg-cyan-300"], ["Drone route", "planned", "bg-white"], ["Review", "required", "bg-amber-300"]],
-  },
-  NDVI: {
-    label: "NDVI Vegetation Health",
-    summary: "Mock vegetation index layer highlights healthy canopy, moderate stress, and high-risk rows.",
-    overlayClass: "bg-[radial-gradient(circle_at_28%_48%,rgba(34,197,94,0.20),transparent_26%),radial-gradient(circle_at_56%_57%,rgba(250,204,21,0.24),transparent_24%),radial-gradient(circle_at_72%_66%,rgba(239,68,68,0.24),transparent_20%)] mix-blend-screen",
-    legend: [["0.78", "healthy rows", "bg-emerald-400"], ["0.61", "moderate stress", "bg-amber-300"], ["0.43", "high stress", "bg-red-400"]],
-  },
-  "Canopy Health": {
-    label: "Canopy Health Clusters",
-    summary: "Tree-level canopy points are emphasized to show row alignment, density, and stress clusters.",
-    overlayClass: "bg-[radial-gradient(circle_at_42%_46%,rgba(16,185,129,0.18),transparent_18%),radial-gradient(circle_at_61%_61%,rgba(251,191,36,0.22),transparent_17%),radial-gradient(circle_at_75%_55%,rgba(248,113,113,0.20),transparent_15%)]",
-    legend: [["82%", "leaf density", "bg-emerald-400"], ["14%", "canopy variance", "bg-cyan-300"], ["12%", "stress rows", "bg-amber-300"]],
-  },
-  "Soil Moisture": {
-    label: "Soil Moisture Gradient",
-    summary: "Moisture layer indicates irrigation variance and likely deficit bands inside the selected orchard.",
-    overlayClass: "bg-[linear-gradient(120deg,rgba(14,165,233,0.20),transparent_42%),radial-gradient(circle_at_67%_62%,rgba(120,53,15,0.28),transparent_22%)]",
-    legend: [["67%", "soil moisture", "bg-sky-400"], ["1.2", "EC dS/m", "bg-cyan-200"], ["Low", "compaction", "bg-emerald-400"]],
-  },
-  Thermal: {
-    label: "Thermal Stress",
-    summary: "Heat-risk overlay identifies canopy temperature anomalies and irrigation timing exposure.",
-    overlayClass: "bg-[radial-gradient(circle_at_66%_59%,rgba(239,68,68,0.30),transparent_24%),radial-gradient(circle_at_47%_48%,rgba(251,146,60,0.22),transparent_25%)] mix-blend-screen",
-    legend: [["24.3 C", "canopy temp", "bg-orange-300"], ["High", "thermal edge", "bg-red-400"], ["-12%", "irrigation rec.", "bg-cyan-300"]],
-  },
-  Elevation: {
-    label: "Terrain Variation",
-    summary: "Contour styling shows slope, terrain variation, and drainage-sensitive rows.",
-    overlayClass: "bg-[repeating-linear-gradient(28deg,rgba(255,255,255,0.00)_0px,rgba(255,255,255,0.00)_16px,rgba(103,232,249,0.16)_17px,rgba(103,232,249,0.00)_19px),radial-gradient(circle_at_35%_42%,rgba(34,197,94,0.12),transparent_22%)]",
-    legend: [["7.4 m", "terrain range", "bg-cyan-300"], ["4.2 deg", "max slope", "bg-amber-300"], ["Good", "drainage", "bg-emerald-400"]],
-  },
-};
-
-const analysisSectionsByMode: Record<TwinTab, Array<{
+const commandAnalysisSections: Array<{
   title: string;
   rows: Array<[string, string, number, "green" | "cyan" | "amber" | "red"]>;
-  image?: string;
-  imageAlt?: string;
-}>> = {
-  "3D View": [
+}> = [
+  { title: "Command Context", rows: [["Mode", "Cesium", 76, "cyan"], ["Segmentation", "Ready", 84, "green"], ["Manual Boundary", "Active", 66, "cyan"], ["Mission Layers", "Live", 72, "green"]] },
   {
-    title: "Canopy Analysis",
-    image: "/assets/orchard-real/leaf_canopy_closeup_01.png",
-    imageAlt: "Close-up canopy analysis capture",
+    title: "Regional Operations",
     rows: [
-      ["Leaf Density", "82%", 82, "green"],
-      ["Chlorophyll Index", "0.78", 78, "green"],
-      ["Pest Indicators", "Low", 18, "cyan"],
-      ["Canopy Temp.", "24.3 C", 42, "amber"],
+      ["Visible Blocks", "Live", 82, "green"],
+      ["Drone Routes", "Ready", 68, "cyan"],
+      ["Manual Labels", "Archive", 74, "green"],
+      ["Review Queue", "3", 42, "amber"],
     ],
   },
-  {
-    title: "Soil & Root Zone",
-    image: "/assets/orchard-real/root_system_closeup.png",
-    imageAlt: "Avocado root system close-up",
-    rows: [
-      ["Soil Moisture", "67%", 67, "cyan"],
-      ["Soil EC", "1.2 dS/m", 38, "cyan"],
-      ["Root Biomass", "High", 76, "green"],
-      ["Compaction Risk", "Low", 22, "green"],
-    ],
-  },
-  {
-    title: "Fruit Estimation",
-    image: "/assets/orchard-real/avocado_fruit_cluster.png",
-    imageAlt: "Avocado fruit cluster",
-    rows: [
-      ["Avg Fruit / Tree", "124", 72, "green"],
-      ["Size Distribution", "M-L", 64, "cyan"],
-      ["Est. Yield", "3.2 t/ha", 70, "green"],
-      ["Confidence", "91%", 91, "green"],
-    ],
-  },
-  ],
-  NDVI: [
-    { title: "NDVI Layer", rows: [["Mean NDVI", "0.71", 71, "green"], ["Delta", "-0.06", 48, "amber"], ["Low vigor rows", "12%", 32, "amber"], ["Review Confidence", "91%", 91, "green"]] },
-    { title: "Vegetation Risk", rows: [["Healthy canopy", "68%", 68, "green"], ["Moderate stress", "20%", 20, "amber"], ["High stress", "12%", 12, "red"], ["Trend", "↑ 8%", 56, "red"]] },
-  ],
-  "Canopy Health": [
-    { title: "Canopy Structure", rows: [["Leaf Density", "82%", 82, "green"], ["Canopy Variance", "14%", 14, "amber"], ["Row Alignment", "0.88", 88, "green"], ["Gap Signal", "6%", 18, "cyan"]] },
-    { title: "Stress Clusters", rows: [["Healthy points", "31", 74, "green"], ["Stressed points", "9", 36, "amber"], ["Diseased points", "3", 14, "red"], ["Sample coverage", "43 trees", 62, "cyan"]] },
-  ],
-  "Soil Moisture": [
-    { title: "Moisture Profile", rows: [["Soil Moisture", "67%", 67, "cyan"], ["Dry band", "18%", 28, "amber"], ["Irrigation variance", "-12%", 42, "cyan"], ["Root zone risk", "Low", 24, "green"]] },
-    { title: "Soil & Root Zone", rows: [["Soil EC", "1.2 dS/m", 38, "cyan"], ["Compaction Risk", "Low", 20, "green"], ["Drainage", "Good", 74, "green"], ["Next cycle", "Reduce", 44, "cyan"]] },
-  ],
-  Thermal: [
-    { title: "Thermal Risk", rows: [["Canopy Temp.", "24.3 C", 52, "amber"], ["Heat anomaly", "High", 78, "red"], ["Stressed edge", "0.31 ha", 46, "red"], ["Cooling trend", "↓ 3%", 58, "green"]] },
-    { title: "Intervention Timing", rows: [["Irrigation window", "36 hr", 64, "cyan"], ["Evap. pressure", "Medium", 55, "amber"], ["Priority", "87 / 100", 87, "red"], ["Yield risk", "-18%", 72, "red"]] },
-  ],
-  Elevation: [
-    { title: "Terrain Variation", rows: [["Elevation range", "7.4 m", 44, "cyan"], ["Max slope", "4.2 deg", 42, "amber"], ["Drainage lines", "3", 36, "cyan"], ["Erosion risk", "Low", 22, "green"]] },
-    { title: "Mission Planning", rows: [["Flight altitude", "72 m", 68, "cyan"], ["Terrain follow", "On", 82, "green"], ["Obstacle risk", "Low", 18, "green"], ["Coverage", "94%", 94, "green"]] },
-  ],
-};
+];
 
 export default function CommandCenter() {
   const [selectedOrchardId, setSelectedOrchardId] = useState<string | null>(null);
@@ -349,10 +207,11 @@ export default function CommandCenter() {
   const [operatorRole, setOperatorRole] = useState<OperatorRole>("regional");
   const [networkSetupComplete, setNetworkSetupComplete] = useState(false);
   const [activeModule, setActiveModule] = useState<ActiveModule>("command");
-  const [activeTwinTab, setActiveTwinTab] = useState<TwinTab>("3D View");
   const [agentChatOpen, setAgentChatOpen] = useState(false);
   const [selectedContextOpen, setSelectedContextOpen] = useState(true);
   const [workflowOpen, setWorkflowOpen] = useState(true);
+  const [mapInstanceKey, setMapInstanceKey] = useState(0);
+  const [pendingGlobeCommand, setPendingGlobeCommand] = useState<UICommand | null>(null);
   const globeCommandRef = useRef<GlobeCommandViewRef>(null);
 
   const [selectedMunicipality, setSelectedMunicipality] = useState<any>(null);
@@ -424,6 +283,12 @@ export default function CommandCenter() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (!pendingGlobeCommand || !globeCommandRef.current) return;
+    globeCommandRef.current.handleCommand(pendingGlobeCommand);
+    setPendingGlobeCommand(null);
+  }, [pendingGlobeCommand]);
+
   const handleOrchardSelect = (orchardId: string) => setSelectedOrchardId(orchardId);
 
   const handleSectionSelect = (orchardId: string, sectionId: string) => {
@@ -434,6 +299,7 @@ export default function CommandCenter() {
   const handleEnter3DTwin = (orchardId: string, sectionId?: string) => {
     setSelectedOrchardId(orchardId);
     if (sectionId) setSelectedSection(sectionId);
+    window.location.href = `/digital-twin?orchardId=${encodeURIComponent(orchardId)}${sectionId ? `&sectionId=${encodeURIComponent(sectionId)}` : ""}`;
   };
 
   const handleMissionPlanned = (missionData: any) => {
@@ -456,7 +322,7 @@ export default function CommandCenter() {
       case "show_gps_boundary":
       case "show_orchard_archive":
       case "select_orchard":
-        globeCommandRef.current?.handleCommand(command);
+        setPendingGlobeCommand(command);
         break;
       case "show_belt_metric":
       case "show_municipality_metric":
@@ -528,19 +394,26 @@ export default function CommandCenter() {
 
   const contextName = getContextDisplayName(selectionContext);
   const memoryTone = mlTrainingSummary?.latest_export ? "green" : "amber";
-  const activeOverlay = modeOverlays[activeTwinTab] ?? modeOverlays["3D View"];
-  const activeAnalysisSections = analysisSectionsByMode[activeTwinTab] ?? analysisSectionsByMode["3D View"];
+  const activeAnalysisSections = commandAnalysisSections;
   const selectedContextObject = selectedSegmentedBlock || selectedOrchardCandidate || selectedMunicipality;
   const selectedContextType = selectedSegmentedBlock ? "orchard_block" : selectedOrchardCandidate ? "orchard" : selectedMunicipality ? "municipality" : "network";
+  const digitalTwinTargetId =
+    selectedOrchardId ||
+    selectedSegmentedBlock?.block_id ||
+    selectedOrchardCandidate?.orchard_id ||
+    selectedOrchardCandidate?.id ||
+    selectedMunicipality?.id ||
+    "los-reyes-block-7a";
+  const digitalTwinHref = `/digital-twin?orchardId=${encodeURIComponent(digitalTwinTargetId)}${selectedSection ? `&sectionId=${encodeURIComponent(selectedSection)}` : ""}`;
 
-  const handleTwinTabChange = (tab: TwinTab) => {
-    console.log("Command Center view tab changed", tab);
-    setActiveTwinTab(tab);
+  const globeCommandRenderProps = {
+    selectedOrchardId: selectedOrchardId || undefined,
+    selectedSectionId: selectedSection || undefined,
+    plannedMissionId: activeDroneMission?.mission_id || activeDroneMission?.id || null,
+    segmentedBlockCount: visibleSegmentedBlocks.length,
+    selectedSegmentedBlockId: selectedSegmentedBlock?.block_id,
+    mapInstanceKey,
   };
-
-  useEffect(() => {
-    console.log("active view changed", activeTwinTab);
-  }, [activeTwinTab]);
 
   return (
     <div className="h-screen overflow-hidden bg-[#03080d] text-gray-100">
@@ -682,84 +555,55 @@ export default function CommandCenter() {
           <div className="flex h-full min-h-0 flex-col rounded-lg border border-white/10 bg-[#07111a]/72 p-2.5 shadow-2xl shadow-black/40">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Digital Twin Preview</div>
-                <h1 className="mt-2 text-xl font-semibold text-white">Los Reyes Orchard - Block 7A</h1>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Globe Command</div>
+                <h1 className="mt-2 text-xl font-semibold text-white">Regional Cesium Operations</h1>
               </div>
-              <span className="rounded-md border border-emerald-400/20 bg-emerald-400/15 px-3 py-1.5 text-xs font-semibold text-emerald-200">Active</span>
+              <span className="rounded-md border border-emerald-400/20 bg-emerald-400/15 px-3 py-1.5 text-xs font-semibold text-emerald-200">Production isolated rendering mode</span>
             </div>
 
-            <div className="mb-3 flex flex-wrap gap-2">
-              {twinTabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => handleTwinTabChange(tab)}
-                  className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${
-                    activeTwinTab === tab ? "border-cyan-300 bg-cyan-300 text-gray-950" : "border-white/10 bg-white/[0.04] text-gray-300 hover:border-cyan-300/35 hover:text-cyan-200"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="rounded-md border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-200">Cesium GlobeCommandView only</span>
+              <Link
+                href={digitalTwinHref}
+                className="rounded-md border border-emerald-300/25 bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-200 hover:bg-emerald-300/15"
+              >
+                Open Digital Twin
+              </Link>
+              <button
+                onClick={() => setMapInstanceKey((k) => k + 1)}
+                className="ml-auto rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-gray-400 hover:border-cyan-300/35 hover:text-cyan-200"
+              >
+                Reset Globe View
+              </button>
             </div>
 
             <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-white/10 bg-black">
-              {activeTwinTab === "3D View" ? (
-                <DigitalTwinErrorBoundary key="digital-twin-3d">
-                  <DigitalTwin3DView />
-                </DigitalTwinErrorBoundary>
-              ) : (
-                <>
-                  <GlobeCommandViewMountLogger />
-                  <div className="pointer-events-none absolute left-3 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-2">
-                    {["Select", "Target", "Route", "Draw", "Layers", "Focus"].map((item) => (
-                      <div key={item} className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-black/65 text-[10px] font-semibold text-gray-300 backdrop-blur-md">
-                        {item.slice(0, 1)}
-                      </div>
-                    ))}
-                  </div>
-                  <div className={`pointer-events-none absolute inset-0 z-20 opacity-90 ${activeOverlay.overlayClass}`} />
-                  <div className="pointer-events-none absolute bottom-4 right-4 z-30 rounded-lg border border-white/10 bg-black/70 p-3 backdrop-blur-md">
-                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400">{activeTwinTab} Legend</div>
-                    <div className="space-y-1.5">
-                      {activeOverlay.legend.map(([value, label, color]) => (
-                        <div key={`${value}-${label}`} className="flex items-center gap-2 text-[10px] text-gray-400">
-                          <span className={`h-2 w-2 rounded-full ${color}`} />
-                          <span className="font-semibold text-gray-200">{value}</span>
-                          <span>{label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="pointer-events-none absolute bottom-4 left-1/2 z-30 w-[42%] -translate-x-1/2 rounded-lg border border-white/10 bg-black/70 px-3 py-2 backdrop-blur-md">
-                    <div className="mb-1 text-center text-[11px] font-semibold text-gray-200">{activeOverlay.label}</div>
-                    <div className="relative h-1 rounded-full bg-gray-700">
-                      <span className="absolute left-[52%] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-cyan-300 shadow-[0_0_16px_rgba(103,232,249,0.7)]" />
-                    </div>
-                  </div>
-                  <GlobeCommandView
-                    key="globe-command-view"
-                    ref={globeCommandRef}
-                    onOrchardSelect={handleOrchardSelect}
-                    onSectionSelect={handleSectionSelect}
-                    onEnter3DTwin={handleEnter3DTwin}
-                    selectedOrchardId={selectedOrchardId || undefined}
-                    selectedSectionId={selectedSection || undefined}
-                    commandHandler={handleUICommand}
-                    onMunicipalitySelected={(municipality) => {
-                      setSelectedMunicipality(municipality);
-                      setActiveModule("command");
-                    }}
-                    onOrchardCandidateSelected={setSelectedOrchardCandidate}
-                    onDetectedOrchardsChanged={setDetectedOrchards}
-                    onVisionAnalysisCompleted={setVisionAnalysisResult}
-                    plannedMission={activeDroneMission}
-                    segmentedOrchardBlocks={visibleSegmentedBlocks}
-                    selectedSegmentedBlockId={selectedSegmentedBlock?.block_id}
-                    onSegmentedBlockSelected={handleSegmentedBlockSelected}
-                    className="h-full min-h-full rounded-none border-0"
-                  />
-                </>
-              )}
+              <GlobeCommandViewMountLogger props={globeCommandRenderProps} />
+              <div className="pointer-events-none absolute left-4 top-4 z-50 rounded-md border border-emerald-300/30 bg-emerald-400/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-100 shadow-2xl backdrop-blur-md">
+                Rendering Cesium GlobeCommandView
+              </div>
+              <GlobeCommandView
+                key={`globe-command-${mapInstanceKey}`}
+                ref={globeCommandRef}
+                onOrchardSelect={handleOrchardSelect}
+                onSectionSelect={handleSectionSelect}
+                onEnter3DTwin={handleEnter3DTwin}
+                selectedOrchardId={selectedOrchardId || undefined}
+                selectedSectionId={selectedSection || undefined}
+                commandHandler={handleUICommand}
+                onMunicipalitySelected={(municipality) => {
+                  setSelectedMunicipality(municipality);
+                  setActiveModule("command");
+                }}
+                onOrchardCandidateSelected={setSelectedOrchardCandidate}
+                onDetectedOrchardsChanged={setDetectedOrchards}
+                onVisionAnalysisCompleted={setVisionAnalysisResult}
+                plannedMission={activeDroneMission}
+                segmentedOrchardBlocks={visibleSegmentedBlocks}
+                selectedSegmentedBlockId={selectedSegmentedBlock?.block_id}
+                onSegmentedBlockSelected={handleSegmentedBlockSelected}
+                className="h-full min-h-full rounded-none border-0"
+              />
             </div>
 
             {selectedSection && (
@@ -797,16 +641,6 @@ export default function CommandCenter() {
           <div className="mt-2 space-y-1.5">
             {activeAnalysisSections.map((section) => (
               <div key={section.title} className="rounded-md border border-white/10 bg-white/[0.035] p-2.5">
-                {section.image && (
-                  <div className="relative mb-2 h-20 overflow-hidden rounded-md border border-white/10 bg-black/40">
-                    <img
-                      src={section.image}
-                      alt={section.imageAlt ?? section.title}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10),rgba(0,0,0,0.54)),radial-gradient(circle_at_50%_35%,transparent_34%,rgba(0,0,0,0.36)_100%)]" />
-                  </div>
-                )}
                 <div className="mb-1.5 flex items-center justify-between">
                   <div className="text-[9px] font-semibold uppercase tracking-[0.16em] text-gray-400">{section.title}</div>
                   <div className="h-1 w-8 rounded-full bg-cyan-300/35" />
@@ -892,7 +726,9 @@ export default function CommandCenter() {
             <div className="mt-2 grid grid-cols-2 gap-1.5">
               {[
                 ["Segment Orchards", () => setActiveModule("segmentation")],
-                ["Reconstruct Twin", () => handleTwinTabChange("3D View")],
+                ["Reconstruct Twin", () => {
+                  window.location.href = digitalTwinHref;
+                }],
                 ["Dispatch Drone", () => setActiveModule("drone")],
                 ["Analyze Inspection", () => setActiveModule("inspection")],
                 ["Simulate ROI", () => {

@@ -10,6 +10,24 @@
   height: 100% !important;
 }
 
+/* WebGL Isolation Layer */
+.webgl-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.webgl-isolation-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color-scheme: dark;
+  transition: opacity 0.3s ease-in-out;
+}
+
 .cesium-viewer {
   position: relative !important;
 }
