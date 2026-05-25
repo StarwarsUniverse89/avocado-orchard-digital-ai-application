@@ -8,6 +8,11 @@ RUN npm ci
 
 COPY . .
 
+# NEXT_PUBLIC_* vars are baked into the client bundle at build time.
+# Pass: docker build --build-arg NEXT_PUBLIC_CESIUM_ION_TOKEN=<token> .
+ARG NEXT_PUBLIC_CESIUM_ION_TOKEN
+ENV NEXT_PUBLIC_CESIUM_ION_TOKEN=$NEXT_PUBLIC_CESIUM_ION_TOKEN
+
 RUN npm run build
 
 

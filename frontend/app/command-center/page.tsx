@@ -569,6 +569,12 @@ export default function CommandCenter() {
               >
                 Open Digital Twin
               </Link>
+              <Link
+                href="/google-command-center"
+                className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-gray-300 hover:border-cyan-300/35 hover:text-cyan-200"
+              >
+                Open Google Satellite Command
+              </Link>
               <button
                 onClick={() => setMapInstanceKey((k) => k + 1)}
                 className="ml-auto rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-gray-400 hover:border-cyan-300/35 hover:text-cyan-200"
